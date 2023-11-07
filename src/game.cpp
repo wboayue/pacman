@@ -1,10 +1,10 @@
 #include "game.h"
-#include <iostream>
 #include "SDL.h"
+#include <iostream>
 
-Game::Game(): ready_{false} {
+Game::Game() : ready_{false} {
   // Initialize SDL
-  if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
     return;
@@ -14,13 +14,9 @@ Game::Game(): ready_{false} {
   ready_ = true;
 }
 
-Game::~Game() {
-  SDL_Quit();
-}
+Game::~Game() { SDL_Quit(); }
 
-bool Game::Ready() const {
-  return ready_;
-}
+bool Game::Ready() const { return ready_; }
 
 void Game::Run(std::size_t target_frame_duration) {
   Uint32 frame_start;
@@ -57,22 +53,20 @@ void Game::ProcessInput() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-      case SDL_QUIT:
-        running_ = false;
-        break;
+    case SDL_QUIT:
+      running_ = false;
+      break;
     }
   }
 
-  const Uint8* state = SDL_GetKeyboardState(NULL);
+  const Uint8 *state = SDL_GetKeyboardState(NULL);
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }
 }
 
-void Game::Update() {
-}
+void Game::Update() {}
 
-void Game::Render() {
-}
+void Game::Render() {}
 
 int Game::GetScore() const { return score; }

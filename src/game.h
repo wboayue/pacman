@@ -1,12 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <random>
 #include "SDL.h"
 #include "renderer.h"
+#include <random>
 
 class Game {
- public:
+public:
   Game();
   ~Game();
 
@@ -14,7 +14,7 @@ class Game {
   int GetScore() const;
   bool Ready() const;
 
- private:
+private:
   std::random_device dev;
   std::mt19937 engine;
   std::uniform_int_distribution<int> random_w;

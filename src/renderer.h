@@ -1,15 +1,15 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <vector>
 #include "SDL.h"
+#include <vector>
 
 class Renderer {
- public:
+public:
   Renderer(const std::size_t screen_width, const std::size_t screen_height);
   ~Renderer();
 
- private:
+private:
   SDL_Window *sdl_window;
   SDL_Renderer *sdl_renderer;
 
