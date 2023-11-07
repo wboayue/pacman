@@ -1,4 +1,20 @@
-# Starter SDL2 game
+# Pacman
+
+Classic
+
+Assets available
+
+Was an implementation specification. Games mecha
+
+Complete game.
+
+ECS vs object orientated. Hybrid.
+Entities mostly data
+
+Game
+
+AudioSystem
+
 
 
 ## Dependencies for Running Locally

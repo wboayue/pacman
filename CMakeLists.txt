@@ -14,6 +14,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS} src)
 
-add_executable(game src/main.cpp src/game.cpp src/renderer.cpp)
+add_executable(pacman src/main.cpp src/game.cpp src/renderer.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
-target_link_libraries(game ${SDL2_LIBRARIES})
+target_link_libraries(pacman ${SDL2_LIBRARIES})
