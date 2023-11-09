@@ -10,7 +10,8 @@ Game::Game() : ready_{false} {
     return;
   }
 
-  renderer_ = std::make_shared<Renderer>(640, 640);
+  int scale{2};
+  renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
   ready_ = true;
 }
 
@@ -50,12 +51,24 @@ void Game::Run(std::size_t target_frame_duration) {
 }
 
 void Game::ProcessInput() {
+  float aspectRatio = 224.0f / 288.0f;
+
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
     case SDL_QUIT:
       running_ = false;
       break;
+    case SDL_WINDOWEVENT:
+      int newWidth = event.window.data1;
+      int newHeight = event.window.data2;
+      float newAspectRatio = (float)newWidth/(float)newHeight;
+      if (newAspectRatio > aspectRatio) {
+        newWidth = (int)(newHeight*aspectRatio);
+      } else {
+        newHeight = (int)(newWidth/aspectRatio);
+      }
+      renderer_->SetWindowSize(newWidth, newHeight);
     }
   }
 
