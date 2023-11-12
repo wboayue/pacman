@@ -1,5 +1,6 @@
 #include "game.h"
 #include "SDL.h"
+#include "SDL_image.h"
 #include <iostream>
 
 Game::Game() : ready_{false} {
@@ -10,9 +11,13 @@ Game::Game() : ready_{false} {
     return;
   }
 
+  IMG_Init(IMG_INIT_PNG);
+
   int scale{2};
   renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
   ready_ = true;
+
+  SDL_RenderSetLogicalSize(renderer_->sdl_renderer, 224, 288);
 }
 
 Game::~Game() { SDL_Quit(); }
@@ -29,6 +34,8 @@ void Game::Run(std::size_t target_frame_duration) {
 
   while (running_) {
     frame_start = SDL_GetTicks();
+    float deltaTime = (frame_start - ticks_count_) / 1000.0f;
+    ticks_count_ = SDL_GetTicks();
 
     ProcessInput();
     Update();
@@ -80,6 +87,38 @@ void Game::ProcessInput() {
 
 void Game::Update() {}
 
-void Game::Render() {}
+void Game::Render() {
+  auto surface = IMG_Load("../assets/maze.png");
+  SDL_assert(surface != nullptr);
+
+  auto texture = SDL_CreateTextureFromSurface(renderer_->sdl_renderer, surface);
+  SDL_assert(texture != nullptr);
+
+  int width{}, height{};
+  SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
+
+  SDL_Rect r;
+  r.w = width;
+  r.h = height;
+  r.x = 0;
+  r.y = 0;
+
+  SDL_RenderCopy(renderer_->sdl_renderer,
+  texture,
+  nullptr,
+  &r);
+
+  SDL_RenderPresent(renderer_->sdl_renderer);
+}
+
+SDL_Texture* LoadTexture(const char* fileName) {
+  SDL_Surface* surface = IMG_Load("../assets/maze1.png");
+  if (!surface) {
+    SDL_Log("Failed to load texture file %s", fileName);
+    return nullptr;
+  }
+  // auto texture = SDL_CreateTextureFromSurface(renderer_->sdl_renderer, surface);
+
+}
 
 int Game::GetScore() const { return score; }

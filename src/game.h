@@ -29,6 +29,7 @@ private:
   bool ready_;
   bool running_;
   std::shared_ptr<Renderer> renderer_;
+  Uint32 ticks_count_;
 };
 
 #endif
