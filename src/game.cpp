@@ -15,9 +15,9 @@ Game::Game() : ready_{false} {
 
   int scale{2};
   renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
-  ready_ = true;
-
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, 224, 288);
+
+  ready_ = true;
 }
 
 Game::~Game() { SDL_Quit(); }
@@ -93,7 +93,6 @@ void Game::Render() {
 
   auto texture = SDL_CreateTextureFromSurface(renderer_->sdl_renderer, surface);
   SDL_assert(texture != nullptr);
-
   int width{}, height{};
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
 
@@ -109,6 +108,9 @@ void Game::Render() {
   &r);
 
   SDL_RenderPresent(renderer_->sdl_renderer);
+
+  SDL_FreeSurface(surface);
+
 }
 
 SDL_Texture* LoadTexture(const char* fileName) {

@@ -1,4 +1,6 @@
 #include "renderer.h"
+#include "SDL_image.h"
+
 #include <iostream>
 #include <string>
 
@@ -27,4 +29,16 @@ Renderer::~Renderer() { SDL_DestroyWindow(sdl_window); }
 
 void Renderer::SetWindowSize(int width, int height) {
   SDL_SetWindowSize(sdl_window, width, height);
+}
+
+Sprite* Renderer::CreateSprite(std::string fileName) {
+  auto surface = IMG_Load("../assets/maze.png");
+  SDL_assert(surface != nullptr);
+
+  auto texture = SDL_CreateTextureFromSurface(sdl_renderer, surface);
+  SDL_assert(texture != nullptr);
+  int width{}, height{};
+  SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
+
+  return nullptr;
 }
