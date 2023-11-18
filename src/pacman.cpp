@@ -1,7 +1,7 @@
 #include "pacman.h"
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : speed_x{1}, speed_y{0}
+    : speed{1, 0}
 {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
@@ -9,13 +9,13 @@ Pacman::Pacman(SDL_Renderer *renderer)
 
 void Pacman::Update(const float deltaTime)
 {
-    x += speed_x;
-    if (x > 150) {
-        x = 0;
+    position += speed;
+
+    if (position.x > 200) {
+        position.x = 0;
     }
-    y += speed_y;
-    if (y > 150) {
-        y = 0;
+    if (position.y > 250) {
+        position.y = 0;
     }
 
     sprite->Update(deltaTime);
@@ -23,26 +23,22 @@ void Pacman::Update(const float deltaTime)
 
 void Pacman::Render(SDL_Renderer *renderer)
 {
-    sprite->Render(renderer, x, y);
+    sprite->Render(renderer, position.x, position.y);
 }
 
 void Pacman::ProcessInput(const Uint8 *state)
 {
     if (state[SDL_SCANCODE_RIGHT]) {
         sprite->SetFrames({1, 2});
-        speed_x = 1;
-        speed_y = 0;
+        speed = Vector2<int>{2, 0};
     } else if (state[SDL_SCANCODE_LEFT]) {
         sprite->SetFrames({3, 4});
-        speed_x = -1;
-        speed_y = 0;
+        speed = Vector2<int>{-2, 0};
     } else if (state[SDL_SCANCODE_UP]) {
         sprite->SetFrames({5, 6});
-        speed_x = 0;
-        speed_y = -1;
+        speed = Vector2<int>{0, -2};
     } else if (state[SDL_SCANCODE_DOWN]) {
         sprite->SetFrames({7, 8});
-        speed_x = 0;
-        speed_y = 1;
+        speed = Vector2<int>{0, 3};
     }
 }

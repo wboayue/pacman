@@ -6,6 +6,7 @@
 
 #include "SDL.h"
 
+#include "vector2.h"
 #include "sprite.h"
 
 class Pacman {
@@ -17,11 +18,8 @@ public:
     void ProcessInput(const Uint8 *state);
 
 private:
-    int x;
-    int y;
-
-    int speed_x;
-    int speed_y;
+    Vector2<int> position;
+    Vector2<int> speed;
 
     std::unique_ptr<Sprite> sprite;
 };
