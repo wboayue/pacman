@@ -17,8 +17,7 @@ Game::Game() : ready_{false} {
   renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, 224, 288);
 
-  pacman = std::make_unique<Sprite>(renderer_->sdl_renderer, "../assets/pacman.png", 4, 16);
-  pacman->SetFrames({1, 2});
+  pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
 
   ready_ = true;
 }
@@ -86,6 +85,9 @@ void Game::ProcessInput() {
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }
+
+  pacman->ProcessInput(state);
+
 }
 
 void Game::Update(const float deltaTime) {
@@ -113,7 +115,7 @@ void Game::Render() {
   nullptr,
   &r);
 
-  pacman->Render(renderer_->sdl_renderer, 0, 0);
+  pacman->Render(renderer_->sdl_renderer);
 
   renderer_->Present();
 }

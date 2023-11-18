@@ -7,7 +7,7 @@
 #include "SDL.h"
 
 #include "renderer.h"
-#include "sprite.h"
+#include "pacman.h"
 
 class Game {
 public:
@@ -37,7 +37,7 @@ private:
   std::shared_ptr<Renderer> renderer_;
   Uint32 ticks_count_;
 
-  std::unique_ptr<Sprite> pacman;
+  std::unique_ptr<Pacman> pacman;
 };
 
 #endif
