@@ -13,6 +13,11 @@ public:
 
   void SetWindowSize(int width, int height);
 
+  void Clear();
+  void Present();
+
+  SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface);
+
   SDL_Renderer *sdl_renderer;
 
   Sprite* CreateSprite(std::string fileName);

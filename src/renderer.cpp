@@ -31,6 +31,18 @@ void Renderer::SetWindowSize(int width, int height) {
   SDL_SetWindowSize(sdl_window, width, height);
 }
 
+void Renderer::Clear() {
+  SDL_RenderClear(sdl_renderer);
+}
+
+void Renderer::Present() {
+  SDL_RenderPresent(sdl_renderer);
+}
+
+SDL_Texture* Renderer::CreateTextureFromSurface(SDL_Surface* surface) {
+  return SDL_CreateTextureFromSurface(sdl_renderer, surface);
+}
+
 Sprite* Renderer::CreateSprite(std::string fileName) {
   auto surface = IMG_Load("../assets/maze.png");
   SDL_assert(surface != nullptr);

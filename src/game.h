@@ -1,9 +1,13 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "SDL.h"
-#include "renderer.h"
 #include <random>
+#include <string>
+
+#include "SDL.h"
+
+#include "renderer.h"
+#include "sprite.h"
 
 class Game {
 public:
@@ -14,6 +18,8 @@ public:
   int GetScore() const;
   bool Ready() const;
 
+  SDL_Texture* GetTexture(std::string fileName);
+
 private:
   std::random_device dev;
   std::mt19937 engine;
@@ -23,13 +29,15 @@ private:
   int score{0};
 
   void ProcessInput();
-  void Update();
+  void Update(const float deltaTime);
   void Render();
 
   bool ready_;
   bool running_;
   std::shared_ptr<Renderer> renderer_;
   Uint32 ticks_count_;
+
+  std::unique_ptr<Sprite> pacman;
 };
 
 #endif

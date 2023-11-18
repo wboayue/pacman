@@ -17,6 +17,9 @@ Game::Game() : ready_{false} {
   renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, 224, 288);
 
+  pacman = std::make_unique<Sprite>(renderer_->sdl_renderer, "../assets/pacman.png", 4, 16);
+  pacman->SetFrames({1, 2});
+
   ready_ = true;
 }
 
@@ -38,7 +41,7 @@ void Game::Run(std::size_t target_frame_duration) {
     ticks_count_ = SDL_GetTicks();
 
     ProcessInput();
-    Update();
+    Update(deltaTime);
     Render();
 
     frame_end = SDL_GetTicks();
@@ -85,16 +88,19 @@ void Game::ProcessInput() {
   }
 }
 
-void Game::Update() {}
+void Game::Update(const float deltaTime) {
+  pacman->Update(deltaTime);
+}
 
 void Game::Render() {
-  auto surface = IMG_Load("../assets/maze.png");
-  SDL_assert(surface != nullptr);
+  renderer_->Clear();
 
-  auto texture = SDL_CreateTextureFromSurface(renderer_->sdl_renderer, surface);
-  SDL_assert(texture != nullptr);
+  // move to asset managers
+  auto maze = GetTexture("../assets/maze.png");
+  SDL_assert(maze != nullptr);
+
   int width{}, height{};
-  SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
+  SDL_QueryTexture(maze, nullptr, nullptr, &width, &height);
 
   SDL_Rect r;
   r.w = width;
@@ -103,24 +109,27 @@ void Game::Render() {
   r.y = 0;
 
   SDL_RenderCopy(renderer_->sdl_renderer,
-  texture,
+  maze,
   nullptr,
   &r);
 
-  SDL_RenderPresent(renderer_->sdl_renderer);
+  pacman->Render(renderer_->sdl_renderer, 0, 0);
 
-  SDL_FreeSurface(surface);
-
+  renderer_->Present();
 }
 
-SDL_Texture* LoadTexture(const char* fileName) {
-  SDL_Surface* surface = IMG_Load("../assets/maze1.png");
+SDL_Texture* Game::GetTexture(std::string fileName) {
+  SDL_Surface* surface = IMG_Load(fileName.c_str());
   if (!surface) {
-    SDL_Log("Failed to load texture file %s", fileName);
+    SDL_Log("Failed to load texture file %s", fileName.c_str());
     return nullptr;
   }
-  // auto texture = SDL_CreateTextureFromSurface(renderer_->sdl_renderer, surface);
 
+  SDL_Texture* texture = renderer_->CreateTextureFromSurface(surface);
+  SDL_assert(texture != nullptr);
+  SDL_FreeSurface(surface);
+
+  return texture;
 }
 
 int Game::GetScore() const { return score; }
