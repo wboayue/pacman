@@ -1,7 +1,7 @@
 #include "pacman.h"
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : speed{1, 0}
+    : speed{0, 0}, position{90, 26*8 - 4}
 {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
@@ -11,11 +11,12 @@ void Pacman::Update(const float deltaTime)
 {
     position += speed;
 
-    if (position.x > 200) {
-        position.x = 0;
+    if (position.x < 8 || position.x > 8*25 - 8) {
+        speed.x = 0;
     }
-    if (position.y > 250) {
-        position.y = 0;
+
+    if (position.y < 16 || position.y > 8*36 - 8) {
+        speed.y = 0;
     }
 
     sprite->Update(deltaTime);
