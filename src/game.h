@@ -8,6 +8,7 @@
 
 #include "renderer.h"
 #include "pacman.h"
+#include "grid.h"
 
 class Game {
 public:
@@ -38,6 +39,7 @@ private:
   Uint32 ticks_count_;
 
   std::unique_ptr<Pacman> pacman;
+  Grid grid;
 };
 
 #endif

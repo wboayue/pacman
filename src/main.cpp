@@ -1,5 +1,6 @@
-#include "game.h"
 #include <iostream>
+
+#include "game.h"
 
 int main() {
   constexpr std::size_t kFramesPerSecond{60};

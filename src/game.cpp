@@ -1,7 +1,12 @@
-#include "game.h"
+#include <iostream>
+
 #include "SDL.h"
 #include "SDL_image.h"
-#include <iostream>
+
+#include "game.h"
+
+const int kGameWidth = 224;
+const int kGameHeight = 288;
 
 Game::Game() : ready_{false} {
   // Initialize SDL
@@ -14,10 +19,11 @@ Game::Game() : ready_{false} {
   IMG_Init(IMG_INIT_PNG);
 
   int scale{2};
-  renderer_ = std::make_shared<Renderer>(224*scale, 288*scale);
-  SDL_RenderSetLogicalSize(renderer_->sdl_renderer, 224, 288);
+  renderer_ = std::make_shared<Renderer>(kGameWidth*scale, kGameHeight*scale);
+  SDL_RenderSetLogicalSize(renderer_->sdl_renderer, kGameWidth, kGameHeight);
 
   pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
+  grid = Grid::Load("../assets/maze.txt");
 
   ready_ = true;
 }
