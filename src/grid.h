@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <math.h>
 
 #include "vector2.h"
 
@@ -35,7 +36,7 @@ public:
     };
 
     Cell& GetCell(const Vec2 &position) {
-        return cells.at(position.y).at(position.x);
+        return cells.at(floor(position.y)).at(floor(position.x));
     };
 //    Grid& operator=(const Grid& grid);
     static Grid Load(const std::string &gridPath);

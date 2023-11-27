@@ -4,8 +4,8 @@
 #include <ostream>
 
 struct Vec2 {
-    int x;
-    int y;
+    float x;
+    float y;
 
     Vec2 operator+(const Vec2 &rhs);
     Vec2& operator+=(const Vec2 &rhs);
@@ -17,11 +17,14 @@ struct Vec2 {
 
     Vec2 operator/(const float& rhs) const {
         if (rhs != 0) {
-            return {(int)(x/rhs), (int)(y/rhs)};
+            return {(x/rhs), (y/rhs)};
         } else {
 //            std::cerr << "Error: Division by zero!" << std::endl;
             return {0, 0};
         }
+    }
+    Vec2 operator*(const float& rhs) const {
+        return {x*rhs, y*rhs};
     }
 
 };

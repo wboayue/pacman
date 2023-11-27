@@ -31,10 +31,10 @@ Game::Game() : ready_{false}, powerPellets{}
 
   for (int y = 0; y < grid.Height(); ++y) {
     for (int x = 0; x < grid.Width(); ++x) {
-      if (grid.GetCell({x, y}) == Cell::kPowerPellet) {
-        powerPellets.push_back(std::make_unique<PowerPellet>(renderer_->sdl_renderer, Vec2{x, y}));
-      } else if (grid.GetCell({x, y}) == Cell::kPellet) {
-        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{x, y}));
+      if (grid.GetCell({(float)x, (float)y}) == Cell::kPowerPellet) {
+        powerPellets.push_back(std::make_unique<PowerPellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}));
+      } else if (grid.GetCell({(float)x, (float)y}) == Cell::kPellet) {
+        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}));
       }
     }
   }
