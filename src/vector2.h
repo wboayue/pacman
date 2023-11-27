@@ -1,28 +1,29 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
-template <class T>
-struct Vector2 {
-    T x;
-    T y;
+#include <ostream>
 
-    Vector2<T> operator+(const Vector2<T> &rhs);
-    Vector2<T>& operator+=(const Vector2<T> &rhs);
+struct Vec2 {
+    int x;
+    int y;
+
+    Vec2 operator+(const Vec2 &rhs);
+    Vec2& operator+=(const Vec2 &rhs);
+
+    friend std::ostream& operator<<(std::ostream& os, const Vec2& rhs) {
+        os << "{" << (int)rhs.x << ", " << (int)rhs.y << "}";
+        return os;
+    }
+
+    Vec2 operator/(const float& rhs) const {
+        if (rhs != 0) {
+            return {(int)(x/rhs), (int)(y/rhs)};
+        } else {
+//            std::cerr << "Error: Division by zero!" << std::endl;
+            return {0, 0};
+        }
+    }
+
 };
-
-template <class T>
-Vector2<T> Vector2<T>::operator+(const Vector2<T> &rhs)
-{
-    return {x+rhs.x, y+rhs.y};
-}
-
-template <class T>
-Vector2<T>& Vector2<T>::operator+=(const Vector2<T> &rhs)
-{   
-    x += rhs.x;
-    y += rhs.y;
-    
-    return *this;
-}
 
 #endif

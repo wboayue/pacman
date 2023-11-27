@@ -8,7 +8,8 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false} {
+Game::Game() : ready_{false}, powerPellets{}
+ {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -22,8 +23,21 @@ Game::Game() : ready_{false} {
   renderer_ = std::make_shared<Renderer>(kGameWidth*scale, kGameHeight*scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, kGameWidth, kGameHeight);
 
-  pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
   grid = Grid::Load("../assets/maze.txt");
+  board = std::make_unique<BoardManager>(renderer_->sdl_renderer);
+
+  pacman = std::make_unique<Pacman>(renderer_->sdl_renderer, grid);
+
+
+  for (int y = 0; y < grid.Height(); ++y) {
+    for (int x = 0; x < grid.Width(); ++x) {
+      if (grid.GetCell({x, y}) == Cell::kPowerPellet) {
+        powerPellets.push_back(std::make_unique<PowerPellet>(renderer_->sdl_renderer, Vec2{x, y}));
+      } else if (grid.GetCell({x, y}) == Cell::kPellet) {
+        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{x, y}));
+      }
+    }
+  }
 
   ready_ = true;
 }
@@ -98,31 +112,32 @@ void Game::ProcessInput() {
 
 void Game::Update(const float deltaTime) {
   pacman->Update(deltaTime);
+  board->Update(deltaTime);
+
+  for (auto &pellet : pellets) {
+    pellet->Update(deltaTime);
+  }
+
+  for (auto &powerPellet : powerPellets) {
+    powerPellet->Update(deltaTime);
+  }
 }
 
 void Game::Render() {
   renderer_->Clear();
 
-  // move to asset managers
-  auto maze = GetTexture("../assets/maze.png");
-  SDL_assert(maze != nullptr);
+  board->Render(renderer_->sdl_renderer);
 
-  int width{}, height{};
-  SDL_QueryTexture(maze, nullptr, nullptr, &width, &height);
+  for (auto &pellet : pellets) {
+    pellet->Render(renderer_->sdl_renderer);
+  }
 
-  SDL_Rect r;
-  r.w = width;
-  r.h = height;
-  r.x = 0;
-  r.y = 0;
-
-  SDL_RenderCopy(renderer_->sdl_renderer,
-  maze,
-  nullptr,
-  &r);
+  for (auto &powerPellet : powerPellets) {
+    powerPellet->Render(renderer_->sdl_renderer);
+  }
 
   pacman->Render(renderer_->sdl_renderer);
-
+ 
   renderer_->Present();
 }
 

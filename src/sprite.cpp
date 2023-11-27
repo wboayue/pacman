@@ -68,6 +68,7 @@ SDL_Texture* LoadTexture(SDL_Renderer *renderer, std::string fileName) {
   SDL_Surface* surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());
+    std::abort();
     return nullptr;
   }
 

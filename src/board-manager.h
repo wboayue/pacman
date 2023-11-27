@@ -1,5 +1,5 @@
-#ifndef POWER_PELLET_H
-#define POWER_PELLET_H
+#ifndef BOARD_MANAGER_H
+#define BOARD_MANAGER_H
 
 #include <string>
 #include <vector>
@@ -9,16 +9,16 @@
 #include "vector2.h"
 #include "sprite.h"
 
-class PowerPellet {
+class BoardManager {
 public:
-    PowerPellet(SDL_Renderer *renderer, Vec2 position);
+    BoardManager(SDL_Renderer *renderer);
 
     void Update(const float deltaTime);
     void Render(SDL_Renderer *renderer);
 
 private:
-    Vec2 position;
-    Sprite sprite;
+    Sprite maze;
+    SDL_Renderer *renderer;
 };
 
 #endif

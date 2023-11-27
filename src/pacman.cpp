@@ -1,22 +1,33 @@
+#include <iostream>
+#include <math.h>
+
 #include "pacman.h"
 
-Pacman::Pacman(SDL_Renderer *renderer)
-    : speed{0, 0}, position{90, 26*8 - 4}
+Pacman::Pacman(SDL_Renderer *renderer, Grid &grid)
+    : speed{0, 0}, position{13*8+4, 26*8+4}, grid{grid}
 {
+ // 12, 25
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
 }
 
 void Pacman::Update(const float deltaTime)
 {
-    position += speed;
+    auto nextPosition = NextGridPosition();
+  std::cout << "next " << nextPosition << " -> " <<  position/8 << " - " << grid.GetCell(nextPosition) << std::endl;
 
-    if (position.x < 8 || position.x > 8*25 - 8) {
+    if (grid.GetCell(nextPosition) == Cell::kWall) {
         speed.x = 0;
+        speed.y = 0;
     }
 
-    if (position.y < 16 || position.y > 8*36 - 8) {
-        speed.y = 0;
+    position += speed;
+
+    if (speed.x > 0 || speed.x < 0) {
+        position.y = (position.y/8) * 8 +4;
+    }
+    if (speed.y > 0 || speed.y < 0) {
+        position.x = (position.x/8) * 8 +4;
     }
 
     sprite->Update(deltaTime);
@@ -24,22 +35,84 @@ void Pacman::Update(const float deltaTime)
 
 void Pacman::Render(SDL_Renderer *renderer)
 {
-    sprite->Render(renderer, position.x, position.y);
+    sprite->Render(renderer, (int)position.x-8, (int)position.y-8);
 }
 
 void Pacman::ProcessInput(const Uint8 *state)
 {
     if (state[SDL_SCANCODE_RIGHT]) {
-        sprite->SetFrames({1, 2});
-        speed = Vector2<int>{2, 0};
+        if (grid.GetCell(NextGridPosition(Direction::kEast)) != Cell::kWall) {
+            sprite->SetFrames({1, 2});
+            speed = Vec2{2, 0};
+        }
     } else if (state[SDL_SCANCODE_LEFT]) {
-        sprite->SetFrames({3, 4});
-        speed = Vector2<int>{-2, 0};
+        if (grid.GetCell(NextGridPosition(Direction::kWest)) != Cell::kWall) {
+            sprite->SetFrames({3, 4});
+            speed = Vec2{-2, 0};
+        }
     } else if (state[SDL_SCANCODE_UP]) {
-        sprite->SetFrames({5, 6});
-        speed = Vector2<int>{0, -2};
+        if (grid.GetCell(NextGridPosition(Direction::kNorth)) != Cell::kWall) {
+            sprite->SetFrames({5, 6});
+            speed = Vec2{0, -2};
+        }
     } else if (state[SDL_SCANCODE_DOWN]) {
-        sprite->SetFrames({7, 8});
-        speed = Vector2<int>{0, 3};
+        if (grid.GetCell(NextGridPosition(Direction::kSouth)) != Cell::kWall) {
+            sprite->SetFrames({7, 8});
+            speed = Vec2{0, 3};
+        }
+    }
+}
+
+Vec2 Pacman::GetPosition()
+{
+    return position;
+}
+
+Vec2 Pacman::GetGridPosition()
+{
+    auto t = position/8;
+    return {t.x, t.y};
+}
+
+Vec2 Pacman::NextGridPosition()
+{
+    auto currentPosition = GetGridPosition();
+ 
+    if (speed.x > 0) {
+        return {currentPosition.x+1, currentPosition.y};
+    }
+    if (speed.x < 0) {
+        return {currentPosition.x-1, currentPosition.y};
+    }
+    if (speed.y > 0) {
+        return {currentPosition.x, currentPosition.y+1};
+    }
+    if (speed.y < 0) {
+        return {currentPosition.x, currentPosition.y-1};
+    }
+
+    return currentPosition;
+}
+
+Vec2 Pacman::NextGridPosition(const Direction &direction)
+{
+    auto currentPosition = GetGridPosition();
+ 
+    switch (direction)
+    {
+    case kEast:
+        return {currentPosition.x+1, currentPosition.y};
+
+    case kWest:
+        return {currentPosition.x-1, currentPosition.y};
+
+    case kNorth:
+        return {currentPosition.x, currentPosition.y-1};
+
+    case kSouth:
+        return {currentPosition.x, currentPosition.y+1};
+    
+    default:
+        return currentPosition;
     }
 }

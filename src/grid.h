@@ -5,11 +5,13 @@
 #include <vector>
 #include <string>
 
+#include "vector2.h"
+
 enum Cell {
     kBlank,
     kWall,
     kPellet,
-    kPowerUp
+    kPowerPellet
 };
 
 const int kGridWidth = 28;
@@ -23,11 +25,17 @@ public:
     {
 
     };
-    int Width() {
-        return cells[0].size();
+    
+    int Width() const {
+        return cells.at(0).size();
     };
-    int Height() {
+    
+    int Height() const {
         return cells.size();
+    };
+
+    Cell& GetCell(const Vec2 &position) {
+        return cells.at(position.y).at(position.x);
     };
 //    Grid& operator=(const Grid& grid);
     static Grid Load(const std::string &gridPath);

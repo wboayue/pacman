@@ -31,7 +31,7 @@ Grid Grid::Load(const std::string &gridPath)
                 break;
 
             case '*':
-                row.push_back(Cell::kPowerUp);
+                row.push_back(Cell::kPowerPellet);
                 break;
             
             default:

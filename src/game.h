@@ -9,6 +9,9 @@
 #include "renderer.h"
 #include "pacman.h"
 #include "grid.h"
+#include "pellet.h"
+#include "power-pellet.h"
+#include "board-manager.h"
 
 class Game {
 public:
@@ -40,6 +43,9 @@ private:
 
   std::unique_ptr<Pacman> pacman;
   Grid grid;
+  std::vector<std::unique_ptr<PowerPellet>> powerPellets;
+  std::vector<std::unique_ptr<Pellet>> pellets;
+  std::unique_ptr<BoardManager> board;
 };
 
 #endif

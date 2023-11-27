@@ -1,5 +1,5 @@
-#ifndef POWER_PELLET_H
-#define POWER_PELLET_H
+#ifndef PELLET_H
+#define PELLET_H
 
 #include <string>
 #include <vector>
@@ -9,9 +9,9 @@
 #include "vector2.h"
 #include "sprite.h"
 
-class PowerPellet {
+class Pellet {
 public:
-    PowerPellet(SDL_Renderer *renderer, Vec2 position);
+    Pellet(SDL_Renderer *renderer, const Vec2 position);
 
     void Update(const float deltaTime);
     void Render(SDL_Renderer *renderer);

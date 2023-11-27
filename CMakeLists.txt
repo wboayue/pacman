@@ -16,6 +16,16 @@ find_package(SDL2_image REQUIRED >=2.0.0)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} src)
 
-add_executable(pacman src/main.cpp src/game.cpp src/renderer.cpp src/sprite.cpp src/pacman.cpp src/vector2.cpp)
+add_executable(pacman 
+    src/main.cpp
+    src/game.cpp
+    src/renderer.cpp
+    src/sprite.cpp
+    src/pacman.cpp
+    src/vector2.cpp
+    src/grid.cpp
+    src/pellet.cpp
+    src/power-pellet.cpp
+    src/board-manager.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 target_link_libraries(pacman ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
