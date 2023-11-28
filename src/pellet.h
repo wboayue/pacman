@@ -12,13 +12,14 @@
 class Pellet {
 public:
     Pellet(SDL_Renderer *renderer, const Vec2 position);
+    Pellet(SDL_Renderer *renderer, const Vec2 position, bool power);
 
     void Update(const float deltaTime);
     void Render(SDL_Renderer *renderer);
 
 private:
     Vec2 position;
-    Sprite sprite;
+    std::unique_ptr<Sprite> sprite;
 };
 
 #endif

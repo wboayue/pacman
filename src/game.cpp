@@ -8,7 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, powerPellets{}
+Game::Game() : ready_{false}
  {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -32,7 +32,7 @@ Game::Game() : ready_{false}, powerPellets{}
   for (int y = 0; y < grid.Height(); ++y) {
     for (int x = 0; x < grid.Width(); ++x) {
       if (grid.GetCell({(float)x, (float)y}) == Cell::kPowerPellet) {
-        powerPellets.push_back(std::make_unique<PowerPellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}));
+        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}, true));
       } else if (grid.GetCell({(float)x, (float)y}) == Cell::kPellet) {
         pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}));
       }
@@ -117,10 +117,6 @@ void Game::Update(const float deltaTime) {
   for (auto &pellet : pellets) {
     pellet->Update(deltaTime);
   }
-
-  for (auto &powerPellet : powerPellets) {
-    powerPellet->Update(deltaTime);
-  }
 }
 
 void Game::Render() {
@@ -130,10 +126,6 @@ void Game::Render() {
 
   for (auto &pellet : pellets) {
     pellet->Render(renderer_->sdl_renderer);
-  }
-
-  for (auto &powerPellet : powerPellets) {
-    powerPellet->Render(renderer_->sdl_renderer);
   }
 
   pacman->Render(renderer_->sdl_renderer);
