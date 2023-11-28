@@ -11,6 +11,7 @@
 #include "grid.h"
 
 enum Direction {
+    kNeutral,
     kNorth,
     kSouth,
     kEast,
@@ -34,7 +35,8 @@ public:
 
 private:
     Vec2 position;
-    Vec2 speed;
+    Vec2 velocity;
+    Direction heading;
 
     Grid &grid;
     std::unique_ptr<Sprite> sprite;
