@@ -23,6 +23,7 @@ Grid Grid::Load(const std::string &gridPath)
             switch (ch)
             {
             case '#':
+            case '-':
                 row.push_back(Cell::kWall);
                 break;
 
