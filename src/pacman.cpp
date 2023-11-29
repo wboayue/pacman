@@ -12,9 +12,7 @@ Pacman::Pacman(SDL_Renderer *renderer, Grid &grid)
 
 void Pacman::Update(const float deltaTime)
 {
-    auto nextPosition = NextGridPosition();
-    //std::cout << "next " << nextPosition << " -> " <<  position/8 << " - " << grid.GetCell(nextPosition) << std::endl;
-
+    // Check that I can turn in requested direction
     if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
         if (heading == Direction::kEast) {
             sprite->SetFrames({1, 2});
@@ -31,9 +29,31 @@ void Pacman::Update(const float deltaTime)
         }
     }
 
+    auto nextPosition = NextGridPosition();
     if (grid.GetCell(nextPosition) == Cell::kWall) {
-        velocity.x = 0;
-        velocity.y = 0;
+        float x = position.x / 8.0;
+        float y = position.y / 8.0;
+        if (velocity.x > 0) {
+            if ((x - floor(x)) > 0.5) {
+                velocity.x = 0;
+                position.x = floor(x)*8 + 4;
+            }
+        } else if (velocity.x < 0) {
+            if (!((x - floor(x)) < 0.5)) {
+                velocity.x = 0;
+                position.x = floor(x)*8 + 4;
+            }
+        } else if (velocity.y > 0) {
+            if ((y - floor(y)) > 0.5) {
+                velocity.y = 0;
+                position.y = floor(y)*8 + 4;
+            }
+        } else if (velocity.y < 0) {
+            if ((y - floor(y)) < 0.5) {
+                velocity.y = 0;
+                position.y = floor(y)*8 + 4;
+            }
+        }
     }
 
     position += (velocity * deltaTime);
@@ -74,7 +94,7 @@ Vec2 Pacman::GetPosition()
 Vec2 Pacman::GetGridPosition()
 {
     auto t = position/8;
-    return {t.x, t.y};
+    return {floor(t.x), floor(t.y)};
 }
 
 Vec2 Pacman::NextGridPosition()
