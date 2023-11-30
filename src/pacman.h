@@ -9,6 +9,7 @@
 #include "vector2.h"
 #include "sprite.h"
 #include "grid.h"
+#include "game-state.h"
 
 enum Direction {
     kNeutral,
@@ -24,7 +25,7 @@ class Pacman {
 public:
     Pacman(SDL_Renderer *renderer);
 
-    void Update(const float deltaTime, Grid &grid);
+    void Update(const float deltaTime, Grid &grid, GameState &state);
     void Render(SDL_Renderer *renderer);
     void ProcessInput(const Uint8 *state);
 

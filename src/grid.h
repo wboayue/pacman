@@ -15,7 +15,8 @@ enum Cell {
     kBlank,
     kWall,
     kPellet,
-    kPowerPellet
+    kPowerPellet,
+    kOffGrid
 };
 
 const int kGridWidth = 28;
@@ -41,7 +42,13 @@ public:
         return cells.size();
     };
 
-    Cell& GetCell(const Vec2 &position) {
+    const Cell GetCell(const Vec2 &position) const {
+        if (position.x < 0 || position.y < 0) {
+            return Cell::kOffGrid;
+        }
+        if (floor(position.x) >= kGridWidth) {
+            return Cell::kOffGrid;
+        }
         return cells.at(floor(position.y)).at(floor(position.x));
     };
 

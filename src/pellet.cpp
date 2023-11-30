@@ -6,7 +6,7 @@ Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position)
 }
 
 Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position, bool power)
-    : position{position}
+    : position{position}, power{power}
 {
     if (power) {
         sprite = std::make_unique<Sprite>(renderer, "../assets/power-pellet.png", 3, 8);
@@ -24,4 +24,9 @@ void Pellet::Update(const float deltaTime)
 void Pellet::Render(SDL_Renderer *renderer)
 {
     sprite->Render(renderer, position.x*8, position.y*8);
+}
+
+bool Pellet::IsEnergizer() const
+{
+    return power;
 }

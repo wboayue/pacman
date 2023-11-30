@@ -8,7 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}
+Game::Game() : ready_{false}, state{0, 3}
  {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -29,7 +29,7 @@ Game::Game() : ready_{false}
   pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
 
   grid.CreatePellets(renderer_->sdl_renderer);
-  
+
   ready_ = true;
 }
 
@@ -102,7 +102,7 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(const float deltaTime) {
-  pacman->Update(deltaTime, grid);
+  pacman->Update(deltaTime, grid, state);
   grid.Update(deltaTime);
   board->Update(deltaTime);
 }

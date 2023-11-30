@@ -4,13 +4,13 @@
 #include "pacman.h"
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : velocity{0, 0}, position{13*8+4, 26*8+4}, heading{Direction::kNeutral}
+    : velocity{0, 0}, position{14*8, 26*8+4}, heading{Direction::kNeutral}
 {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
 }
 
-void Pacman::Update(const float deltaTime, Grid &grid)
+void Pacman::Update(const float deltaTime, Grid &grid, GameState &state)
 {
     // Check that I can turn in requested direction
     if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
@@ -58,6 +58,12 @@ void Pacman::Update(const float deltaTime, Grid &grid)
 
     if (grid.HasPellet(GetGridPosition())) {
         auto pellet = grid.ConsumePellet(GetGridPosition());
+        if (pellet->IsEnergizer()) {
+            state.score += 50;
+        } else {
+            state.score += 10;
+        }
+        std::cout << "score:  " << state.score << std::endl;
     } else {
         position += (velocity * deltaTime);
 
@@ -67,6 +73,13 @@ void Pacman::Update(const float deltaTime, Grid &grid)
         if (velocity.y > 0 || velocity.y < 0) {
             position.x = floor(((int)position.x/8) * 8 +4);
         }
+    }
+
+    // teleport
+    if (position.x < -16) {
+        position.x = kGridWidth * 8 + 16;
+    } else if (position.x > kGridWidth * 8 + 16) {
+        position.x = -16;
     }
 
     sprite->Update(deltaTime);

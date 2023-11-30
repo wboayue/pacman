@@ -17,9 +17,11 @@ public:
     void Update(const float deltaTime);
     void Render(SDL_Renderer *renderer);
 
+    bool IsEnergizer() const;
 private:
     Vec2 position;
     std::unique_ptr<Sprite> sprite;
+    bool power;
 };
 
 #endif

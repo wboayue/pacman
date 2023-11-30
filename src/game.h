@@ -11,6 +11,7 @@
 #include "grid.h"
 #include "pellet.h"
 #include "board-manager.h"
+#include "game-state.h"
 
 class Game {
 public:
@@ -43,6 +44,7 @@ private:
   std::unique_ptr<Pacman> pacman;
   Grid grid;
   std::unique_ptr<BoardManager> board;
+  GameState state;
 };
 
 #endif
