@@ -2,6 +2,7 @@
 #define VECTOR2_H
 
 #include <ostream>
+#include <functional>
 
 struct Vec2 {
     float x;
@@ -28,5 +29,15 @@ struct Vec2 {
     }
 
 };
+
+struct Vec2Hash {
+    size_t operator()(const Vec2 &item) const {
+        size_t h1 = std::hash<float>()(item.x);
+        size_t h2 = std::hash<float>()(item.y);
+        return h1 ^ (h2 << 1);
+    }
+};
+
+bool operator==(const Vec2 &lhs, const Vec2 &rhs);
 
 #endif

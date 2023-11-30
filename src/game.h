@@ -42,7 +42,6 @@ private:
 
   std::unique_ptr<Pacman> pacman;
   Grid grid;
-  std::vector<std::unique_ptr<Pellet>> pellets;
   std::unique_ptr<BoardManager> board;
 };
 

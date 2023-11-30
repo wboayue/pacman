@@ -6,7 +6,10 @@
 #include <string>
 #include <math.h>
 
+#include "SDL.h"
+
 #include "vector2.h"
+#include "pellet.h"
 
 enum Cell {
     kBlank,
@@ -27,6 +30,9 @@ public:
 
     };
     
+    void Update(const float deltaTime);
+    void Render(SDL_Renderer *renderer);
+
     int Width() const {
         return cells.at(0).size();
     };
@@ -38,10 +44,18 @@ public:
     Cell& GetCell(const Vec2 &position) {
         return cells.at(floor(position.y)).at(floor(position.x));
     };
+
+    bool HasPellet(const Vec2 &position);
+    std::unique_ptr<Pellet> ConsumePellet(const Vec2 &position);
+
+    void CreatePellets(SDL_Renderer *renderer);
+
 //    Grid& operator=(const Grid& grid);
     static Grid Load(const std::string &gridPath);
 private:
     std::vector<std::vector<Cell>> cells;
+    // std::vector<std::unique_ptr<Pellet>> pellets;
+    std::unordered_map<Vec2, std::unique_ptr<Pellet>, Vec2Hash> pellets;
 };
 
 #endif

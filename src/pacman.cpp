@@ -3,14 +3,14 @@
 
 #include "pacman.h"
 
-Pacman::Pacman(SDL_Renderer *renderer, Grid &grid)
-    : velocity{0, 0}, position{13*8+4, 26*8+4}, grid{grid}, heading{Direction::kNeutral}
+Pacman::Pacman(SDL_Renderer *renderer)
+    : velocity{0, 0}, position{13*8+4, 26*8+4}, heading{Direction::kNeutral}
 {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
 }
 
-void Pacman::Update(const float deltaTime)
+void Pacman::Update(const float deltaTime, Grid &grid)
 {
     // Check that I can turn in requested direction
     if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
@@ -56,13 +56,17 @@ void Pacman::Update(const float deltaTime)
         }
     }
 
-    position += (velocity * deltaTime);
+    if (grid.HasPellet(GetGridPosition())) {
+        auto pellet = grid.ConsumePellet(GetGridPosition());
+    } else {
+        position += (velocity * deltaTime);
 
-    if (velocity.x > 0 || velocity.x < 0) {
-        position.y = floor(((int)position.y/8) * 8 +4);
-    }
-    if (velocity.y > 0 || velocity.y < 0) {
-        position.x = floor(((int)position.x/8) * 8 +4);
+        if (velocity.x > 0 || velocity.x < 0) {
+            position.y = floor(((int)position.y/8) * 8 +4);
+        }
+        if (velocity.y > 0 || velocity.y < 0) {
+            position.x = floor(((int)position.x/8) * 8 +4);
+        }
     }
 
     sprite->Update(deltaTime);

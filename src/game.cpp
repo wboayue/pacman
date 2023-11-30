@@ -26,19 +26,10 @@ Game::Game() : ready_{false}
   grid = Grid::Load("../assets/maze.txt");
   board = std::make_unique<BoardManager>(renderer_->sdl_renderer);
 
-  pacman = std::make_unique<Pacman>(renderer_->sdl_renderer, grid);
+  pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
 
-
-  for (int y = 0; y < grid.Height(); ++y) {
-    for (int x = 0; x < grid.Width(); ++x) {
-      if (grid.GetCell({(float)x, (float)y}) == Cell::kPowerPellet) {
-        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}, true));
-      } else if (grid.GetCell({(float)x, (float)y}) == Cell::kPellet) {
-        pellets.push_back(std::make_unique<Pellet>(renderer_->sdl_renderer, Vec2{(float)x, (float)y}));
-      }
-    }
-  }
-
+  grid.CreatePellets(renderer_->sdl_renderer);
+  
   ready_ = true;
 }
 
@@ -111,23 +102,16 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(const float deltaTime) {
-  pacman->Update(deltaTime);
+  pacman->Update(deltaTime, grid);
+  grid.Update(deltaTime);
   board->Update(deltaTime);
-
-  for (auto &pellet : pellets) {
-    pellet->Update(deltaTime);
-  }
 }
 
 void Game::Render() {
   renderer_->Clear();
 
   board->Render(renderer_->sdl_renderer);
-
-  for (auto &pellet : pellets) {
-    pellet->Render(renderer_->sdl_renderer);
-  }
-
+  grid.Render(renderer_->sdl_renderer);
   pacman->Render(renderer_->sdl_renderer);
  
   renderer_->Present();

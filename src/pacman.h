@@ -22,9 +22,9 @@ const float kMaxSpeed = 75.75757625;
 
 class Pacman {
 public:
-    Pacman(SDL_Renderer *renderer, Grid &grid);
+    Pacman(SDL_Renderer *renderer);
 
-    void Update(const float deltaTime);
+    void Update(const float deltaTime, Grid &grid);
     void Render(SDL_Renderer *renderer);
     void ProcessInput(const Uint8 *state);
 
@@ -38,7 +38,6 @@ private:
     Vec2 velocity;
     Direction heading;
 
-    Grid &grid;
     std::unique_ptr<Sprite> sprite;
 };
 

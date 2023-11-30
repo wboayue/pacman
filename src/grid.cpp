@@ -3,6 +3,52 @@
 
 #include "grid.h"
 
+bool Grid::HasPellet(const Vec2 &position)
+{
+    return GetCell(position) == kPellet || GetCell(position) == kPowerPellet;
+}
+
+std::unique_ptr<Pellet> Grid::ConsumePellet(const Vec2 &position)
+{
+    auto it = pellets.find(position);
+    if (it != pellets.end()) {
+        auto tmp = std::move(it->second);
+        pellets.erase(it);
+
+        cells.at(position.y).at(position.x) = kBlank;
+
+        return tmp;
+    }
+
+    return {};
+}
+
+void Grid::CreatePellets(SDL_Renderer *renderer)
+{
+    for (int y = 0; y < Height(); ++y) {
+        for (int x = 0; x < Width(); ++x) {
+            Vec2 position{(float)x, (float)y};
+            if (GetCell(position) == Cell::kPowerPellet) {
+                pellets[position] = std::make_unique<Pellet>(renderer, position, true);
+            } else if (GetCell(position) == Cell::kPellet) {
+                pellets[position] = std::make_unique<Pellet>(renderer, position);
+            }
+        }
+    }
+}
+
+void Grid::Update(const float deltaTime) {
+  for (auto &pellet : pellets) {
+    pellet.second->Update(deltaTime);
+  }
+}
+
+void Grid::Render(SDL_Renderer *renderer) {
+  for (auto &pellet : pellets) {
+    pellet.second->Render(renderer);
+  }
+}
+
 Grid Grid::Load(const std::string &gridPath)
 {
     std::fstream file{gridPath};
