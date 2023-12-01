@@ -23,7 +23,7 @@ void Pellet::Update(const float deltaTime)
 
 void Pellet::Render(SDL_Renderer *renderer)
 {
-    sprite->Render(renderer, position.x*8, position.y*8);
+    sprite->Render(renderer, {position.x*8, position.y*8});
 }
 
 bool Pellet::IsEnergizer() const

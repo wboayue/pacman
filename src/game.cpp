@@ -104,7 +104,7 @@ void Game::ProcessInput() {
 void Game::Update(const float deltaTime) {
   pacman->Update(deltaTime, grid, state);
   grid.Update(deltaTime);
-  board->Update(deltaTime);
+  board->Update(deltaTime, state);
 }
 
 void Game::Render() {

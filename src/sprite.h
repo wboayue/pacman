@@ -6,6 +6,8 @@
 
 #include "SDL.h"
 
+#include "vector2.h"
+
 class Sprite {
 public:
     Sprite(SDL_Renderer *renderer, std::string fileName);
@@ -14,7 +16,8 @@ public:
     ~Sprite();
 
     void Update(const float deltaTime);
-    void Render(SDL_Renderer *renderer, int x, int y);
+    void Render(SDL_Renderer *renderer, Vec2 destination);
+    void Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination);
 
     void SetFrames(std::vector<int> frames);
     

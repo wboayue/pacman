@@ -63,7 +63,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state)
         } else {
             state.score += 10;
         }
-        std::cout << "score:  " << state.score << std::endl;
+//        std::cout << "score:  " << state.score << std::endl;
     } else {
         position += (velocity * deltaTime);
 
@@ -87,7 +87,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state)
 
 void Pacman::Render(SDL_Renderer *renderer)
 {
-    sprite->Render(renderer, (int)position.x-8, (int)position.y-8);
+    sprite->Render(renderer, {floor(position.x-8), floor(position.y-8)});
 }
 
 void Pacman::ProcessInput(const Uint8 *state)

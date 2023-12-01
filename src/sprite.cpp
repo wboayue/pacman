@@ -45,7 +45,7 @@ void Sprite::Update(const float deltaTime) {
     }
 }
 
-void Sprite::Render(SDL_Renderer *renderer, int x, int y)
+void Sprite::Render(SDL_Renderer *renderer, Vec2 destination)
 {
     auto frame = static_cast<int>(currentFrame);
 
@@ -55,12 +55,17 @@ void Sprite::Render(SDL_Renderer *renderer, int x, int y)
     source.x = frameWidth * frames[frame];
     source.y = 0;
 
-    SDL_Rect destination;
-    destination.w = frameWidth;
-    destination.h = height;
-    destination.x = x;
-    destination.y = y;
+    SDL_Rect destination_;
+    destination_.w = frameWidth;
+    destination_.h = height;
+    destination_.x = destination.x;
+    destination_.y = destination.y;
 
+    Render(renderer, source, destination_);
+    // SDL_RenderCopy(renderer, texture, &source, &destination);
+}
+
+void Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) {
     SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
