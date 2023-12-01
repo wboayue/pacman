@@ -2,8 +2,8 @@
 #define GAME_STATE_H
 
 struct GameState {
-    int score;
-    int lives;
+  int score;
+  int lives;
 };
 
 #endif

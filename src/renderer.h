@@ -3,8 +3,8 @@
 
 #include "SDL.h"
 #include "sprite.h"
-#include <vector>
 #include <string>
+#include <vector>
 
 class Renderer {
 public:
@@ -16,11 +16,11 @@ public:
   void Clear();
   void Present();
 
-  SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface);
+  SDL_Texture *CreateTextureFromSurface(SDL_Surface *surface);
 
   SDL_Renderer *sdl_renderer;
 
-  Sprite* CreateSprite(std::string fileName);
+  Sprite *CreateSprite(std::string fileName);
 
 private:
   SDL_Window *sdl_window;

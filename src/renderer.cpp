@@ -8,9 +8,9 @@ Renderer::Renderer(const std::size_t screen_width,
                    const std::size_t screen_height)
     : screen_width(screen_width), screen_height(screen_height) {
   // Create Window
-  sdl_window =
-      SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       screen_width, screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+  sdl_window = SDL_CreateWindow(
+      "Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width,
+      screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
   if (nullptr == sdl_window) {
     std::cerr << "Window could not be created.\n";
@@ -31,19 +31,15 @@ void Renderer::SetWindowSize(int width, int height) {
   SDL_SetWindowSize(sdl_window, width, height);
 }
 
-void Renderer::Clear() {
-  SDL_RenderClear(sdl_renderer);
-}
+void Renderer::Clear() { SDL_RenderClear(sdl_renderer); }
 
-void Renderer::Present() {
-  SDL_RenderPresent(sdl_renderer);
-}
+void Renderer::Present() { SDL_RenderPresent(sdl_renderer); }
 
-SDL_Texture* Renderer::CreateTextureFromSurface(SDL_Surface* surface) {
+SDL_Texture *Renderer::CreateTextureFromSurface(SDL_Surface *surface) {
   return SDL_CreateTextureFromSurface(sdl_renderer, surface);
 }
 
-Sprite* Renderer::CreateSprite(std::string fileName) {
+Sprite *Renderer::CreateSprite(std::string fileName) {
   auto surface = IMG_Load("../assets/maze.png");
   SDL_assert(surface != nullptr);
 

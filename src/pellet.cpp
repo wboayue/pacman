@@ -1,32 +1,23 @@
 #include "pellet.h"
 
 Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position)
-    : Pellet(renderer, position, false)
-{
-}
+    : Pellet(renderer, position, false) {}
 
 Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position, bool power)
-    : position{position}, power{power}
-{
-    if (power) {
-        sprite = std::make_unique<Sprite>(renderer, "../assets/power-pellet.png", 3, 8);
-        sprite->SetFrames({1, 2});
-    } else {
-        sprite = std::make_unique<Sprite>(renderer, "../assets/pellet.png");
-    }
+    : position{position}, power{power} {
+  if (power) {
+    sprite =
+        std::make_unique<Sprite>(renderer, "../assets/power-pellet.png", 3, 8);
+    sprite->SetFrames({1, 2});
+  } else {
+    sprite = std::make_unique<Sprite>(renderer, "../assets/pellet.png");
+  }
 }
 
-void Pellet::Update(const float deltaTime)
-{
-    sprite->Update(deltaTime);
+void Pellet::Update(const float deltaTime) { sprite->Update(deltaTime); }
+
+void Pellet::Render(SDL_Renderer *renderer) {
+  sprite->Render(renderer, {position.x * 8, position.y * 8});
 }
 
-void Pellet::Render(SDL_Renderer *renderer)
-{
-    sprite->Render(renderer, {position.x*8, position.y*8});
-}
-
-bool Pellet::IsEnergizer() const
-{
-    return power;
-}
+bool Pellet::IsEnergizer() const { return power; }

@@ -8,8 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, state{0, 3}
- {
+Game::Game() : ready_{false}, state{0, 3} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -20,7 +19,8 @@ Game::Game() : ready_{false}, state{0, 3}
   IMG_Init(IMG_INIT_PNG);
 
   int scale{2};
-  renderer_ = std::make_shared<Renderer>(kGameWidth*scale, kGameHeight*scale);
+  renderer_ =
+      std::make_shared<Renderer>(kGameWidth * scale, kGameHeight * scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, kGameWidth, kGameHeight);
 
   grid = Grid::Load("../assets/maze.txt");
@@ -82,11 +82,11 @@ void Game::ProcessInput() {
     case SDL_WINDOWEVENT:
       int newWidth = event.window.data1;
       int newHeight = event.window.data2;
-      float newAspectRatio = (float)newWidth/(float)newHeight;
+      float newAspectRatio = (float)newWidth / (float)newHeight;
       if (newAspectRatio > aspectRatio) {
-        newWidth = (int)(newHeight*aspectRatio);
+        newWidth = (int)(newHeight * aspectRatio);
       } else {
-        newHeight = (int)(newWidth/aspectRatio);
+        newHeight = (int)(newWidth / aspectRatio);
       }
       renderer_->SetWindowSize(newWidth, newHeight);
     }
@@ -98,7 +98,6 @@ void Game::ProcessInput() {
   }
 
   pacman->ProcessInput(state);
-
 }
 
 void Game::Update(const float deltaTime) {
@@ -113,18 +112,18 @@ void Game::Render() {
   board->Render(renderer_->sdl_renderer);
   grid.Render(renderer_->sdl_renderer);
   pacman->Render(renderer_->sdl_renderer);
- 
+
   renderer_->Present();
 }
 
-SDL_Texture* Game::GetTexture(std::string fileName) {
-  SDL_Surface* surface = IMG_Load(fileName.c_str());
+SDL_Texture *Game::GetTexture(std::string fileName) {
+  SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());
     return nullptr;
   }
 
-  SDL_Texture* texture = renderer_->CreateTextureFromSurface(surface);
+  SDL_Texture *texture = renderer_->CreateTextureFromSurface(surface);
   SDL_assert(texture != nullptr);
   SDL_FreeSurface(surface);
 

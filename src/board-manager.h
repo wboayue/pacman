@@ -5,26 +5,27 @@
 
 #include "SDL.h"
 
+#include "game-state.h"
 #include "sprite.h"
 #include "vector2.h"
-#include "game-state.h"
 
 class BoardManager {
 public:
-    BoardManager(SDL_Renderer *renderer);
+  BoardManager(SDL_Renderer *renderer);
 
-    void Update(const float deltaTime, GameState &state);
-    void Render(SDL_Renderer *renderer);
+  void Update(const float deltaTime, GameState &state);
+  void Render(SDL_Renderer *renderer);
 
 private:
-    void WriteText(SDL_Renderer *renderer, Vec2 position, const std::string &text);
+  void WriteText(SDL_Renderer *renderer, Vec2 position,
+                 const std::string &text);
 
-    Sprite maze;
-    Sprite pacman;
-    Sprite fruits;
-    Sprite text;
+  Sprite maze;
+  Sprite pacman;
+  Sprite fruits;
+  Sprite text;
 
-    std::string score;
+  std::string score;
 };
 
 #endif

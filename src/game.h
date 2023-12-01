@@ -6,12 +6,12 @@
 
 #include "SDL.h"
 
-#include "renderer.h"
-#include "pacman.h"
-#include "grid.h"
-#include "pellet.h"
 #include "board-manager.h"
 #include "game-state.h"
+#include "grid.h"
+#include "pacman.h"
+#include "pellet.h"
+#include "renderer.h"
 
 class Game {
 public:
@@ -22,7 +22,7 @@ public:
   int GetScore() const;
   bool Ready() const;
 
-  SDL_Texture* GetTexture(std::string fileName);
+  SDL_Texture *GetTexture(std::string fileName);
 
 private:
   std::random_device dev;
