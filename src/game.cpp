@@ -16,8 +16,6 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false} {
     return;
   }
 
-  std::cerr << "here\n";
-
   IMG_Init(IMG_INIT_PNG);
 
   int scale{2};
@@ -35,8 +33,6 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false} {
 
   CreateGhosts(renderer_->sdl_renderer);
 
-  std::cerr << "there\n";
-
   ready_ = true;
 }
 
@@ -45,11 +41,19 @@ Game::~Game() { SDL_Quit(); }
 void Game::CreateGhosts(SDL_Renderer *renderer)
 {
   auto sprite = std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
-  auto blinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 14*8});
+  auto blinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 14*8+4});
   ghosts.push_back(std::move(blinky));
 
+  sprite = std::make_unique<Sprite>(renderer, "../assets/inky.png", 4, 16);
+  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{12*8, 17*8+4});
+  ghosts.push_back(std::move(inky));
+
+  sprite = std::make_unique<Sprite>(renderer, "../assets/pinky.png", 4, 16);
+  auto pinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 17*8+4});
+  ghosts.push_back(std::move(pinky));
+
   sprite = std::make_unique<Sprite>(renderer, "../assets/clyde.png", 4, 16);
-  auto clyde = std::make_unique<Ghost>(std::move(sprite), Vec2{15*8, 18*8});
+  auto clyde = std::make_unique<Ghost>(std::move(sprite), Vec2{16*8, 17*8+4});
   ghosts.push_back(std::move(clyde));
 }
 
@@ -147,11 +151,12 @@ void Game::Render() {
 
   board->Render(renderer_->sdl_renderer);
   grid.Render(renderer_->sdl_renderer);
-  pacman->Render(renderer_->sdl_renderer);
 
   for (auto &ghost : ghosts) {
     ghost->Render(renderer_->sdl_renderer);
   }
+
+  pacman->Render(renderer_->sdl_renderer);
 
   renderer_->Present();
 }
