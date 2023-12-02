@@ -3,6 +3,7 @@
 
 #include <random>
 #include <string>
+#include <vector>
 
 #include "SDL.h"
 
@@ -10,6 +11,7 @@
 #include "game-state.h"
 #include "grid.h"
 #include "pacman.h"
+#include "ghost.h"
 #include "pellet.h"
 #include "renderer.h"
 
@@ -36,6 +38,8 @@ private:
   void Update(const float deltaTime);
   void Render();
 
+  void CreateGhosts(SDL_Renderer* renderer);
+
   bool ready_;
   bool running_;
   std::shared_ptr<Renderer> renderer_;
@@ -44,6 +48,7 @@ private:
   std::unique_ptr<Pacman> pacman;
   Grid grid;
   std::unique_ptr<BoardManager> board;
+  std::vector<std::unique_ptr<Ghost>> ghosts;
   GameState state;
 };
 

@@ -42,7 +42,6 @@ private:
   Direction heading;
 
   std::unique_ptr<Sprite> sprite;
-  SDL_Renderer *renderer;
 };
 
 #endif

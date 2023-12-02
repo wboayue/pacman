@@ -7,8 +7,8 @@ const Vec2 kHomePosition{14 * 8 + 4, 26 * 8 + 4};
 
 Pacman::Pacman(SDL_Renderer *renderer)
     : velocity{0, 0}, position{kHomePosition}, heading{
-                                                        Direction::kNeutral},
-                                                        renderer{renderer} {
+                                                        Direction::kNeutral}
+                                                         {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
   sprite->SetFrames({1, 2});
 }

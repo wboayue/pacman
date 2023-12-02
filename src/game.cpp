@@ -8,13 +8,15 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, state{0, 2, 0} {
+Game::Game() : ready_{false}, state{0, 2, 0, 0, false} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
     return;
   }
+
+  std::cerr << "here\n";
 
   IMG_Init(IMG_INIT_PNG);
 
@@ -31,10 +33,25 @@ Game::Game() : ready_{false}, state{0, 2, 0} {
   grid = Grid{cells};
   grid.CreatePellets(renderer_->sdl_renderer);
 
+  CreateGhosts(renderer_->sdl_renderer);
+
+  std::cerr << "there\n";
+
   ready_ = true;
 }
 
 Game::~Game() { SDL_Quit(); }
+
+void Game::CreateGhosts(SDL_Renderer *renderer)
+{
+  auto sprite = std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
+  auto blinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 14*8});
+  ghosts.push_back(std::move(blinky));
+
+  sprite = std::make_unique<Sprite>(renderer, "../assets/clyde.png", 4, 16);
+  auto clyde = std::make_unique<Ghost>(std::move(sprite), Vec2{15*8, 18*8});
+  ghosts.push_back(std::move(clyde));
+}
 
 bool Game::Ready() const { return ready_; }
 
@@ -45,6 +62,8 @@ void Game::Run(std::size_t target_frame_duration) {
 
   int frame_count = 0;
   running_ = true;
+
+  ticks_count_ = SDL_GetTicks();
 
   while (running_) {
     frame_start = SDL_GetTicks();
@@ -114,7 +133,12 @@ void Game::ProcessInput() {
 
 void Game::Update(const float deltaTime) {
   pacman->Update(deltaTime, grid, state);
+  for (auto &ghost : ghosts) {
+    ghost->Update(deltaTime, grid, state);
+  }
+
   grid.Update(deltaTime);
+
   board->Update(deltaTime, state);
 }
 
@@ -124,6 +148,10 @@ void Game::Render() {
   board->Render(renderer_->sdl_renderer);
   grid.Render(renderer_->sdl_renderer);
   pacman->Render(renderer_->sdl_renderer);
+
+  for (auto &ghost : ghosts) {
+    ghost->Render(renderer_->sdl_renderer);
+  }
 
   renderer_->Present();
 }
