@@ -69,10 +69,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     }
     state.pelletsConsumed += 1;
     if (state.pelletsConsumed == 244) {
-      grid.Reset(renderer);
-      Reset();
-      state.pelletsConsumed = 0;
-      state.level += 1;
+      state.levelCompleted = true;
     }
     // std::cout << "pellets  " << state.pelletsConsumed << std::endl;
   } else {

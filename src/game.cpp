@@ -55,6 +55,15 @@ void Game::Run(std::size_t target_frame_duration) {
     Update(deltaTime);
     Render();
 
+    if (state.levelCompleted) {
+      // play sound
+      grid.Reset(renderer_->sdl_renderer);
+      pacman->Reset();
+      state.pelletsConsumed = 0;
+      state.level += 1;
+      state.levelCompleted = false;
+    }
+
     frame_end = SDL_GetTicks();
 
     // Keep track of how long each loop through the input/update/render cycle

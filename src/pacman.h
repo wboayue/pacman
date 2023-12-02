@@ -33,10 +33,9 @@ public:
   Vec2 GetGridPosition();
   Vec2 NextGridPosition(const Direction &direction);
   Vec2 NextGridPosition();
+  void Reset();
 
 private:
-
-  void Reset();
   
   Vec2 position;
   Vec2 velocity;

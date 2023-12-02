@@ -6,6 +6,7 @@ struct GameState {
   int extraLives;
   int level;
   int pelletsConsumed;
+  bool levelCompleted;
 };
 
 #endif
