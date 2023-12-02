@@ -26,6 +26,7 @@ add_executable(pacman
     src/grid.cpp
     src/pellet.cpp
     src/game-state.cpp
+    src/ghost.cpp
     src/board-manager.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 target_link_libraries(pacman ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

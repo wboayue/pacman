@@ -9,7 +9,7 @@ Pacman::Pacman(SDL_Renderer *renderer)
     : velocity{0, 0}, position{kHomePosition}, heading{
                                                         Direction::kNeutral},
                                                         renderer{renderer} {
-  sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
+  sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
   sprite->SetFrames({1, 2});
 }
 
