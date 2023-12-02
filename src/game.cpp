@@ -56,6 +56,8 @@ void Game::Run(std::size_t target_frame_duration) {
     Render();
 
     if (state.levelCompleted) {
+      SDL_Delay(500);
+
       // play sound
       grid.Reset(renderer_->sdl_renderer);
       pacman->Reset();
