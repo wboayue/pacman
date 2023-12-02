@@ -3,7 +3,9 @@
 
 struct GameState {
   int score;
-  int lives;
+  int extraLives;
+  int level;
+  int pelletsConsumed;
 };
 
 #endif

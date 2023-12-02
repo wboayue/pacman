@@ -19,6 +19,8 @@ public:
 private:
   void WriteText(SDL_Renderer *renderer, Vec2 position,
                  const std::string &text);
+  void RenderExtraLives(SDL_Renderer *renderer);
+  void RenderFruits(SDL_Renderer *renderer);
 
   Sprite maze;
   Sprite pacman;
@@ -26,6 +28,8 @@ private:
   Sprite text;
 
   std::string score;
+  int extraLives;
+  int level;
 };
 
 #endif

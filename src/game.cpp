@@ -8,7 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, state{0, 3} {
+Game::Game() : ready_{false}, state{0, 2, 0} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -23,11 +23,12 @@ Game::Game() : ready_{false}, state{0, 3} {
       std::make_shared<Renderer>(kGameWidth * scale, kGameHeight * scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, kGameWidth, kGameHeight);
 
-  grid = Grid::Load("../assets/maze.txt");
   board = std::make_unique<BoardManager>(renderer_->sdl_renderer);
 
   pacman = std::make_unique<Pacman>(renderer_->sdl_renderer);
 
+  auto cells = Grid::Load("../assets/maze.txt");
+  grid = Grid{cells};
   grid.CreatePellets(renderer_->sdl_renderer);
 
   ready_ = true;

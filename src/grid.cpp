@@ -7,6 +7,12 @@ bool Grid::HasPellet(const Vec2 &position) {
   return GetCell(position) == kPellet || GetCell(position) == kPowerPellet;
 }
 
+void Grid::Reset(SDL_Renderer *renderer)
+{
+  cells = Grid::Load("../assets/maze.txt");
+  CreatePellets(renderer);
+}
+
 std::unique_ptr<Pellet> Grid::ConsumePellet(const Vec2 &position) {
   auto it = pellets.find(position);
   if (it != pellets.end()) {
@@ -46,7 +52,7 @@ void Grid::Render(SDL_Renderer *renderer) {
   }
 }
 
-Grid Grid::Load(const std::string &gridPath) {
+std::vector<std::vector<Cell>> Grid::Load(const std::string &gridPath) {
   std::fstream file{gridPath};
   if (!file.is_open()) {
     std::cerr << "Unable to open grid at: " << gridPath << std::endl;
@@ -100,5 +106,5 @@ Grid Grid::Load(const std::string &gridPath) {
   }
 
   file.close();
-  return std::move(Grid(cells));
+  return std::move(cells);
 }

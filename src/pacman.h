@@ -35,11 +35,15 @@ public:
   Vec2 NextGridPosition();
 
 private:
+
+  void Reset();
+  
   Vec2 position;
   Vec2 velocity;
   Direction heading;
 
   std::unique_ptr<Sprite> sprite;
+  SDL_Renderer *renderer;
 };
 
 #endif

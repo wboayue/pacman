@@ -3,9 +3,12 @@
 
 #include "pacman.h"
 
+const Vec2 kHomePosition{14 * 8 + 4, 26 * 8 + 4}; 
+
 Pacman::Pacman(SDL_Renderer *renderer)
-    : velocity{0, 0}, position{14 * 8, 26 * 8 + 4}, heading{
-                                                        Direction::kNeutral} {
+    : velocity{0, 0}, position{kHomePosition}, heading{
+                                                        Direction::kNeutral},
+                                                        renderer{renderer} {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 4, 16);
   sprite->SetFrames({1, 2});
 }
@@ -25,6 +28,8 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     } else if (heading == Direction::kSouth) {
       sprite->SetFrames({7, 8});
       velocity = Vec2{0, kMaxSpeed * 0.8f};
+    } else {
+      sprite->SetFrames({1, 2});
     }
   }
 
@@ -62,7 +67,14 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     } else {
       state.score += 10;
     }
-    //        std::cout << "score:  " << state.score << std::endl;
+    state.pelletsConsumed += 1;
+    if (state.pelletsConsumed == 244) {
+      grid.Reset(renderer);
+      Reset();
+      state.pelletsConsumed = 0;
+      state.level += 1;
+    }
+    // std::cout << "pellets  " << state.pelletsConsumed << std::endl;
   } else {
     position += (velocity * deltaTime);
 
@@ -82,6 +94,12 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
   }
 
   sprite->Update(deltaTime);
+}
+
+void Pacman::Reset() {
+  velocity = Vec2{0, 0};
+  position = Vec2{14 * 8 + 4, 26 * 8 + 4};
+  heading = Direction::kNeutral;
 }
 
 void Pacman::Render(SDL_Renderer *renderer) {

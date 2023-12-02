@@ -4,21 +4,69 @@ BoardManager::BoardManager(SDL_Renderer *renderer)
     : maze{renderer, "../assets/maze.png"},
       pacman{renderer, "../assets/pacman.png"}, fruits{renderer,
                                                        "../assets/fruits.png"},
-      text{renderer, "../assets/white-text.png"} {}
+      text{renderer, "../assets/white-text.png"},
+      extraLives{0}
+       {}
 
 void BoardManager::Update(const float deltaTime, GameState &state) {
   maze.Update(deltaTime);
 
   score = std::to_string(state.score);
+  extraLives = state.extraLives;
+  level = state.level;
 }
 
 void BoardManager::Render(SDL_Renderer *renderer) {
+  // Maze
   maze.Render(renderer, {0, 0});
 
+  RenderExtraLives(renderer);
+
+  RenderFruits(renderer);
+
+  // Display score
   WriteText(renderer, {9, 0}, "HIGH SCORE");
   WriteText(renderer, {3, 0}, "1UP");
-
   WriteText(renderer, {4, 1}, score);
+}
+
+void BoardManager::RenderExtraLives(SDL_Renderer *renderer) {
+  SDL_Rect source;
+  source.w = 16;
+  source.h = 16;
+  source.x = 4 * 16;
+  source.y = 0;
+
+  for (int i = 0; i < extraLives; ++i) {
+
+    SDL_Rect destination;
+
+    destination.w = 16;
+    destination.h = 16;
+    destination.x = 4 * 8 - (i*16);
+    destination.y = 34 * 8;
+
+    pacman.Render(renderer, source, destination);
+  }
+}
+
+void BoardManager::RenderFruits(SDL_Renderer *renderer)
+{
+  SDL_Rect source;
+  source.w = 16;
+  source.h = 16;
+  source.x = level * 16;
+  source.y = 0;
+
+
+  SDL_Rect destination;
+
+  destination.w = 16;
+  destination.h = 16;
+  destination.x = 24 * 8;
+  destination.y = 34 * 8;
+
+  fruits.Render(renderer, source, destination);
 }
 
 void BoardManager::WriteText(SDL_Renderer *renderer, Vec2 position,

@@ -44,10 +44,12 @@ public:
   bool HasPellet(const Vec2 &position);
   std::unique_ptr<Pellet> ConsumePellet(const Vec2 &position);
 
+  void Reset(SDL_Renderer *renderer);
+
   void CreatePellets(SDL_Renderer *renderer);
 
   //    Grid& operator=(const Grid& grid);
-  static Grid Load(const std::string &gridPath);
+  static std::vector<std::vector<Cell>> Load(const std::string &gridPath);
 
 private:
   std::vector<std::vector<Cell>> cells;
