@@ -10,5 +10,5 @@ Vec2 &Vec2::operator+=(const Vec2 &rhs) {
 }
 
 bool operator==(const Vec2 &lhs, const Vec2 &rhs) {
-  return lhs.x == rhs.x && lhs.y == lhs.y;
+  return lhs.x == rhs.x && lhs.y == rhs.y;
 };

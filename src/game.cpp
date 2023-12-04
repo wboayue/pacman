@@ -41,19 +41,19 @@ Game::~Game() { SDL_Quit(); }
 void Game::CreateGhosts(SDL_Renderer *renderer)
 {
   auto sprite = std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
-  auto blinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 14*8+4});
+  auto blinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 14*8+4}, Direction::kWest);
   ghosts.push_back(std::move(blinky));
 
   sprite = std::make_unique<Sprite>(renderer, "../assets/inky.png", 4, 16);
-  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{12*8, 17*8+4});
+  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{12*8, 17*8+4}, Direction::kNorth);
   ghosts.push_back(std::move(inky));
 
   sprite = std::make_unique<Sprite>(renderer, "../assets/pinky.png", 4, 16);
-  auto pinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 17*8+4});
+  auto pinky = std::make_unique<Ghost>(std::move(sprite), Vec2{14*8, 17*8+4}, Direction::kSouth);
   ghosts.push_back(std::move(pinky));
 
   sprite = std::make_unique<Sprite>(renderer, "../assets/clyde.png", 4, 16);
-  auto clyde = std::make_unique<Ghost>(std::move(sprite), Vec2{16*8, 17*8+4});
+  auto clyde = std::make_unique<Ghost>(std::move(sprite), Vec2{16*8, 17*8+4}, Direction::kNorth);
   ghosts.push_back(std::move(clyde));
 }
 
@@ -138,7 +138,7 @@ void Game::ProcessInput() {
 void Game::Update(const float deltaTime) {
   pacman->Update(deltaTime, grid, state);
   for (auto &ghost : ghosts) {
-    ghost->Update(deltaTime, grid, state);
+    ghost->Update(deltaTime, grid, state, *pacman);
   }
 
   grid.Update(deltaTime);

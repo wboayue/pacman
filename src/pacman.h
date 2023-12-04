@@ -6,20 +6,11 @@
 
 #include "SDL.h"
 
+#include "constants.h"
 #include "game-state.h"
 #include "grid.h"
 #include "sprite.h"
 #include "vector2.h"
-
-enum Direction {
-  kNeutral,
-  kNorth,
-  kSouth,
-  kEast,
-  kWest,
-};
-
-const float kMaxSpeed = 75.75757625;
 
 class Pacman {
 public:
