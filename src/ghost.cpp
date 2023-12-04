@@ -72,9 +72,14 @@ void Ghost::chase(Grid &grid, Pacman &pacman)
   }
 
   auto candidates_ = candidates(grid);
-  auto candidate = candidates_[0];
-
-  heading = candidate.heading;
+  auto closet = candidates_[0];
+  for (auto &candidate : candidates_) {
+    if (candidate.position.Distance(getTargetGridCell(pacman))
+        < closet.position.Distance(getTargetGridCell(pacman))) {
+          closet = candidate;
+    }
+  }
+  heading = closet.heading;
 
   if (heading == Direction::kEast || heading == Direction::kWest) {
     position.y = floor(((int)position.y / 8) * 8 + 4);
@@ -150,9 +155,9 @@ std::vector<Candidate> Ghost::candidates(Grid &grid)
   return results;
 }
 
-Vec2 Ghost::getTargetGridCell()
+Vec2 Ghost::getTargetGridCell(Pacman &pacman)
 {
-  return Vec2{24, 0};
+  return pacman.GetGridPosition();
 }
 
 void Ghost::Render(SDL_Renderer *renderer)
@@ -188,22 +193,23 @@ void Ghost::setFramesForHeading(Direction heading)
 
 void Ghost::setVelocityForHeading(Direction heading)
 {
+  float speed = 0.7;
   switch (heading)
   {
   case Direction::kNorth:
-    velocity = Vec2{0, kMaxSpeed * -0.6f};
+    velocity = Vec2{0, kMaxSpeed * -speed};
     break;
 
   case Direction::kSouth:
-    velocity = Vec2{0, kMaxSpeed * 0.6f};
+    velocity = Vec2{0, kMaxSpeed * speed};
     break;
 
   case Direction::kEast:
-    velocity = Vec2{kMaxSpeed * 0.6f, 0};
+    velocity = Vec2{kMaxSpeed * speed, 0};
     break;
 
   case Direction::kWest:
-    velocity = Vec2{kMaxSpeed * -0.6f, 0};
+    velocity = Vec2{kMaxSpeed * -speed, 0};
     break;
 
   default:

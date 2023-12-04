@@ -45,7 +45,8 @@ void Game::CreateGhosts(SDL_Renderer *renderer)
   ghosts.push_back(std::move(blinky));
 
   sprite = std::make_unique<Sprite>(renderer, "../assets/inky.png", 4, 16);
-  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{12*8, 17*8+4}, Direction::kNorth);
+//  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{12*8, 17*8+4}, Direction::kNorth);
+  auto inky = std::make_unique<Ghost>(std::move(sprite), Vec2{16*8, 14*8+4}, Direction::kNorth);
   ghosts.push_back(std::move(inky));
 
   sprite = std::make_unique<Sprite>(renderer, "../assets/pinky.png", 4, 16);

@@ -29,7 +29,7 @@ private:
   void penDance();
   Vec2 getGridPosition();
   void chase(Grid &grid, Pacman &pacman);
-  Vec2 getTargetGridCell();
+  Vec2 getTargetGridCell(Pacman &pacman);
   bool inCellCenter();
   std::vector<Candidate> candidates(Grid &grid);
 

@@ -8,7 +8,10 @@ struct Vec2 {
   float x;
   float y;
 
+  float Distance(const Vec2 &rhs);
+
   Vec2 operator+(const Vec2 &rhs);
+  Vec2 operator-(const Vec2 &rhs);
   Vec2 &operator+=(const Vec2 &rhs);
 
   friend std::ostream &operator<<(std::ostream &os, const Vec2 &rhs) {
