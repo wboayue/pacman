@@ -117,6 +117,8 @@ void Pacman::ProcessInput(const Uint8 *state) {
 
 Vec2 Pacman::GetPosition() { return position; }
 
+Direction Pacman::GetHeading() { return heading; }
+
 Vec2 Pacman::GetGridPosition() {
   auto t = position / 8;
   return {floor(t.x), floor(t.y)};

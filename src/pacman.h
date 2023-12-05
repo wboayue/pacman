@@ -21,6 +21,7 @@ public:
   void ProcessInput(const Uint8 *state);
 
   Vec2 GetPosition();
+  Direction GetHeading();
   Vec2 GetGridPosition();
   Vec2 NextGridPosition(const Direction &direction);
   Vec2 NextGridPosition();
