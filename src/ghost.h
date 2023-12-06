@@ -15,7 +15,7 @@ struct Candidate {
 
 class Ghost;
 
-using Targeter = Vec2 (*) (Pacman &pacman, Ghost &blinky);
+using Targeter = Vec2 (*) (Ghost &me, Pacman &pacman, Ghost &blinky);
 
 struct GhostConfig {
   virtual std::unique_ptr<Sprite> GetSprite() const = 0;

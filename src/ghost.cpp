@@ -78,7 +78,7 @@ void Ghost::chase(Grid &grid, Pacman &pacman, Ghost &blinky)
   } else {
     auto closet = candidates_.at(0);
     for (auto &candidate : candidates_) {
-      auto target = targeter(pacman, blinky);
+      auto target = targeter(*this, pacman, blinky);
       if (candidate.position.Distance(target)
           < closet.position.Distance(target)) {
             closet = candidate;
@@ -255,7 +255,7 @@ BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer)
 
 Targeter BlinkyConfig::GetTargeter() const
 {
-  return [](Pacman &pacman, Ghost &blinky) {
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
     return pacman.GetGridPosition();
   };
 }
@@ -284,7 +284,7 @@ InkyConfig::InkyConfig(SDL_Renderer *renderer)
 
 Targeter InkyConfig::GetTargeter() const
 {
-  return [](Pacman &pacman, Ghost &blinky) {
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
     Vec2 target = pacman.GetGridPosition();
     auto position = pacman.GetGridPosition();
     auto distance = 2.0f;
@@ -331,7 +331,7 @@ PinkyConfig::PinkyConfig(SDL_Renderer *renderer)
 
 Targeter PinkyConfig::GetTargeter() const
 {
-  return [](Pacman &pacman, Ghost &blinky) {
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
     Vec2 target = pacman.GetGridPosition();
     auto position = pacman.GetGridPosition();
 
@@ -375,8 +375,13 @@ ClydeConfig::ClydeConfig(SDL_Renderer *renderer)
 
 Targeter ClydeConfig::GetTargeter() const
 {
-  return [](Pacman &pacman, Ghost &blinky) {
-    return pacman.GetGridPosition();
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
+    auto d = me.GetCell().Distance(pacman.GetGridPosition());
+    if (d > 8.0) {
+      return pacman.GetGridPosition();
+    } else {
+      return Vec2{0, 34};
+    }
   };
 }
 
@@ -387,7 +392,8 @@ std::unique_ptr<Sprite> ClydeConfig::GetSprite() const
 
 Vec2 ClydeConfig::GetInitialPosition() const
 {
-  return Vec2{16*8, 17*8+4};
+//  return Vec2{16*8, 17*8+4};
+  return Vec2{16*8, 12*8+4};
 }
 
 Direction ClydeConfig::GetInitialHeading() const
