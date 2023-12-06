@@ -40,7 +40,7 @@ Game::~Game() { SDL_Quit(); }
 
 void Game::CreateGhosts(SDL_Renderer *renderer)
 {
-  auto blinky = std::make_unique<Ghost>(std::move(BlinkyConfig{renderer}));
+  auto blinky = std::make_unique<Ghost>(BlinkyConfig{renderer});
   ghosts.push_back(std::move(blinky));
 
   auto inky = std::make_unique<Ghost>(InkyConfig{renderer});

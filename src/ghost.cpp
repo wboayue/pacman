@@ -25,11 +25,10 @@ Direction reverseDirection(Direction direction) {
 
 Ghost::Ghost(const GhostConfig &config)
   : sprite{config.GetSprite()}, position{config.GetInitialPosition()},
-    heading{config.GetInitialHeading()}, config{config}
+    heading{config.GetInitialHeading()}, targeter{config.GetTargeter()}
 {
   setFramesForHeading(heading);
   currentCell = getGridPosition();
-  // this->config = config;
 }
 
 void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman)
@@ -74,10 +73,11 @@ void Ghost::chase(Grid &grid, Pacman &pacman)
   }
 
   auto candidates_ = candidates(grid);
-  auto closet = candidates_[0];
+  auto closet = candidates_.at(0);
   for (auto &candidate : candidates_) {
-    if (candidate.position.Distance(getTargetGridCell(pacman))
-        < closet.position.Distance(getTargetGridCell(pacman))) {
+    auto target = targeter(pacman);
+    if (candidate.position.Distance(target)
+        < closet.position.Distance(target)) {
           closet = candidate;
     }
   }
@@ -157,10 +157,10 @@ std::vector<Candidate> Ghost::candidates(Grid &grid)
   return results;
 }
 
-Vec2 Ghost::getTargetGridCell(Pacman &pacman)
-{
-  return pacman.GetGridPosition();
-}
+// Vec2 Ghost::getTargetGridCell(Pacman &pacman)
+// {
+//   return pacman.GetGridPosition();
+// }
 
 void Ghost::Render(SDL_Renderer *renderer)
 {
@@ -249,9 +249,11 @@ BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer)
 {
 }
 
-Vec2 BlinkyConfig::GetTargetCell(Pacman &pacman) const
+Targeter BlinkyConfig::GetTargeter() const
 {
-  return pacman.GetGridPosition();
+  return [](Pacman &pacman) {
+    return pacman.GetGridPosition();
+  };
 }
 
 std::unique_ptr<Sprite> BlinkyConfig::GetSprite() const
@@ -276,9 +278,11 @@ InkyConfig::InkyConfig(SDL_Renderer *renderer)
 {
 }
 
-Vec2 InkyConfig::GetTargetCell(Pacman &pacman) const
+Targeter InkyConfig::GetTargeter() const
 {
-  return pacman.GetGridPosition();
+  return [] (Pacman &pacman) {
+    return pacman.GetGridPosition();
+  };
 }
 
 std::unique_ptr<Sprite> InkyConfig::GetSprite() const
@@ -303,22 +307,24 @@ PinkyConfig::PinkyConfig(SDL_Renderer *renderer)
 {
 }
 
-Vec2 PinkyConfig::GetTargetCell(Pacman &pacman) const
+Targeter PinkyConfig::GetTargeter() const
 {
-  Vec2 target = pacman.GetGridPosition();
-  auto position = pacman.GetGridPosition();
+  return [](Pacman &pacman) {
+    Vec2 target = pacman.GetGridPosition();
+    auto position = pacman.GetGridPosition();
 
-  if (pacman.GetHeading() == Direction::kNorth) {
-    target += Vec2{0, -4};
-  } else if (pacman.GetHeading() == Direction::kSouth) {
-    target += Vec2{0, 4};
-  } else if (pacman.GetHeading() == Direction::kEast) {
-    target += Vec2{4, 0};
-  } else if (pacman.GetHeading() == Direction::kWest) {
-    target += Vec2{-4, 0};
-  }
+    if (pacman.GetHeading() == Direction::kNorth) {
+      target += Vec2{0, -4};
+    } else if (pacman.GetHeading() == Direction::kSouth) {
+      target += Vec2{0, 4};
+    } else if (pacman.GetHeading() == Direction::kEast) {
+      target += Vec2{4, 0};
+    } else if (pacman.GetHeading() == Direction::kWest) {
+      target += Vec2{-4, 0};
+    }
 
-  return target;
+    return target;
+  };
 }
 
 std::unique_ptr<Sprite> PinkyConfig::GetSprite() const
@@ -328,8 +334,10 @@ std::unique_ptr<Sprite> PinkyConfig::GetSprite() const
 
 Vec2 PinkyConfig::GetInitialPosition() const
 {
+  return Vec2{14*8, 10*8+4};
+
   // return Vec2{14*8, 17*8+4};
-  return Vec2{20*8, 14*8+4}; // test
+  //return Vec2{20*8, 14*8+4}; // test
 }
 
 Direction PinkyConfig::GetInitialHeading() const
@@ -344,9 +352,12 @@ ClydeConfig::ClydeConfig(SDL_Renderer *renderer)
 {
 }
 
-Vec2 ClydeConfig::GetTargetCell(Pacman &pacman) const
+
+Targeter ClydeConfig::GetTargeter() const
 {
-  return pacman.GetGridPosition();
+  return [](Pacman &pacman) {
+    return pacman.GetGridPosition();
+  };
 }
 
 std::unique_ptr<Sprite> ClydeConfig::GetSprite() const
