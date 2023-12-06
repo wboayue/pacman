@@ -73,15 +73,19 @@ void Ghost::chase(Grid &grid, Pacman &pacman)
   }
 
   auto candidates_ = candidates(grid);
-  auto closet = candidates_.at(0);
-  for (auto &candidate : candidates_) {
-    auto target = targeter(pacman);
-    if (candidate.position.Distance(target)
-        < closet.position.Distance(target)) {
-          closet = candidate;
+  if (candidates_.empty()) {
+    heading = reverseDirection(heading);
+  } else {
+    auto closet = candidates_.at(0);
+    for (auto &candidate : candidates_) {
+      auto target = targeter(pacman);
+      if (candidate.position.Distance(target)
+          < closet.position.Distance(target)) {
+            closet = candidate;
+      }
     }
+    heading = closet.heading;
   }
-  heading = closet.heading;
 
   if (heading == Direction::kEast || heading == Direction::kWest) {
     position.y = floor(((int)position.y / 8) * 8 + 4);
@@ -335,9 +339,7 @@ std::unique_ptr<Sprite> PinkyConfig::GetSprite() const
 Vec2 PinkyConfig::GetInitialPosition() const
 {
   return Vec2{14*8, 10*8+4};
-
   // return Vec2{14*8, 17*8+4};
-  //return Vec2{20*8, 14*8+4}; // test
 }
 
 Direction PinkyConfig::GetInitialHeading() const
