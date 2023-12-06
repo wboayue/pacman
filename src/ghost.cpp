@@ -28,10 +28,10 @@ Ghost::Ghost(const GhostConfig &config)
     heading{config.GetInitialHeading()}, targeter{config.GetTargeter()}
 {
   setFramesForHeading(heading);
-  currentCell = getGridPosition();
+  currentCell = GetCell();
 }
 
-void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman)
+void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky)
 {
   if (isInPen()) {
     if (active) {
@@ -40,7 +40,7 @@ void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
       penDance();
     }
   } else {
-    chase(grid, pacman);
+    chase(grid, pacman, blinky);
 // CHASE—A ghost's objective in chase mode is to find and capture Pac-Man by hunting him down through the maze. Each ghost exhibits unique behavior when chasing Pac-Man, giving them their different personalities: Blinky (red) is very aggressive and hard to shake once he gets behind you, Pinky (pink) tends to get in front of you and cut you off, Inky (light blue) is the least predictable of the bunch, and Clyde (orange) seems to do his own thing and stay out of the way.
 // SCATTER—In scatter mode, the ghosts give up the chase for a few seconds and head for their respective home corners. It is a welcome but brief rest—soon enough, they will revert to chase mode and be after Pac-Man again.
 // FRIGHTENED    
@@ -60,9 +60,9 @@ void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   sprite->Update(deltaTime);
 }
 
-void Ghost::chase(Grid &grid, Pacman &pacman)
+void Ghost::chase(Grid &grid, Pacman &pacman, Ghost &blinky)
 {
-  auto cell = getGridPosition();
+  auto cell = GetCell();
   if (!(currentCell == cell)) {
     currentCell = cell;
     newCell = true;
@@ -78,7 +78,7 @@ void Ghost::chase(Grid &grid, Pacman &pacman)
   } else {
     auto closet = candidates_.at(0);
     for (auto &candidate : candidates_) {
-      auto target = targeter(pacman);
+      auto target = targeter(pacman, blinky);
       if (candidate.position.Distance(target)
           < closet.position.Distance(target)) {
             closet = candidate;
@@ -148,7 +148,7 @@ std::vector<Candidate> Ghost::candidates(Grid &grid)
     if (option.heading == reverseDirection(heading)) {
       continue;
     }
-    auto pos = getGridPosition()+option.position;
+    auto pos = GetCell()+option.position;
     if (grid.GetCell(pos) == Cell::kWall) {
       continue;
     }
@@ -226,14 +226,14 @@ void Ghost::setVelocityForHeading(Direction heading)
 
 bool Ghost::isInPen()
 {
-  auto pos = getGridPosition();
+  auto pos = GetCell();
   return pos.x >= 12 &&
          pos.x <= 16 &&
          pos.y >= 17 &&
          pos.y <= 18;
 }
 
-Vec2 Ghost::getGridPosition() {
+Vec2 Ghost::GetCell() {
   auto t = position / 8;
   return {floor(t.x), floor(t.y)};
 }
@@ -255,7 +255,7 @@ BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer)
 
 Targeter BlinkyConfig::GetTargeter() const
 {
-  return [](Pacman &pacman) {
+  return [](Pacman &pacman, Ghost &blinky) {
     return pacman.GetGridPosition();
   };
 }
@@ -284,8 +284,25 @@ InkyConfig::InkyConfig(SDL_Renderer *renderer)
 
 Targeter InkyConfig::GetTargeter() const
 {
-  return [] (Pacman &pacman) {
-    return pacman.GetGridPosition();
+  return [](Pacman &pacman, Ghost &blinky) {
+    Vec2 target = pacman.GetGridPosition();
+    auto position = pacman.GetGridPosition();
+    auto distance = 2.0f;
+
+    if (pacman.GetHeading() == Direction::kNorth) {
+      target += Vec2{0, -distance};
+    } else if (pacman.GetHeading() == Direction::kSouth) {
+      target += Vec2{0, distance};
+    } else if (pacman.GetHeading() == Direction::kEast) {
+      target += Vec2{distance, 0};
+    } else if (pacman.GetHeading() == Direction::kWest) {
+      target += Vec2{-distance, 0};
+    }
+
+    auto v = target - blinky.GetCell();
+    v = v * 2;
+
+    return blinky.GetCell() + v;
   };
 }
 
@@ -296,7 +313,8 @@ std::unique_ptr<Sprite> InkyConfig::GetSprite() const
 
 Vec2 InkyConfig::GetInitialPosition() const
 {
-  return Vec2{12*8, 17*8+4};
+  return Vec2{12*8, 14*8+4};
+//  return Vec2{12*8, 17*8+4};
 }
 
 Direction InkyConfig::GetInitialHeading() const
@@ -313,7 +331,7 @@ PinkyConfig::PinkyConfig(SDL_Renderer *renderer)
 
 Targeter PinkyConfig::GetTargeter() const
 {
-  return [](Pacman &pacman) {
+  return [](Pacman &pacman, Ghost &blinky) {
     Vec2 target = pacman.GetGridPosition();
     auto position = pacman.GetGridPosition();
 
@@ -357,7 +375,7 @@ ClydeConfig::ClydeConfig(SDL_Renderer *renderer)
 
 Targeter ClydeConfig::GetTargeter() const
 {
-  return [](Pacman &pacman) {
+  return [](Pacman &pacman, Ghost &blinky) {
     return pacman.GetGridPosition();
   };
 }

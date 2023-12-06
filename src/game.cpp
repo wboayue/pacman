@@ -40,17 +40,17 @@ Game::~Game() { SDL_Quit(); }
 
 void Game::CreateGhosts(SDL_Renderer *renderer)
 {
-  auto blinky = std::make_unique<Ghost>(BlinkyConfig{renderer});
-  ghosts.push_back(std::move(blinky));
+  blinky = std::make_shared<Ghost>(BlinkyConfig{renderer});
+  ghosts.push_back(blinky);
 
-  auto inky = std::make_unique<Ghost>(InkyConfig{renderer});
-  ghosts.push_back(std::move(inky));
+  auto inky = std::make_shared<Ghost>(InkyConfig{renderer});
+  ghosts.push_back(inky);
 
-  auto pinky = std::make_unique<Ghost>(PinkyConfig{renderer});
-  ghosts.push_back(std::move(pinky));
+  auto pinky = std::make_shared<Ghost>(PinkyConfig{renderer});
+  ghosts.push_back(pinky);
 
-  auto clyde = std::make_unique<Ghost>(ClydeConfig{renderer});
-  ghosts.push_back(std::move(clyde));
+  auto clyde = std::make_shared<Ghost>(ClydeConfig{renderer});
+  ghosts.push_back(clyde);
 }
 
 bool Game::Ready() const { return ready_; }
@@ -134,7 +134,7 @@ void Game::ProcessInput() {
 void Game::Update(const float deltaTime) {
   pacman->Update(deltaTime, grid, state);
   for (auto &ghost : ghosts) {
-    ghost->Update(deltaTime, grid, state, *pacman);
+    ghost->Update(deltaTime, grid, state, *pacman, *blinky);
   }
 
   grid.Update(deltaTime);

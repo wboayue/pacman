@@ -48,7 +48,8 @@ private:
   std::unique_ptr<Pacman> pacman;
   Grid grid;
   std::unique_ptr<BoardManager> board;
-  std::vector<std::unique_ptr<Ghost>> ghosts;
+  std::vector<std::shared_ptr<Ghost>> ghosts;
+  std::shared_ptr<Ghost> blinky;
   GameState state;
 };
 

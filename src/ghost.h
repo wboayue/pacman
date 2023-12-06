@@ -13,7 +13,9 @@ struct Candidate {
   Direction heading;
 };
 
-using Targeter = Vec2 (*) (Pacman &pacman);
+class Ghost;
+
+using Targeter = Vec2 (*) (Pacman &pacman, Ghost &blinky);
 
 struct GhostConfig {
   virtual std::unique_ptr<Sprite> GetSprite() const = 0;
@@ -26,8 +28,9 @@ class Ghost {
 public:
   Ghost(const GhostConfig &config);
 
-  void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman);
+  void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
+  Vec2 GetCell();
 
 private:
   
@@ -36,8 +39,7 @@ private:
   bool isInPen();
   void exitPen();
   void penDance();
-  Vec2 getGridPosition();
-  void chase(Grid &grid, Pacman &pacman);
+  void chase(Grid &grid, Pacman &pacman, Ghost &blinky);
   bool inCellCenter();
   std::vector<Candidate> candidates(Grid &grid);
 
