@@ -15,13 +15,14 @@ struct Candidate {
 
 class Ghost;
 
-using Targeter = Vec2 (*)(Ghost &me, Pacman &pacman, Ghost &blinky);
+using Targeter = Vec2 (*)(Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode);
 
 struct GhostConfig {
   virtual std::unique_ptr<Sprite> GetSprite() const = 0;
   virtual Vec2 GetInitialPosition() const = 0;
   virtual Direction GetInitialHeading() const = 0;
   virtual Targeter GetTargeter() const = 0;
+  virtual Vec2 GetScatterCell() const = 0;
 };
 
 class Ghost {
@@ -31,7 +32,9 @@ public:
   void Update(const float deltaTime, Grid &grid, GameState &state,
               Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
+  void Reset();
   Vec2 GetCell();
+  Vec2 GetScatterCell() { return scatterCell; };
 
 private:
   void setFramesForHeading(Direction heading);
@@ -39,17 +42,19 @@ private:
   bool isInPen();
   void exitPen();
   void penDance();
-  void chase(Grid &grid, Pacman &pacman, Ghost &blinky);
+  void chase(Grid &grid, const Vec2 &target);
   bool inCellCenter();
   std::vector<Candidate> candidates(Grid &grid);
 
   bool active;
   Vec2 position;
+  Vec2 initialPosition;
   Vec2 velocity;
   Direction heading;
   Targeter targeter;
 
   Vec2 currentCell;
+  Vec2 scatterCell;
   bool newCell;
 
   std::unique_ptr<Sprite> sprite;
@@ -62,6 +67,7 @@ struct BlinkyConfig : public GhostConfig {
   Vec2 GetInitialPosition() const override;
   Direction GetInitialHeading() const override;
   Targeter GetTargeter() const override;
+  Vec2 GetScatterCell() const override;
 
 private:
   SDL_Renderer *renderer;
@@ -74,6 +80,7 @@ struct InkyConfig : public GhostConfig {
   Vec2 GetInitialPosition() const override;
   Direction GetInitialHeading() const override;
   Targeter GetTargeter() const override;
+  Vec2 GetScatterCell() const override;
 
 private:
   SDL_Renderer *renderer;
@@ -86,6 +93,7 @@ struct PinkyConfig : public GhostConfig {
   Vec2 GetInitialPosition() const override;
   Direction GetInitialHeading() const override;
   Targeter GetTargeter() const override;
+  Vec2 GetScatterCell() const override;
 
 private:
   SDL_Renderer *renderer;
@@ -98,6 +106,7 @@ struct ClydeConfig : public GhostConfig {
   Vec2 GetInitialPosition() const override;
   Direction GetInitialHeading() const override;
   Targeter GetTargeter() const override;
+  Vec2 GetScatterCell() const override;
 
 private:
   SDL_Renderer *renderer;

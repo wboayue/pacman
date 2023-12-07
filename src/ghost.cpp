@@ -19,13 +19,16 @@ Direction reverseDirection(Direction direction) {
     return Direction::kWest;
   case Direction::kWest:
     return Direction::kEast;
+  default:
+    return Direction::kNeutral;
   }
-  return Direction::kNeutral;
 }
 
 Ghost::Ghost(const GhostConfig &config)
-    : sprite{config.GetSprite()}, position{config.GetInitialPosition()},
-      heading{config.GetInitialHeading()}, targeter{config.GetTargeter()} {
+    : sprite{config.GetSprite()}, initialPosition{config.GetInitialPosition()},
+      heading{config.GetInitialHeading()}, targeter{config.GetTargeter()},
+      scatterCell{config.GetScatterCell()} {
+  position = initialPosition;
   setFramesForHeading(heading);
   currentCell = GetCell();
 }
@@ -39,18 +42,8 @@ void Ghost::Update(const float deltaTime, Grid &grid, GameState &state,
       penDance();
     }
   } else {
-    chase(grid, pacman, blinky);
-    // CHASE—A ghost's objective in chase mode is to find and capture
-    // Pac-Man by hunting him down through the maze. Each ghost exhibits
-    // unique behavior when chasing Pac-Man, giving them their different
-    // personalities: Blinky (red) is very aggressive and hard to shake once
-    // he gets behind you, Pinky (pink) tends to get in front of you and cut
-    // you off, Inky (light blue) is the least predictable of the bunch, and
-    // Clyde (orange) seems to do his own thing and stay out of the way.
-    // SCATTER—In scatter mode, the ghosts give up the chase for a few
-    // seconds and head for their respective home corners. It is a welcome
-    // but brief rest—soon enough, they will revert to chase mode and be
-    // after Pac-Man again. FRIGHTENED
+    auto target = targeter(*this, pacman, blinky, state.mode);
+    chase(grid, target);
 
     setFramesForHeading(heading);
     setVelocityForHeading(heading);
@@ -67,7 +60,7 @@ void Ghost::Update(const float deltaTime, Grid &grid, GameState &state,
   sprite->Update(deltaTime);
 }
 
-void Ghost::chase(Grid &grid, Pacman &pacman, Ghost &blinky) {
+void Ghost::chase(Grid &grid, const Vec2 &target) {
   auto cell = GetCell();
   if (!(currentCell == cell)) {
     currentCell = cell;
@@ -84,7 +77,6 @@ void Ghost::chase(Grid &grid, Pacman &pacman, Ghost &blinky) {
   } else {
     auto closet = candidates_.at(0);
     for (auto &candidate : candidates_) {
-      auto target = targeter(*this, pacman, blinky);
       if (candidate.position.Distance(target) <
           closet.position.Distance(target)) {
         closet = candidate;
@@ -100,8 +92,6 @@ void Ghost::chase(Grid &grid, Pacman &pacman, Ghost &blinky) {
     position.x = floor(((int)position.x / 8) * 8 + 4);
   }
 
-  //  std::cout << "choose " << getGridPosition() << std::endl;
-  // std::cout << "heading " << heading << std::endl;
   newCell = false;
 }
 
@@ -114,33 +104,10 @@ bool Ghost::inCellCenter() {
   float x = position.x - floor(position.x);
   float y = position.y - floor(position.y);
 
-  switch (heading) {
-  case Direction::kNorth:
-    if (y <= 0.5) {
-      return true;
-    }
-    break;
-
-  case Direction::kSouth:
-    if (y >= 0.5) {
-      return true;
-    }
-    break;
-
-  case Direction::kEast:
-    if (x >= 0.5) {
-      return true;
-    }
-    break;
-
-  case Direction::kWest:
-    if (x <= 0.5) {
-      return true;
-    }
-    break;
-  }
-
-  return false;
+  return (heading == Direction::kNorth && y <= 0.5) ||
+         (heading == Direction::kSouth && y >= 0.5) ||
+         (heading == Direction::kEast && x >= 0.5) ||
+         (heading == Direction::kWest && x <= 0.5);
 }
 
 std::vector<Candidate> Ghost::candidates(Grid &grid) {
@@ -161,13 +128,12 @@ std::vector<Candidate> Ghost::candidates(Grid &grid) {
   return results;
 }
 
-// Vec2 Ghost::getTargetGridCell(Pacman &pacman)
-// {
-//   return pacman.GetGridPosition();
-// }
-
 void Ghost::Render(SDL_Renderer *renderer) {
   sprite->Render(renderer, {floor(position.x - 8), floor(position.y - 8)});
+}
+
+void Ghost::Reset() {
+  position = initialPosition;
 }
 
 void Ghost::setFramesForHeading(Direction heading) {
@@ -238,10 +204,16 @@ void Ghost::penDance() {}
 BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter BlinkyConfig::GetTargeter() const {
-  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
-    return pacman.GetGridPosition();
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
+    if (mode == GhostMode::kScatter) {
+      return me.GetScatterCell();
+    } else {
+      return pacman.GetGridPosition();
+    }
   };
 }
+
+Vec2 BlinkyConfig::GetScatterCell() const { return Vec2{24, 0}; }
 
 std::unique_ptr<Sprite> BlinkyConfig::GetSprite() const {
   return std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
@@ -258,27 +230,33 @@ Direction BlinkyConfig::GetInitialHeading() const { return Direction::kWest; }
 InkyConfig::InkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter InkyConfig::GetTargeter() const {
-  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
-    Vec2 target = pacman.GetGridPosition();
-    auto position = pacman.GetGridPosition();
-    auto distance = 2.0f;
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {  
+    if (mode == GhostMode::kScatter) {
+      return me.GetScatterCell();
+    } else {
+      Vec2 target = pacman.GetGridPosition();
+      auto position = pacman.GetGridPosition();
+      auto distance = 2.0f;
 
-    if (pacman.GetHeading() == Direction::kNorth) {
-      target += Vec2{0, -distance};
-    } else if (pacman.GetHeading() == Direction::kSouth) {
-      target += Vec2{0, distance};
-    } else if (pacman.GetHeading() == Direction::kEast) {
-      target += Vec2{distance, 0};
-    } else if (pacman.GetHeading() == Direction::kWest) {
-      target += Vec2{-distance, 0};
-    }
+      if (pacman.GetHeading() == Direction::kNorth) {
+        target += Vec2{0, -distance};
+      } else if (pacman.GetHeading() == Direction::kSouth) {
+        target += Vec2{0, distance};
+      } else if (pacman.GetHeading() == Direction::kEast) {
+        target += Vec2{distance, 0};
+      } else if (pacman.GetHeading() == Direction::kWest) {
+        target += Vec2{-distance, 0};
+      }
 
-    auto v = target - blinky.GetCell();
-    v = v * 2;
+      auto v = target - blinky.GetCell();
+      v = v * 2;
 
-    return blinky.GetCell() + v;
+      return blinky.GetCell() + v;
+    };
   };
-}
+};
+
+Vec2 InkyConfig::GetScatterCell() const { return Vec2{27, 34}; }
 
 std::unique_ptr<Sprite> InkyConfig::GetSprite() const {
   return std::make_unique<Sprite>(renderer, "../assets/inky.png", 4, 16);
@@ -296,7 +274,11 @@ Direction InkyConfig::GetInitialHeading() const { return Direction::kNorth; }
 PinkyConfig::PinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter PinkyConfig::GetTargeter() const {
-  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
+    if (mode == GhostMode::kScatter) {
+      return me.GetScatterCell();
+    }
+
     Vec2 target = pacman.GetGridPosition();
     auto position = pacman.GetGridPosition();
 
@@ -314,6 +296,8 @@ Targeter PinkyConfig::GetTargeter() const {
   };
 }
 
+Vec2 PinkyConfig::GetScatterCell() const { return Vec2{2, 0}; }
+
 std::unique_ptr<Sprite> PinkyConfig::GetSprite() const {
   return std::make_unique<Sprite>(renderer, "../assets/pinky.png", 4, 16);
 }
@@ -330,15 +314,21 @@ Direction PinkyConfig::GetInitialHeading() const { return Direction::kSouth; }
 ClydeConfig::ClydeConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter ClydeConfig::GetTargeter() const {
-  return [](Ghost &me, Pacman &pacman, Ghost &blinky) {
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
+    if (mode == GhostMode::kScatter) {
+      return me.GetScatterCell();
+    }
+
     auto d = me.GetCell().Distance(pacman.GetGridPosition());
     if (d > 8.0) {
       return pacman.GetGridPosition();
     } else {
-      return Vec2{0, 34};
+      return me.GetScatterCell();
     }
   };
 }
+
+Vec2 ClydeConfig::GetScatterCell() const { return Vec2{0, 34}; }
 
 std::unique_ptr<Sprite> ClydeConfig::GetSprite() const {
   return std::make_unique<Sprite>(renderer, "../assets/clyde.png", 4, 16);

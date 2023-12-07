@@ -8,7 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, state{0, 2, 0, 0, false} {
+Game::Game() : ready_{false}, state{0, 2, 0, 0, false, GhostMode::kChase} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -82,6 +82,27 @@ void Game::Run(std::size_t target_frame_duration) {
       state.pelletsConsumed = 0;
       state.level += 1;
       state.levelCompleted = false;
+
+      for (auto &ghost : ghosts) {
+        ghost->Reset();
+      }
+    }
+
+    bool killed = false;
+
+    for (auto &ghost : ghosts) {
+      if (ghost->GetCell() == pacman->GetGridPosition()) {
+        pacman->Reset();
+        state.extraLives -= 1;
+        killed = true;
+        break;
+      }
+    }
+
+    if (killed) {
+      for (auto &ghost : ghosts) {
+        ghost->Reset();
+      }
     }
 
     frame_end = SDL_GetTicks();
