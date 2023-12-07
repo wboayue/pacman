@@ -93,6 +93,7 @@ void Game::Run(std::size_t target_frame_duration) {
       if (ghost->GetCell() == pacman->GetGridPosition()) {
         pacman->Reset();
         state.extraLives -= 1;
+        state.mode = GhostMode::kChase;
         killed = true;
         break;
       }
@@ -101,6 +102,14 @@ void Game::Run(std::size_t target_frame_duration) {
     if (killed) {
       for (auto &ghost : ghosts) {
         ghost->Reset();
+      }
+
+      if (state.extraLives < 0) {
+        state.score = 0;
+        state.extraLives = 2;
+        state.level = 0;
+        state.pelletsConsumed = 0;
+        state.levelCompleted = false;
       }
     }
 

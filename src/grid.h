@@ -11,7 +11,7 @@
 #include "pellet.h"
 #include "vector2.h"
 
-enum Cell { kBlank, kWall, kPellet, kPowerPellet, kOffGrid };
+enum class Cell { kBlank, kWall, kPellet, kPowerPellet, kOffGrid };
 
 const int kGridWidth = 28;
 const int kGridHeight = 36;

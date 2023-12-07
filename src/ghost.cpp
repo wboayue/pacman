@@ -200,11 +200,11 @@ BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter BlinkyConfig::GetTargeter() const {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
-    if (mode == GhostMode::kScatter) {
+    if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
-    } else {
-      return pacman.GetGridPosition();
     }
+    
+    return pacman.GetGridPosition();
   };
 }
 
@@ -224,28 +224,27 @@ InkyConfig::InkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter InkyConfig::GetTargeter() const {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
-    if (mode == GhostMode::kScatter) {
+    if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
-    } else {
-      Vec2 target = pacman.GetGridPosition();
-      auto position = pacman.GetGridPosition();
-      auto distance = 2.0f;
+    } 
+    Vec2 target = pacman.GetGridPosition();
+    auto position = pacman.GetGridPosition();
+    auto distance = 2.0f;
 
-      if (pacman.GetHeading() == Direction::kNorth) {
-        target += Vec2{0, -distance};
-      } else if (pacman.GetHeading() == Direction::kSouth) {
-        target += Vec2{0, distance};
-      } else if (pacman.GetHeading() == Direction::kEast) {
-        target += Vec2{distance, 0};
-      } else if (pacman.GetHeading() == Direction::kWest) {
-        target += Vec2{-distance, 0};
-      }
+    if (pacman.GetHeading() == Direction::kNorth) {
+      target += Vec2{0, -distance};
+    } else if (pacman.GetHeading() == Direction::kSouth) {
+      target += Vec2{0, distance};
+    } else if (pacman.GetHeading() == Direction::kEast) {
+      target += Vec2{distance, 0};
+    } else if (pacman.GetHeading() == Direction::kWest) {
+      target += Vec2{-distance, 0};
+    }
 
-      auto v = target - blinky.GetCell();
-      v = v * 2;
+    auto v = target - blinky.GetCell();
+    v = v * 2;
 
-      return blinky.GetCell() + v;
-    };
+    return blinky.GetCell() + v;
   };
 };
 
@@ -268,7 +267,7 @@ PinkyConfig::PinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter PinkyConfig::GetTargeter() const {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
-    if (mode == GhostMode::kScatter) {
+    if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }
 
@@ -308,7 +307,7 @@ ClydeConfig::ClydeConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter ClydeConfig::GetTargeter() const {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
-    if (mode == GhostMode::kScatter) {
+    if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }
 

@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-enum Direction {
+enum class Direction {
   kNeutral,
   kNorth,
   kSouth,

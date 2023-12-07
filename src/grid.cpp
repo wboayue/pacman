@@ -4,7 +4,7 @@
 #include "grid.h"
 
 bool Grid::HasPellet(const Vec2 &position) {
-  return GetCell(position) == kPellet || GetCell(position) == kPowerPellet;
+  return GetCell(position) == Cell::kPellet || GetCell(position) == Cell::kPowerPellet;
 }
 
 void Grid::Reset(SDL_Renderer *renderer) {
@@ -18,7 +18,7 @@ std::unique_ptr<Pellet> Grid::ConsumePellet(const Vec2 &position) {
     auto tmp = std::move(it->second);
     pellets.erase(it);
 
-    cells.at(position.y).at(position.x) = kBlank;
+    cells.at(position.y).at(position.x) = Cell::kBlank;
 
     return tmp;
   }

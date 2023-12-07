@@ -62,6 +62,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     auto pellet = grid.ConsumePellet(GetGridPosition());
     if (pellet->IsEnergizer()) {
       state.score += 50;
+      state.mode = GhostMode::kScared;
     } else {
       state.score += 10;
     }
@@ -145,16 +146,16 @@ Vec2 Pacman::NextGridPosition(const Direction &direction) {
   auto currentPosition = GetGridPosition();
 
   switch (direction) {
-  case kEast:
+  case Direction::kEast:
     return {currentPosition.x + 1, currentPosition.y};
 
-  case kWest:
+  case Direction::kWest:
     return {currentPosition.x - 1, currentPosition.y};
 
-  case kNorth:
+  case Direction::kNorth:
     return {currentPosition.x, currentPosition.y - 1};
 
-  case kSouth:
+  case Direction::kSouth:
     return {currentPosition.x, currentPosition.y + 1};
 
   default:

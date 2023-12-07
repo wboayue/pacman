@@ -4,6 +4,7 @@
 enum class GhostMode {
   kScatter,
   kChase,
+  kScared,
 };
 
 struct GameState {
