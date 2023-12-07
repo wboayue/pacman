@@ -1,10 +1,9 @@
 #include "board-manager.h"
 
 BoardManager::BoardManager(SDL_Renderer *renderer)
-    : maze{renderer, "../assets/maze.png"},
-      pacman{renderer, "../assets/pacman.png"}, fruits{renderer,
-                                                       "../assets/fruits.png"},
-      text{renderer, "../assets/white-text.png"}, extraLives{0} {}
+    : maze{renderer, "../assets/maze.png"}, pacman{renderer, "../assets/pacman.png"},
+      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"},
+      extraLives{0} {}
 
 void BoardManager::Update(const float deltaTime, GameState &state) {
   maze.Update(deltaTime);
@@ -65,8 +64,7 @@ void BoardManager::RenderFruits(SDL_Renderer *renderer) {
   fruits.Render(renderer, source, destination);
 }
 
-void BoardManager::WriteText(SDL_Renderer *renderer, Vec2 position,
-                             const std::string &text) {
+void BoardManager::WriteText(SDL_Renderer *renderer, Vec2 position, const std::string &text) {
   SDL_Rect source;
   SDL_Rect destination;
 

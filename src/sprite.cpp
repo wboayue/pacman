@@ -12,8 +12,7 @@ Sprite::Sprite(SDL_Renderer *renderer, std::string fileName)
   frameWidth = width;
 }
 
-Sprite::Sprite(SDL_Renderer *renderer, std::string fileName, int fps,
-               int frameWidth)
+Sprite::Sprite(SDL_Renderer *renderer, std::string fileName, int fps, int frameWidth)
     : fps{fps}, currentFrame{0}, frames{0} {
   texture = LoadTexture(renderer, fileName);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
@@ -60,8 +59,7 @@ void Sprite::Render(SDL_Renderer *renderer, Vec2 destination) {
   // SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
-void Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source,
-                    const SDL_Rect &destination) {
+void Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) {
   SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 

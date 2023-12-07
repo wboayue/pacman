@@ -1,13 +1,11 @@
 #include "pellet.h"
 
-Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position)
-    : Pellet(renderer, position, false) {}
+Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position) : Pellet(renderer, position, false) {}
 
 Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position, bool power)
     : position{position}, power{power} {
   if (power) {
-    sprite =
-        std::make_unique<Sprite>(renderer, "../assets/power-pellet.png", 3, 8);
+    sprite = std::make_unique<Sprite>(renderer, "../assets/power-pellet.png", 3, 8);
     sprite->SetFrames({1, 2});
   } else {
     sprite = std::make_unique<Sprite>(renderer, "../assets/pellet.png");

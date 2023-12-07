@@ -19,8 +19,7 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false, GhostMode::kChase} {
   IMG_Init(IMG_INIT_PNG);
 
   int scale{2};
-  renderer_ =
-      std::make_shared<Renderer>(kGameWidth * scale, kGameHeight * scale);
+  renderer_ = std::make_shared<Renderer>(kGameWidth * scale, kGameHeight * scale);
   SDL_RenderSetLogicalSize(renderer_->sdl_renderer, kGameWidth, kGameHeight);
 
   board = std::make_unique<BoardManager>(renderer_->sdl_renderer);

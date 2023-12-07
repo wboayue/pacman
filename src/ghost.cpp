@@ -33,8 +33,8 @@ Ghost::Ghost(const GhostConfig &config)
   currentCell = GetCell();
 }
 
-void Ghost::Update(const float deltaTime, Grid &grid, GameState &state,
-                   Pacman &pacman, Ghost &blinky) {
+void Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
+                   Ghost &blinky) {
   if (isInPen()) {
     if (active) {
       exitPen();
@@ -77,8 +77,7 @@ void Ghost::chase(Grid &grid, const Vec2 &target) {
   } else {
     auto closet = candidates_.at(0);
     for (auto &candidate : candidates_) {
-      if (candidate.position.Distance(target) <
-          closet.position.Distance(target)) {
+      if (candidate.position.Distance(target) < closet.position.Distance(target)) {
         closet = candidate;
       }
     }
@@ -104,10 +103,8 @@ bool Ghost::inCellCenter() {
   float x = position.x - floor(position.x);
   float y = position.y - floor(position.y);
 
-  return (heading == Direction::kNorth && y <= 0.5) ||
-         (heading == Direction::kSouth && y >= 0.5) ||
-         (heading == Direction::kEast && x >= 0.5) ||
-         (heading == Direction::kWest && x <= 0.5);
+  return (heading == Direction::kNorth && y <= 0.5) || (heading == Direction::kSouth && y >= 0.5) ||
+         (heading == Direction::kEast && x >= 0.5) || (heading == Direction::kWest && x <= 0.5);
 }
 
 std::vector<Candidate> Ghost::candidates(Grid &grid) {
@@ -132,9 +129,7 @@ void Ghost::Render(SDL_Renderer *renderer) {
   sprite->Render(renderer, {floor(position.x - 8), floor(position.y - 8)});
 }
 
-void Ghost::Reset() {
-  position = initialPosition;
-}
+void Ghost::Reset() { position = initialPosition; }
 
 void Ghost::setFramesForHeading(Direction heading) {
   switch (heading) {
@@ -219,9 +214,7 @@ std::unique_ptr<Sprite> BlinkyConfig::GetSprite() const {
   return std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
 }
 
-Vec2 BlinkyConfig::GetInitialPosition() const {
-  return Vec2{14 * 8, 14 * 8 + 4};
-}
+Vec2 BlinkyConfig::GetInitialPosition() const { return Vec2{14 * 8, 14 * 8 + 4}; }
 
 Direction BlinkyConfig::GetInitialHeading() const { return Direction::kWest; }
 
@@ -230,7 +223,7 @@ Direction BlinkyConfig::GetInitialHeading() const { return Direction::kWest; }
 InkyConfig::InkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 Targeter InkyConfig::GetTargeter() const {
-  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {  
+  return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
     if (mode == GhostMode::kScatter) {
       return me.GetScatterCell();
     } else {

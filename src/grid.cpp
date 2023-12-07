@@ -88,8 +88,8 @@ std::vector<std::vector<Cell>> Grid::Load(const std::string &gridPath) {
     }
 
     if (row.size() != kGridWidth) {
-      std::cerr << "row " << y << " should have " << kGridWidth
-                << " columns. found " << row.size() << "." << std::endl;
+      std::cerr << "row " << y << " should have " << kGridWidth << " columns. found " << row.size()
+                << "." << std::endl;
       std::cerr << line << std::endl;
       std::abort();
     }
@@ -99,8 +99,7 @@ std::vector<std::vector<Cell>> Grid::Load(const std::string &gridPath) {
   }
 
   if (cells.size() != kGridHeight) {
-    std::cerr << "expected grid of " << kGridHeight << " rows. got "
-              << cells.size() << std::endl;
+    std::cerr << "expected grid of " << kGridHeight << " rows. got " << cells.size() << std::endl;
     std::abort();
   }
 

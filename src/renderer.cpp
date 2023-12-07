@@ -4,13 +4,12 @@
 #include <iostream>
 #include <string>
 
-Renderer::Renderer(const std::size_t screen_width,
-                   const std::size_t screen_height)
+Renderer::Renderer(const std::size_t screen_width, const std::size_t screen_height)
     : screen_width(screen_width), screen_height(screen_height) {
   // Create Window
-  sdl_window = SDL_CreateWindow(
-      "Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width,
-      screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+  sdl_window =
+      SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width,
+                       screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
   if (nullptr == sdl_window) {
     std::cerr << "Window could not be created.\n";

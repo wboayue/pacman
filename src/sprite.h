@@ -17,8 +17,7 @@ public:
 
   void Update(const float deltaTime);
   void Render(SDL_Renderer *renderer, Vec2 destination);
-  void Render(SDL_Renderer *renderer, const SDL_Rect &source,
-              const SDL_Rect &destination);
+  void Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination);
 
   void SetFrames(std::vector<int> frames);
 
