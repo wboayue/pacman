@@ -7,7 +7,7 @@ int main() {
 
   Game game;
   if (game.Ready()) {
-    game.Run(1000/kFramesPerSecond);
+    game.Run(1000 / kFramesPerSecond);
     std::cout << "Game has terminated successfully!\n";
     return 0;
   }

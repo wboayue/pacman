@@ -7,8 +7,7 @@ bool Grid::HasPellet(const Vec2 &position) {
   return GetCell(position) == kPellet || GetCell(position) == kPowerPellet;
 }
 
-void Grid::Reset(SDL_Renderer *renderer)
-{
+void Grid::Reset(SDL_Renderer *renderer) {
   cells = Grid::Load("../assets/maze.txt");
   CreatePellets(renderer);
 }

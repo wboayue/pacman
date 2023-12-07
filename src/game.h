@@ -9,9 +9,9 @@
 
 #include "board-manager.h"
 #include "game-state.h"
+#include "ghost.h"
 #include "grid.h"
 #include "pacman.h"
-#include "ghost.h"
 #include "pellet.h"
 #include "renderer.h"
 
@@ -38,7 +38,7 @@ private:
   void Update(const float deltaTime);
   void Render();
 
-  void CreateGhosts(SDL_Renderer* renderer);
+  void CreateGhosts(SDL_Renderer *renderer);
 
   bool ready_;
   bool running_;

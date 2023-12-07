@@ -38,8 +38,7 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false} {
 
 Game::~Game() { SDL_Quit(); }
 
-void Game::CreateGhosts(SDL_Renderer *renderer)
-{
+void Game::CreateGhosts(SDL_Renderer *renderer) {
   blinky = std::make_shared<Ghost>(BlinkyConfig{renderer});
   ghosts.push_back(blinky);
 
@@ -87,8 +86,8 @@ void Game::Run(std::size_t target_frame_duration) {
 
     frame_end = SDL_GetTicks();
 
-    // Keep track of how long each loop through the input/update/render cycle
-    // takes.
+    // Keep track of how long each loop through the input/update/render
+    // cycle takes.
     frame_count++;
     frame_duration = frame_end - frame_start;
 

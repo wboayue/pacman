@@ -28,7 +28,6 @@ public:
   void Reset();
 
 private:
-  
   Vec2 position;
   Vec2 velocity;
   Direction heading;
