@@ -3,7 +3,7 @@
 
 #include "grid.h"
 
-bool Grid::HasPellet(const Vec2 &position) {
+bool Grid::HasPellet(const Vec2 &position) const {
   return GetCell(position) == Cell::kPellet || GetCell(position) == Cell::kPowerPellet;
 }
 

@@ -58,7 +58,6 @@ void Game::Run(std::size_t target_frame_duration) {
   Uint32 frame_end;
   Uint32 frame_duration;
 
-  int frame_count = 0;
   running_ = true;
 
   ticks_count_ = SDL_GetTicks();
@@ -117,7 +116,6 @@ void Game::Run(std::size_t target_frame_duration) {
 
     // Keep track of how long each loop through the input/update/render
     // cycle takes.
-    frame_count++;
     frame_duration = frame_end - frame_start;
 
     // If the time for this frame is too small (i.e. frame_duration is
@@ -185,7 +183,7 @@ void Game::Render() {
   renderer_->Present();
 }
 
-SDL_Texture *Game::GetTexture(std::string fileName) {
+SDL_Texture *Game::GetTexture(const std::string &fileName) const {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());

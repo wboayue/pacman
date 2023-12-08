@@ -31,7 +31,7 @@ public:
 
   int Height() const { return cells.size(); };
 
-  const Cell GetCell(const Vec2 &position) const {
+  Cell GetCell(const Vec2 &position) const {
     if (position.x < 0 || position.y < 0) {
       return Cell::kOffGrid;
     }
@@ -41,19 +41,17 @@ public:
     return cells.at(floor(position.y)).at(floor(position.x));
   };
 
-  bool HasPellet(const Vec2 &position);
+  bool HasPellet(const Vec2 &position) const;
   std::unique_ptr<Pellet> ConsumePellet(const Vec2 &position);
 
   void Reset(SDL_Renderer *renderer);
 
   void CreatePellets(SDL_Renderer *renderer);
 
-  //    Grid& operator=(const Grid& grid);
   static std::vector<std::vector<Cell>> Load(const std::string &gridPath);
 
 private:
   std::vector<std::vector<Cell>> cells;
-  // std::vector<std::unique_ptr<Pellet>> pellets;
   std::unordered_map<Vec2, std::unique_ptr<Pellet>, Vec2Hash> pellets;
 };
 
