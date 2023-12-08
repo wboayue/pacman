@@ -2,15 +2,15 @@
 
 #include "game.h"
 
-int main() {
-  constexpr std::size_t kFramesPerSecond{60};
+static constexpr std::size_t kFramesPerSecond{60};
 
+int main() {
   Game game;
-  if (game.Ready()) {
-    game.Run(1000 / kFramesPerSecond);
-    std::cout << "Game has terminated successfully!\n";
-    return 0;
+  if (!game.Ready()) {
+    return 1;
   }
 
-  return 1;
+  game.Run(1000 / kFramesPerSecond);
+  std::cout << "Game has terminated successfully!\n";
+  return 0;
 }
