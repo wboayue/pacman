@@ -40,17 +40,17 @@ private:
 
   void createGhosts(SDL_Renderer *renderer);
 
-  bool ready_;
-  bool running_;
+  bool ready_{false};
+  bool running_{false};
   std::shared_ptr<Renderer> renderer_;
-  Uint32 ticks_count_;
+  Uint32 ticks_count_{0};
 
   std::unique_ptr<Pacman> pacman;
   Grid grid;
   std::unique_ptr<BoardManager> board;
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
-  GameState state;
+  GameState state{0, 2, 0, 0, false, GhostMode::kChase};
 };
 
 #endif

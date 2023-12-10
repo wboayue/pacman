@@ -9,6 +9,23 @@ static constexpr std::array<Candidate, 4> options{
     Candidate{{-1, 0}, Direction::kWest},
 };
 
+static constexpr auto kGhostFps = 4;
+static constexpr auto kGhostFrameWidth = 16;
+
+static constexpr auto kBlinkyStartCell = Vec2{14, 14}; 
+static constexpr auto kBlinkyScatterCell = Vec2{24, 0}; 
+
+static constexpr auto kClydeStartCell = Vec2{16, 17}; 
+static constexpr auto kClydeScatterCell = Vec2{0, 34}; 
+static constexpr auto kClydeRelaxDistance = 8.0f; 
+
+static constexpr auto kPinkyStartCell = Vec2{14, 17}; 
+static constexpr auto kPinkyScatterCell = Vec2{2, 0}; 
+
+static constexpr auto kInkyStartCell = Vec2{12, 17}; 
+static constexpr auto kInkyScatterCell = Vec2{27, 34};
+static constexpr auto kInkyPacmanOffset = 2.0f;
+
 auto reverseDirection(Direction direction) -> Direction {
   switch (direction) {
   case Direction::kNorth:
@@ -51,10 +68,10 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   }
 
   // teleport
-  if (position.x < -16) {
-    position.x = kGridWidth * 8 + 16;
-  } else if (position.x > kGridWidth * 8 + 16) {
-    position.x = -16;
+  if (position.x < -(kCellSize*2)) {
+    position.x = kGridWidth * kCellSize + (kCellSize*2);
+  } else if (position.x > kGridWidth * kCellSize + (kCellSize*2)) {
+    position.x = -(kCellSize*2);
   }
 
   sprite->Update(deltaTime);
@@ -85,26 +102,23 @@ auto Ghost::chase(Grid &grid, const Vec2 &target) -> void {
   }
 
   if (heading == Direction::kEast || heading == Direction::kWest) {
-    position.y = floor(((int)position.y / 8) * 8 + 4);
+    position.y = floor(((int)position.y / kCellSize) * kCellSize + (kCellSize/2));
   }
   if (heading == Direction::kNorth || heading == Direction::kSouth) {
-    position.x = floor(((int)position.x / 8) * 8 + 4);
+    position.x = floor(((int)position.x / kCellSize) * kCellSize + (kCellSize/2));
   }
 
   newCell = false;
 }
 
-//   position.y = floor(((int)position.y / 8) * 8 + 4);
-// }
-// if (velocity.y > 0 || velocity.y < 0) {
-//   position.x = floor(((int)position.x / 8) * 8 + 4);
-
 auto Ghost::inCellCenter() -> bool {
+  static constexpr auto kMidPoint = 0.5f;
+
   float x = position.x - floor(position.x);
   float y = position.y - floor(position.y);
 
-  return (heading == Direction::kNorth && y <= 0.5) || (heading == Direction::kSouth && y >= 0.5) ||
-         (heading == Direction::kEast && x >= 0.5) || (heading == Direction::kWest && x <= 0.5);
+  return (heading == Direction::kNorth && y <= kMidPoint) || (heading == Direction::kSouth && y >= kMidPoint) ||
+         (heading == Direction::kEast && x >= kMidPoint) || (heading == Direction::kWest && x <= kMidPoint);
 }
 
 auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
@@ -126,7 +140,7 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
 }
 
 auto Ghost::Render(SDL_Renderer *renderer) -> void {
-  sprite->Render(renderer, {floor(position.x - 8), floor(position.y - 8)});
+  sprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
 }
 
 auto Ghost::Reset() -> void { position = initialPosition; }
@@ -187,7 +201,7 @@ auto Ghost::isInPen() -> bool {
 }
 
 auto Ghost::GetCell() -> Vec2 {
-  auto t = position / 8;
+  auto t = position / kCellSize;
   return {floor(t.x), floor(t.y)};
 }
 
@@ -209,13 +223,15 @@ auto BlinkyConfig::GetTargeter() const -> Targeter {
   };
 }
 
-auto BlinkyConfig::GetScatterCell() const -> Vec2 { return Vec2{24, 0}; }
+auto BlinkyConfig::GetScatterCell() const -> Vec2 { return kBlinkyScatterCell; }
 
 auto BlinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/blinky.png", 4, 16);
+  return std::make_unique<Sprite>(renderer, "../assets/blinky.png", kGhostFps, kGhostFrameWidth);
 }
 
-auto BlinkyConfig::GetInitialPosition() const -> Vec2 { return Vec2{14 * 8, 14 * 8 + 4}; }
+auto BlinkyConfig::GetInitialPosition() const -> Vec2 { 
+  return Vec2{kBlinkyStartCell.x * kCellSize, kBlinkyStartCell.y * kCellSize + (kCellSize/2)};
+}
 
 auto BlinkyConfig::GetInitialHeading() const -> Direction { return Direction::kWest; }
 
@@ -229,34 +245,32 @@ auto InkyConfig::GetTargeter() const -> Targeter {
       return me.GetScatterCell();
     }
     Vec2 target = pacman.GetGridPosition();
-    auto distance = 2.0f;
 
     if (pacman.GetHeading() == Direction::kNorth) {
-      target += Vec2{0, -distance};
+      target += Vec2{0, -kInkyPacmanOffset};
     } else if (pacman.GetHeading() == Direction::kSouth) {
-      target += Vec2{0, distance};
+      target += Vec2{0, kInkyPacmanOffset};
     } else if (pacman.GetHeading() == Direction::kEast) {
-      target += Vec2{distance, 0};
+      target += Vec2{kInkyPacmanOffset, 0};
     } else if (pacman.GetHeading() == Direction::kWest) {
-      target += Vec2{-distance, 0};
+      target += Vec2{-kInkyPacmanOffset, 0};
     }
 
-    auto v = target - blinky.GetCell();
-    v = v * 2;
+    auto projection = target - blinky.GetCell();
+    projection = projection * 2;
 
-    return blinky.GetCell() + v;
+    return blinky.GetCell() + projection;
   };
 };
 
-auto InkyConfig::GetScatterCell() const -> Vec2 { return Vec2{27, 34}; }
+auto InkyConfig::GetScatterCell() const -> Vec2 { return kInkyScatterCell; }
 
 auto InkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/inky.png", 4, 16);
+  return std::make_unique<Sprite>(renderer, "../assets/inky.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto InkyConfig::GetInitialPosition() const -> Vec2 {
-  return Vec2{12 * 8, 14 * 8 + 4};
-  //  return Vec2{12*8, 17*8+4};
+  return Vec2{kInkyStartCell.x * kCellSize, kInkyStartCell.y * kCellSize + (kCellSize/2)};
 }
 
 auto InkyConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }
@@ -287,15 +301,14 @@ auto PinkyConfig::GetTargeter() const -> Targeter {
   };
 }
 
-auto PinkyConfig::GetScatterCell() const -> Vec2 { return Vec2{2, 0}; }
+auto PinkyConfig::GetScatterCell() const -> Vec2 { return kPinkyScatterCell; }
 
 auto PinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/pinky.png", 4, 16);
+  return std::make_unique<Sprite>(renderer, "../assets/pinky.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto PinkyConfig::GetInitialPosition() const -> Vec2 {
-  return Vec2{14 * 8, 10 * 8 + 4};
-  // return Vec2{14*8, 17*8+4};
+  return Vec2{kPinkyStartCell.x * kCellSize, kPinkyStartCell.y * kCellSize + (kCellSize/2)};
 }
 
 auto PinkyConfig::GetInitialHeading() const -> Direction { return Direction::kSouth; }
@@ -311,7 +324,7 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
     }
 
     auto d = me.GetCell().Distance(pacman.GetGridPosition());
-    if (d > 8.0) {
+    if (d > kClydeRelaxDistance) {
       return pacman.GetGridPosition();
     } else {
       return me.GetScatterCell();
@@ -319,15 +332,14 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
   };
 }
 
-auto ClydeConfig::GetScatterCell() const -> Vec2 { return Vec2{0, 34}; }
+auto ClydeConfig::GetScatterCell() const -> Vec2 { return kClydeScatterCell; }
 
 auto ClydeConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/clyde.png", 4, 16);
+  return std::make_unique<Sprite>(renderer, "../assets/clyde.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto ClydeConfig::GetInitialPosition() const -> Vec2 {
-  //  return Vec2{16*8, 17*8+4};
-  return Vec2{16 * 8, 12 * 8 + 4};
+  return Vec2{kClydeStartCell.x * kCellSize, kClydeStartCell.y * kCellSize + (kCellSize/2)};
 }
 
 auto ClydeConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }

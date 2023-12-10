@@ -8,7 +8,7 @@
 const int kGameWidth = 224;
 const int kGameHeight = 288;
 
-Game::Game() : ready_{false}, state{0, 2, 0, 0, false, GhostMode::kChase} {
+Game::Game() {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -55,9 +55,9 @@ auto Game::createGhosts(SDL_Renderer *renderer) -> void {
 auto Game::Ready() const -> bool { return ready_; }
 
 auto Game::Run(std::size_t target_frame_duration) -> void {
-  Uint32 frame_start;
-  Uint32 frame_end;
-  Uint32 frame_duration;
+  Uint32 frame_start{0};
+  Uint32 frame_end{0};
+  Uint32 frame_duration{0};
 
   running_ = true;
 
@@ -127,7 +127,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 }
 
 auto Game::processInput() -> void {
-  float aspectRatio = 224.0f / 288.0f;
+  static constexpr auto aspectRatio = 224.0f / 288.0f;
 
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
@@ -140,16 +140,16 @@ auto Game::processInput() -> void {
       int newHeight = event.window.data2;
       float newAspectRatio = (float)newWidth / (float)newHeight;
       if (newAspectRatio > aspectRatio) {
-        newWidth = (int)(newHeight * aspectRatio);
+        newWidth = (int)((float)newHeight * aspectRatio);
       } else {
-        newHeight = (int)(newWidth / aspectRatio);
+        newHeight = (int)((float)newWidth / aspectRatio);
       }
       renderer_->SetWindowSize(newWidth, newHeight);
     }
   }
 
   const Uint8 *state = SDL_GetKeyboardState(nullptr);
-  if (state[SDL_SCANCODE_ESCAPE]) {
+  if (state[SDL_SCANCODE_ESCAPE] != 0u) {
     running_ = false;
   }
 
@@ -184,7 +184,7 @@ auto Game::render() -> void {
 
 auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
-  if (!surface) {
+  if (surface == nullptr) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());
     return nullptr;
   }

@@ -13,6 +13,7 @@ public:
   Sprite(SDL_Renderer *renderer, std::string fileName);
   Sprite(SDL_Renderer *renderer, std::string fileName, int fps, int frameWidth);
 
+  // TODO implement rule of 5
   ~Sprite();
 
   void Update(const float deltaTime);

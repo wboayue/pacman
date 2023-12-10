@@ -9,6 +9,7 @@ enum class Direction {
   kWest,
 };
 
-const float kMaxSpeed = 75.75757625;
+static constexpr float kMaxSpeed = 75.75757625;
+static constexpr int kCellSize = 8;
 
 #endif
