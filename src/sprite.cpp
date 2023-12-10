@@ -3,7 +3,7 @@
 #include "SDL_image.h"
 #include "sprite.h"
 
-SDL_Texture *LoadTexture(SDL_Renderer *renderer, std::string fileName);
+auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture*;
 
 Sprite::Sprite(SDL_Renderer *renderer, std::string fileName)
     : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
@@ -26,9 +26,9 @@ Sprite::~Sprite() {
   }
 }
 
-void Sprite::SetFrames(std::vector<int> frames) { this->frames = frames; }
+auto Sprite::SetFrames(std::vector<int> frames) -> void { this->frames = frames; }
 
-void Sprite::Update(const float deltaTime) {
+auto Sprite::Update(const float deltaTime) -> void {
   if (fps == 0 || frames.size() < 2) {
     return;
   }
@@ -40,7 +40,7 @@ void Sprite::Update(const float deltaTime) {
   }
 }
 
-void Sprite::Render(SDL_Renderer *renderer, Vec2 destination) {
+auto Sprite::Render(SDL_Renderer *renderer, Vec2 destination) -> void {
   auto frame = static_cast<int>(currentFrame);
 
   SDL_Rect source;
@@ -59,11 +59,11 @@ void Sprite::Render(SDL_Renderer *renderer, Vec2 destination) {
   // SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
-void Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) {
+auto Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) -> void {
   SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
-SDL_Texture *LoadTexture(SDL_Renderer *renderer, std::string fileName) {
+auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture* {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());
