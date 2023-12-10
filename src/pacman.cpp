@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 #include "pacman.h"
 
@@ -118,9 +118,9 @@ auto Pacman::ProcessInput(const Uint8 *state) -> void {
   }
 }
 
-auto Pacman::GetPosition() const  -> Vec2 { return position; }
+auto Pacman::GetPosition() const -> Vec2 { return position; }
 
-auto Pacman::GetHeading() const  -> Direction { return heading; }
+auto Pacman::GetHeading() const -> Direction { return heading; }
 
 auto Pacman::GetGridPosition() const -> Vec2 {
   auto t = position / 8;

@@ -45,7 +45,7 @@ auto Grid::Update(const float deltaTime) -> void {
   }
 }
 
-auto Grid::Render(SDL_Renderer *renderer) -> void{
+auto Grid::Render(SDL_Renderer *renderer) -> void {
   for (auto &pellet : pellets) {
     pellet.second->Render(renderer);
   }

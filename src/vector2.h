@@ -12,14 +12,14 @@ struct Vec2 {
 
   auto operator+(const Vec2 &rhs) const -> Vec2;
   auto operator-(const Vec2 &rhs) const -> Vec2;
-  auto operator+=(const Vec2 &rhs) -> Vec2&;
+  auto operator+=(const Vec2 &rhs) -> Vec2 &;
 
-  friend auto operator<<(std::ostream &os, const Vec2 &rhs) -> std::ostream& {
+  friend auto operator<<(std::ostream &os, const Vec2 &rhs) -> std::ostream & {
     os << "{" << (int)rhs.x << ", " << (int)rhs.y << "}";
     return os;
   }
 
-  auto operator/(const float &rhs) const -> Vec2; 
+  auto operator/(const float &rhs) const -> Vec2;
   auto operator*(const float &rhs) const -> Vec2;
 };
 

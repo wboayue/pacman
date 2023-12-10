@@ -1,8 +1,6 @@
 #include <memory>
 
-enum class Sound {
-  kIntro
-};
+enum class Sound { kIntro };
 
 class AudioSystem {
 public:

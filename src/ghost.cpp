@@ -25,8 +25,8 @@ auto reverseDirection(Direction direction) -> Direction {
 }
 
 Ghost::Ghost(const GhostConfig &config)
-    : initialPosition{config.GetInitialPosition()},
-      heading{config.GetInitialHeading()}, targeter{config.GetTargeter()},
+    : initialPosition{config.GetInitialPosition()}, heading{config.GetInitialHeading()},
+      targeter{config.GetTargeter()},
       scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()} {
   position = initialPosition;
   setFramesForHeading(heading);
@@ -200,11 +200,11 @@ auto Ghost::penDance() -> void {}
 BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 auto BlinkyConfig::GetTargeter() const -> Targeter {
-  return [](Ghost &me, Pacman &pacman, [[maybe_unused]]Ghost &blinky, GhostMode mode) {
+  return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
     if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }
-    
+
     return pacman.GetGridPosition();
   };
 }
@@ -227,7 +227,7 @@ auto InkyConfig::GetTargeter() const -> Targeter {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
     if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
-    } 
+    }
     Vec2 target = pacman.GetGridPosition();
     auto distance = 2.0f;
 
@@ -266,7 +266,7 @@ auto InkyConfig::GetInitialHeading() const -> Direction { return Direction::kNor
 PinkyConfig::PinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 auto PinkyConfig::GetTargeter() const -> Targeter {
-  return [](Ghost &me, Pacman &pacman, [[maybe_unused]]Ghost &blinky, GhostMode mode) {
+  return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
     if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }
@@ -305,7 +305,7 @@ auto PinkyConfig::GetInitialHeading() const -> Direction { return Direction::kSo
 ClydeConfig::ClydeConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 auto ClydeConfig::GetTargeter() const -> Targeter {
-  return [](Ghost &me, Pacman &pacman, [[maybe_unused]]Ghost &blinky, GhostMode mode) {
+  return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
     if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }

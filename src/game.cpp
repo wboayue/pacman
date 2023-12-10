@@ -184,7 +184,7 @@ auto Game::render() -> void {
   renderer_->Present();
 }
 
-auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture* {
+auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());

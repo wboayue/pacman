@@ -19,8 +19,7 @@ const int kGridHeight = 36;
 class Grid {
 public:
   Grid(){};
-  Grid(std::vector<std::vector<Cell>> cells)
-      : cells{cells} {};
+  Grid(std::vector<std::vector<Cell>> cells) : cells{cells} {};
 
   auto Update(const float deltaTime) -> void;
   auto Render(SDL_Renderer *renderer) -> void;

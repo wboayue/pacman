@@ -3,7 +3,7 @@
 #include "SDL_image.h"
 #include "sprite.h"
 
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture*;
+auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture *;
 
 Sprite::Sprite(SDL_Renderer *renderer, std::string fileName)
     : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
@@ -59,11 +59,12 @@ auto Sprite::Render(SDL_Renderer *renderer, Vec2 destination) -> void {
   // SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
-auto Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) -> void {
+auto Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination)
+    -> void {
   SDL_RenderCopy(renderer, texture, &source, &destination);
 }
 
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture* {
+auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture * {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());

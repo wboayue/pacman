@@ -24,7 +24,7 @@ public:
   auto GetScore() const -> int;
   auto Ready() const -> bool;
 
-  auto GetTexture(const std::string &fileName) const -> SDL_Texture*;
+  auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
 private:
   std::random_device dev;

@@ -10,7 +10,7 @@ auto Vec2::Distance(const Vec2 &rhs) const -> float {
 auto Vec2::operator+(const Vec2 &rhs) const -> Vec2 { return {x + rhs.x, y + rhs.y}; }
 auto Vec2::operator-(const Vec2 &rhs) const -> Vec2 { return {x - rhs.x, y - rhs.y}; }
 
-auto Vec2::operator+=(const Vec2 &rhs) -> Vec2& {
+auto Vec2::operator+=(const Vec2 &rhs) -> Vec2 & {
   x += rhs.x;
   y += rhs.y;
   return *this;
@@ -26,4 +26,6 @@ auto Vec2::operator/(const float &rhs) const -> Vec2 {
 }
 auto Vec2::operator*(const float &rhs) const -> Vec2 { return {x * rhs, y * rhs}; }
 
-auto operator==(const Vec2 &lhs, const Vec2 &rhs) -> bool { return lhs.x == rhs.x && lhs.y == rhs.y; };
+auto operator==(const Vec2 &lhs, const Vec2 &rhs) -> bool {
+  return lhs.x == rhs.x && lhs.y == rhs.y;
+};

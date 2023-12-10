@@ -4,8 +4,7 @@
 #include <iostream>
 #include <string>
 
-Renderer::Renderer(const std::size_t screen_width, const std::size_t screen_height)
-     {
+Renderer::Renderer(const std::size_t screen_width, const std::size_t screen_height) {
   // Create Window
   sdl_window =
       SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width,
@@ -34,11 +33,11 @@ auto Renderer::Clear() -> void { SDL_RenderClear(sdl_renderer); }
 
 auto Renderer::Present() -> void { SDL_RenderPresent(sdl_renderer); }
 
-auto Renderer::CreateTextureFromSurface(SDL_Surface *surface) -> SDL_Texture* {
+auto Renderer::CreateTextureFromSurface(SDL_Surface *surface) -> SDL_Texture * {
   return SDL_CreateTextureFromSurface(sdl_renderer, surface);
 }
 
-auto Renderer::CreateSprite(std::string fileName) -> Sprite* {
+auto Renderer::CreateSprite(std::string fileName) -> Sprite * {
   auto surface = IMG_Load(fileName.c_str());
   SDL_assert(surface != nullptr);
 
