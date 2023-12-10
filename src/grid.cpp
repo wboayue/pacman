@@ -3,16 +3,16 @@
 
 #include "grid.h"
 
-bool Grid::HasPellet(const Vec2 &position) const {
+auto Grid::HasPellet(const Vec2 &position) const -> bool {
   return GetCell(position) == Cell::kPellet || GetCell(position) == Cell::kPowerPellet;
 }
 
-void Grid::Reset(SDL_Renderer *renderer) {
+auto Grid::Reset(SDL_Renderer *renderer) -> void {
   cells = Grid::Load("../assets/maze.txt");
   CreatePellets(renderer);
 }
 
-std::unique_ptr<Pellet> Grid::ConsumePellet(const Vec2 &position) {
+auto Grid::ConsumePellet(const Vec2 &position) -> std::unique_ptr<Pellet> {
   auto it = pellets.find(position);
   if (it != pellets.end()) {
     auto tmp = std::move(it->second);
@@ -26,7 +26,7 @@ std::unique_ptr<Pellet> Grid::ConsumePellet(const Vec2 &position) {
   return {};
 }
 
-void Grid::CreatePellets(SDL_Renderer *renderer) {
+auto Grid::CreatePellets(SDL_Renderer *renderer) -> void {
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
       Vec2 position{(float)x, (float)y};
@@ -39,19 +39,19 @@ void Grid::CreatePellets(SDL_Renderer *renderer) {
   }
 }
 
-void Grid::Update(const float deltaTime) {
+auto Grid::Update(const float deltaTime) -> void {
   for (auto &pellet : pellets) {
     pellet.second->Update(deltaTime);
   }
 }
 
-void Grid::Render(SDL_Renderer *renderer) {
+auto Grid::Render(SDL_Renderer *renderer) -> void{
   for (auto &pellet : pellets) {
     pellet.second->Render(renderer);
   }
 }
 
-std::vector<std::vector<Cell>> Grid::Load(const std::string &gridPath) {
+auto Grid::Load(const std::string &gridPath) -> std::vector<std::vector<Cell>> {
   std::fstream file{gridPath};
   if (!file.is_open()) {
     std::cerr << "Unable to open grid at: " << gridPath << std::endl;
@@ -104,5 +104,5 @@ std::vector<std::vector<Cell>> Grid::Load(const std::string &gridPath) {
   }
 
   file.close();
-  return std::move(cells);
+  return cells;
 }

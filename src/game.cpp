@@ -12,7 +12,7 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false, GhostMode::kChase} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
-    std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    std::cerr << "SDL_Error:  " << SDL_GetError() << "\n";
     return;
   }
 

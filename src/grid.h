@@ -20,18 +20,16 @@ class Grid {
 public:
   Grid(){};
   Grid(std::vector<std::vector<Cell>> cells)
-      : cells{cells} {
+      : cells{cells} {};
 
-        };
+  auto Update(const float deltaTime) -> void;
+  auto Render(SDL_Renderer *renderer) -> void;
 
-  void Update(const float deltaTime);
-  void Render(SDL_Renderer *renderer);
+  auto Width() const -> int { return cells.at(0).size(); };
 
-  int Width() const { return cells.at(0).size(); };
+  auto Height() const -> int { return cells.size(); };
 
-  int Height() const { return cells.size(); };
-
-  Cell GetCell(const Vec2 &position) const {
+  auto GetCell(const Vec2 &position) const -> Cell {
     if (position.x < 0 || position.y < 0) {
       return Cell::kOffGrid;
     }
@@ -41,14 +39,14 @@ public:
     return cells.at(floor(position.y)).at(floor(position.x));
   };
 
-  bool HasPellet(const Vec2 &position) const;
-  std::unique_ptr<Pellet> ConsumePellet(const Vec2 &position);
+  auto HasPellet(const Vec2 &position) const -> bool;
+  auto ConsumePellet(const Vec2 &position) -> std::unique_ptr<Pellet>;
 
-  void Reset(SDL_Renderer *renderer);
+  auto Reset(SDL_Renderer *renderer) -> void;
 
-  void CreatePellets(SDL_Renderer *renderer);
+  auto CreatePellets(SDL_Renderer *renderer) -> void;
 
-  static std::vector<std::vector<Cell>> Load(const std::string &gridPath);
+  auto static Load(const std::string &gridPath) -> std::vector<std::vector<Cell>>;
 
 private:
   std::vector<std::vector<Cell>> cells;
