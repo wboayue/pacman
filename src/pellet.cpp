@@ -12,10 +12,10 @@ Pellet::Pellet(SDL_Renderer *renderer, const Vec2 position, bool power)
   }
 }
 
-void Pellet::Update(const float deltaTime) { sprite->Update(deltaTime); }
+auto Pellet::Update(const float deltaTime) -> void { sprite->Update(deltaTime); }
 
-void Pellet::Render(SDL_Renderer *renderer) {
+auto Pellet::Render(SDL_Renderer *renderer) -> void {
   sprite->Render(renderer, {position.x * 8, position.y * 8});
 }
 
-bool Pellet::IsEnergizer() const { return power; }
+auto Pellet::IsEnergizer() const -> bool { return power; }

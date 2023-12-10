@@ -30,14 +30,15 @@ Game::Game() : ready_{false}, state{0, 2, 0, 0, false, GhostMode::kChase} {
   grid = Grid{cells};
   grid.CreatePellets(renderer_->sdl_renderer);
 
-  CreateGhosts(renderer_->sdl_renderer);
+  createGhosts(renderer_->sdl_renderer);
 
   ready_ = true;
 }
 
 Game::~Game() { SDL_Quit(); }
 
-void Game::CreateGhosts(SDL_Renderer *renderer) {
+auto Game::createGhosts(SDL_Renderer *renderer) -> void {
+  // switch to stack
   blinky = std::make_shared<Ghost>(BlinkyConfig{renderer});
   ghosts.push_back(blinky);
 
@@ -51,9 +52,9 @@ void Game::CreateGhosts(SDL_Renderer *renderer) {
   ghosts.push_back(clyde);
 }
 
-bool Game::Ready() const { return ready_; }
+auto Game::Ready() const -> bool { return ready_; }
 
-void Game::Run(std::size_t target_frame_duration) {
+auto Game::Run(std::size_t target_frame_duration) -> void {
   Uint32 frame_start;
   Uint32 frame_end;
   Uint32 frame_duration;
@@ -67,9 +68,9 @@ void Game::Run(std::size_t target_frame_duration) {
     float deltaTime = (frame_start - ticks_count_) / 1000.0f;
     ticks_count_ = SDL_GetTicks();
 
-    ProcessInput();
-    Update(deltaTime);
-    Render();
+    processInput();
+    update(deltaTime);
+    render();
 
     if (state.levelCompleted) {
       SDL_Delay(500);
@@ -127,7 +128,7 @@ void Game::Run(std::size_t target_frame_duration) {
   }
 }
 
-void Game::ProcessInput() {
+auto Game::processInput() -> void {
   float aspectRatio = 224.0f / 288.0f;
 
   SDL_Event event;
@@ -149,7 +150,7 @@ void Game::ProcessInput() {
     }
   }
 
-  const Uint8 *state = SDL_GetKeyboardState(NULL);
+  const Uint8 *state = SDL_GetKeyboardState(nullptr);
   if (state[SDL_SCANCODE_ESCAPE]) {
     running_ = false;
   }
@@ -157,7 +158,7 @@ void Game::ProcessInput() {
   pacman->ProcessInput(state);
 }
 
-void Game::Update(const float deltaTime) {
+auto Game::update(const float deltaTime) -> void {
   pacman->Update(deltaTime, grid, state);
   for (auto &ghost : ghosts) {
     ghost->Update(deltaTime, grid, state, *pacman, *blinky);
@@ -168,7 +169,7 @@ void Game::Update(const float deltaTime) {
   board->Update(deltaTime, state);
 }
 
-void Game::Render() {
+auto Game::render() -> void {
   renderer_->Clear();
 
   board->Render(renderer_->sdl_renderer);
@@ -183,7 +184,7 @@ void Game::Render() {
   renderer_->Present();
 }
 
-SDL_Texture *Game::GetTexture(const std::string &fileName) const {
+auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture* {
   SDL_Surface *surface = IMG_Load(fileName.c_str());
   if (!surface) {
     SDL_Log("Failed to load texture file %s", fileName.c_str());
@@ -197,4 +198,4 @@ SDL_Texture *Game::GetTexture(const std::string &fileName) const {
   return texture;
 }
 
-int Game::GetScore() const { return score; }
+auto Game::GetScore() const -> int { return score; }

@@ -16,16 +16,16 @@ class Pacman {
 public:
   Pacman(SDL_Renderer *renderer);
 
-  void Update(const float deltaTime, Grid &grid, GameState &state);
-  void Render(SDL_Renderer *renderer);
-  void ProcessInput(const Uint8 *state);
+  auto Update(const float deltaTime, Grid &grid, GameState &state) -> void;
+  auto Render(SDL_Renderer *renderer) -> void;
+  auto ProcessInput(const Uint8 *state) -> void;
 
-  Vec2 GetPosition();
-  Direction GetHeading();
-  Vec2 GetGridPosition();
-  Vec2 NextGridPosition(const Direction &direction);
-  Vec2 NextGridPosition();
-  void Reset();
+  auto GetPosition() const -> Vec2;
+  auto GetHeading() const -> Direction;
+  auto GetGridPosition() const -> Vec2;
+  auto NextGridPosition(const Direction &direction) const -> Vec2;
+  auto NextGridPosition() const -> Vec2;
+  auto Reset() -> void;
 
 private:
   Vec2 position;

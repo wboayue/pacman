@@ -20,11 +20,11 @@ public:
   Game();
   ~Game();
 
-  void Run(std::size_t target_frame_duration);
-  int GetScore() const;
-  bool Ready() const;
+  auto Run(std::size_t target_frame_duration) -> void;
+  auto GetScore() const -> int;
+  auto Ready() const -> bool;
 
-  SDL_Texture *GetTexture(const std::string &fileName) const;
+  auto GetTexture(const std::string &fileName) const -> SDL_Texture*;
 
 private:
   std::random_device dev;
@@ -34,11 +34,11 @@ private:
 
   int score{0};
 
-  void ProcessInput();
-  void Update(const float deltaTime);
-  void Render();
+  void processInput();
+  void update(const float deltaTime);
+  void render();
 
-  void CreateGhosts(SDL_Renderer *renderer);
+  void createGhosts(SDL_Renderer *renderer);
 
   bool ready_;
   bool running_;

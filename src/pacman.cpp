@@ -1,19 +1,20 @@
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 #include "pacman.h"
 
-const Vec2 kHomePosition{14 * 8 + 4, 26 * 8 + 4};
+static constexpr Vec2 kHomePosition{14 * 8 + 4, 26 * 8 + 4};
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : velocity{0, 0}, position{kHomePosition}, heading{Direction::kNeutral} {
+    : position{kHomePosition}, velocity{0, 0}, heading{Direction::kNeutral} {
   sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
   sprite->SetFrames({1, 2});
 }
 
-void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
+auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state) -> void {
   // Check that I can turn in requested direction
   if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
+    // setSpriteForHeading
     if (heading == Direction::kEast) {
       sprite->SetFrames({1, 2});
       velocity = Vec2{kMaxSpeed * 0.8f, 0};
@@ -33,6 +34,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
 
   auto nextPosition = NextGridPosition();
   if (grid.GetCell(nextPosition) == Cell::kWall) {
+    // handle collision with wall
     float x = position.x / 8.0;
     float y = position.y / 8.0;
     if (velocity.x > 0) {
@@ -59,6 +61,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
   }
 
   if (grid.HasPellet(GetGridPosition())) {
+    // handle energizer
     auto pellet = grid.ConsumePellet(GetGridPosition());
     if (pellet->IsEnergizer()) {
       state.score += 50;
@@ -72,6 +75,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     }
     // std::cout << "pellets  " << state.pelletsConsumed << std::endl;
   } else {
+    // update position
     position += (velocity * deltaTime);
 
     if (velocity.x > 0 || velocity.x < 0) {
@@ -82,7 +86,7 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
     }
   }
 
-  // teleport
+  // teleport on side
   if (position.x < -16) {
     position.x = kGridWidth * 8 + 16;
   } else if (position.x > kGridWidth * 8 + 16) {
@@ -92,17 +96,17 @@ void Pacman::Update(const float deltaTime, Grid &grid, GameState &state) {
   sprite->Update(deltaTime);
 }
 
-void Pacman::Reset() {
+auto Pacman::Reset() -> void {
   velocity = Vec2{0, 0};
   position = Vec2{14 * 8 + 4, 26 * 8 + 4};
   heading = Direction::kNeutral;
 }
 
-void Pacman::Render(SDL_Renderer *renderer) {
+auto Pacman::Render(SDL_Renderer *renderer) -> void {
   sprite->Render(renderer, {floor(position.x - 8), floor(position.y - 8)});
 }
 
-void Pacman::ProcessInput(const Uint8 *state) {
+auto Pacman::ProcessInput(const Uint8 *state) -> void {
   if (state[SDL_SCANCODE_RIGHT]) {
     heading = Direction::kEast;
   } else if (state[SDL_SCANCODE_LEFT]) {
@@ -114,16 +118,16 @@ void Pacman::ProcessInput(const Uint8 *state) {
   }
 }
 
-Vec2 Pacman::GetPosition() { return position; }
+auto Pacman::GetPosition() const  -> Vec2 { return position; }
 
-Direction Pacman::GetHeading() { return heading; }
+auto Pacman::GetHeading() const  -> Direction { return heading; }
 
-Vec2 Pacman::GetGridPosition() {
+auto Pacman::GetGridPosition() const -> Vec2 {
   auto t = position / 8;
   return {floor(t.x), floor(t.y)};
 }
 
-Vec2 Pacman::NextGridPosition() {
+auto Pacman::NextGridPosition() const -> Vec2 {
   auto currentPosition = GetGridPosition();
 
   if (velocity.x > 0) {
@@ -142,7 +146,7 @@ Vec2 Pacman::NextGridPosition() {
   return currentPosition;
 }
 
-Vec2 Pacman::NextGridPosition(const Direction &direction) {
+auto Pacman::NextGridPosition(const Direction &direction) const -> Vec2 {
   auto currentPosition = GetGridPosition();
 
   switch (direction) {

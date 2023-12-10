@@ -43,3 +43,5 @@ AudioSystem
 mkdir build && cd build
 cmake .. && make
 ```
+
+https://www.sounds-resource.com/arcade/pacman/sound/10603/

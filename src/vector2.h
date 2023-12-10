@@ -8,26 +8,19 @@ struct Vec2 {
   float x;
   float y;
 
-  float Distance(const Vec2 &rhs);
+  auto Distance(const Vec2 &rhs) const -> float;
 
-  Vec2 operator+(const Vec2 &rhs);
-  Vec2 operator-(const Vec2 &rhs);
-  Vec2 &operator+=(const Vec2 &rhs);
+  auto operator+(const Vec2 &rhs) const -> Vec2;
+  auto operator-(const Vec2 &rhs) const -> Vec2;
+  auto operator+=(const Vec2 &rhs) -> Vec2&;
 
-  friend std::ostream &operator<<(std::ostream &os, const Vec2 &rhs) {
+  friend auto operator<<(std::ostream &os, const Vec2 &rhs) -> std::ostream& {
     os << "{" << (int)rhs.x << ", " << (int)rhs.y << "}";
     return os;
   }
 
-  Vec2 operator/(const float &rhs) const {
-    if (rhs != 0) {
-      return {(x / rhs), (y / rhs)};
-    } else {
-      //            std::cerr << "Error: Division by zero!" << std::endl;
-      return {0, 0};
-    }
-  }
-  Vec2 operator*(const float &rhs) const { return {x * rhs, y * rhs}; }
+  auto operator/(const float &rhs) const -> Vec2; 
+  auto operator*(const float &rhs) const -> Vec2;
 };
 
 struct Vec2Hash {
@@ -38,6 +31,6 @@ struct Vec2Hash {
   }
 };
 
-bool operator==(const Vec2 &lhs, const Vec2 &rhs);
+auto operator==(const Vec2 &lhs, const Vec2 &rhs) -> bool;
 
 #endif
