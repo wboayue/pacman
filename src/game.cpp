@@ -78,9 +78,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
       // play sound
       grid.Reset(renderer_->sdl_renderer);
       pacman->Reset();
-      state.pelletsConsumed = 0;
-      state.level += 1;
-      state.levelCompleted = false;
+      state.NextLevel();
 
       for (auto &ghost : ghosts) {
         ghost->Reset();

@@ -14,6 +14,8 @@ struct GameState {
   int pelletsConsumed;
   bool levelCompleted;
   GhostMode mode;
+
+  auto NextLevel() -> void;
 };
 
 #endif
