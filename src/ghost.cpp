@@ -12,17 +12,17 @@ static constexpr std::array<Candidate, 4> options{
 static constexpr auto kGhostFps = 4;
 static constexpr auto kGhostFrameWidth = 16;
 
-static constexpr auto kBlinkyStartCell = Vec2{14, 14}; 
-static constexpr auto kBlinkyScatterCell = Vec2{24, 0}; 
+static constexpr auto kBlinkyStartCell = Vec2{14, 14};
+static constexpr auto kBlinkyScatterCell = Vec2{24, 0};
 
-static constexpr auto kClydeStartCell = Vec2{16, 17}; 
-static constexpr auto kClydeScatterCell = Vec2{0, 34}; 
-static constexpr auto kClydeRelaxDistance = 8.0f; 
+static constexpr auto kClydeStartCell = Vec2{16, 17};
+static constexpr auto kClydeScatterCell = Vec2{0, 34};
+static constexpr auto kClydeRelaxDistance = 8.0f;
 
-static constexpr auto kPinkyStartCell = Vec2{14, 17}; 
-static constexpr auto kPinkyScatterCell = Vec2{2, 0}; 
+static constexpr auto kPinkyStartCell = Vec2{14, 17};
+static constexpr auto kPinkyScatterCell = Vec2{2, 0};
 
-static constexpr auto kInkyStartCell = Vec2{12, 17}; 
+static constexpr auto kInkyStartCell = Vec2{12, 17};
 static constexpr auto kInkyScatterCell = Vec2{27, 34};
 static constexpr auto kInkyPacmanOffset = 2.0f;
 
@@ -68,10 +68,10 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   }
 
   // teleport
-  if (position.x < -(kCellSize*2)) {
-    position.x = kGridWidth * kCellSize + (kCellSize*2);
-  } else if (position.x > kGridWidth * kCellSize + (kCellSize*2)) {
-    position.x = -(kCellSize*2);
+  if (position.x < -(kCellSize * 2)) {
+    position.x = kGridWidth * kCellSize + (kCellSize * 2);
+  } else if (position.x > kGridWidth * kCellSize + (kCellSize * 2)) {
+    position.x = -(kCellSize * 2);
   }
 
   sprite->Update(deltaTime);
@@ -102,10 +102,10 @@ auto Ghost::chase(Grid &grid, const Vec2 &target) -> void {
   }
 
   if (heading == Direction::kEast || heading == Direction::kWest) {
-    position.y = floor(((int)position.y / kCellSize) * kCellSize + (kCellSize/2));
+    position.y = floor(((int)position.y / kCellSize) * kCellSize + (kCellSize / 2));
   }
   if (heading == Direction::kNorth || heading == Direction::kSouth) {
-    position.x = floor(((int)position.x / kCellSize) * kCellSize + (kCellSize/2));
+    position.x = floor(((int)position.x / kCellSize) * kCellSize + (kCellSize / 2));
   }
 
   newCell = false;
@@ -117,8 +117,10 @@ auto Ghost::inCellCenter() -> bool {
   float x = position.x - floor(position.x);
   float y = position.y - floor(position.y);
 
-  return (heading == Direction::kNorth && y <= kMidPoint) || (heading == Direction::kSouth && y >= kMidPoint) ||
-         (heading == Direction::kEast && x >= kMidPoint) || (heading == Direction::kWest && x <= kMidPoint);
+  return (heading == Direction::kNorth && y <= kMidPoint) ||
+         (heading == Direction::kSouth && y >= kMidPoint) ||
+         (heading == Direction::kEast && x >= kMidPoint) ||
+         (heading == Direction::kWest && x <= kMidPoint);
 }
 
 auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
@@ -229,8 +231,8 @@ auto BlinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, "../assets/blinky.png", kGhostFps, kGhostFrameWidth);
 }
 
-auto BlinkyConfig::GetInitialPosition() const -> Vec2 { 
-  return Vec2{kBlinkyStartCell.x * kCellSize, kBlinkyStartCell.y * kCellSize + (kCellSize/2)};
+auto BlinkyConfig::GetInitialPosition() const -> Vec2 {
+  return Vec2{kBlinkyStartCell.x * kCellSize, kBlinkyStartCell.y * kCellSize + (kCellSize / 2)};
 }
 
 auto BlinkyConfig::GetInitialHeading() const -> Direction { return Direction::kWest; }
@@ -270,7 +272,7 @@ auto InkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
 }
 
 auto InkyConfig::GetInitialPosition() const -> Vec2 {
-  return Vec2{kInkyStartCell.x * kCellSize, kInkyStartCell.y * kCellSize + (kCellSize/2)};
+  return Vec2{kInkyStartCell.x * kCellSize, kInkyStartCell.y * kCellSize + (kCellSize / 2)};
 }
 
 auto InkyConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }
@@ -308,7 +310,7 @@ auto PinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
 }
 
 auto PinkyConfig::GetInitialPosition() const -> Vec2 {
-  return Vec2{kPinkyStartCell.x * kCellSize, kPinkyStartCell.y * kCellSize + (kCellSize/2)};
+  return Vec2{kPinkyStartCell.x * kCellSize, kPinkyStartCell.y * kCellSize + (kCellSize / 2)};
 }
 
 auto PinkyConfig::GetInitialHeading() const -> Direction { return Direction::kSouth; }
@@ -339,7 +341,7 @@ auto ClydeConfig::GetSprite() const -> std::unique_ptr<Sprite> {
 }
 
 auto ClydeConfig::GetInitialPosition() const -> Vec2 {
-  return Vec2{kClydeStartCell.x * kCellSize, kClydeStartCell.y * kCellSize + (kCellSize/2)};
+  return Vec2{kClydeStartCell.x * kCellSize, kClydeStartCell.y * kCellSize + (kCellSize / 2)};
 }
 
 auto ClydeConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }
