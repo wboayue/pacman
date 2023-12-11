@@ -13,9 +13,9 @@ AudioSystem::AudioSystem() {
   }
 
   if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-      std::cerr << "SDL_mixer could not initialize!\n";
-      std::cerr << "SDL_mixer Error: " << Mix_GetError() << "\n";
-      return;
+    std::cerr << "SDL_mixer could not initialize!\n";
+    std::cerr << "SDL_mixer Error: " << Mix_GetError() << "\n";
+    return;
   }
 
   enabled_ = true;
@@ -28,7 +28,7 @@ AudioSystem::~AudioSystem() {
 
   Mix_Quit();
 
-  SDL_QuitSubSystem(SDL_INIT_AUDIO);    
+  SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 void AudioSystem::PlaySync(Sound sound_) {
@@ -39,20 +39,20 @@ void AudioSystem::PlaySync(Sound sound_) {
   const std::string soundFile{"../assets/sounds/game_start.wav"};
 
   // Load a sound file
-  Mix_Chunk* sound = Mix_LoadWAV(soundFile.c_str());
+  Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
   if (sound == nullptr) {
-      printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
-      return;
+    printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
+    return;
   }
 
   // Play the sound synchronously
   if (Mix_PlayChannelTimed(-1, sound, 0, -1) == -1) {
-      printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
+    printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
   }
 
   // Wait for the sound to finish playing
   while (Mix_Playing(-1) != 0) {
-      SDL_Delay(100); // Add a short delay to reduce CPU usage
+    SDL_Delay(100); // Add a short delay to reduce CPU usage
   }
 
   // Free the loaded sound
@@ -74,19 +74,19 @@ void AudioSystem::PlayAsync(Sound sound_) {
   }
 
   // Load a sound file
-  Mix_Chunk* sound = Mix_LoadWAV(soundFile.c_str());
+  Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
   if (sound == nullptr) {
-      printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
-      return;
+    printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
+    return;
   }
 
   // Play the sound synchronously
   if (Mix_PlayChannel(-1, sound, 0) == -1) {
-      printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
+    printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
   }
 
   // Free the loaded sound
-//  Mix_FreeChunk(sound);
+  //  Mix_FreeChunk(sound);
 }
 
 void AudioSystem::PlayAsync(Sound sound_, int loop) {
@@ -104,61 +104,61 @@ void AudioSystem::PlayAsync(Sound sound_, int loop) {
   }
 
   // Load a sound file
-  Mix_Chunk* sound = Mix_LoadWAV(soundFile.c_str());
+  Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
   if (sound == nullptr) {
-      printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
-      return;
+    printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
+    return;
   }
 
   // Play the sound synchronously
   if (Mix_PlayChannel(-1, sound, loop) == -1) {
-      printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
+    printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
   }
 
   // Mix_HaltChannel(-1);
 
   // Free the loaded sound
-//  Mix_FreeChunk(sound);
+  //  Mix_FreeChunk(sound);
 }
 
 auto playSound(const std::string &soundFile) -> int {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
+  // Initialize SDL
+  if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+    printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+    return 1;
+  }
 
-    // Initialize SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-        return 1;
-    }
+  // Initialize SDL_mixer
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+    return 1;
+  }
 
-    // Load a sound file
-    Mix_Chunk* sound = Mix_LoadWAV(soundFile.c_str());
-    if (sound == nullptr) {
-        printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
-        return 1;
-    }
+  // Load a sound file
+  Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
+  if (sound == nullptr) {
+    printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
+    return 1;
+  }
 
-    // Play the sound synchronously
-    if (Mix_PlayChannelTimed(-1, sound, 0, -1) == -1) {
-        printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
-    }
+  // Play the sound synchronously
+  if (Mix_PlayChannelTimed(-1, sound, 0, -1) == -1) {
+    printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
+  }
 
-    // Wait for the sound to finish playing
-    while (Mix_Playing(-1) != 0) {
-        SDL_Delay(100); // Add a short delay to reduce CPU usage
-    }
+  // Wait for the sound to finish playing
+  while (Mix_Playing(-1) != 0) {
+    SDL_Delay(100); // Add a short delay to reduce CPU usage
+  }
 
-    // Free the loaded sound
-    Mix_FreeChunk(sound);
+  // Free the loaded sound
+  Mix_FreeChunk(sound);
 
-    // // Quit SDL_mixer
-    // Mix_Quit();
+  // // Quit SDL_mixer
+  // Mix_Quit();
 
-    // // Quit SDL
-    // SDL_Quit();
+  // // Quit SDL
+  // SDL_Quit();
 
-    return 0;
+  return 0;
 }

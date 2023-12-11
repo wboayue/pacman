@@ -11,7 +11,8 @@ Pacman::Pacman(SDL_Renderer *renderer)
   sprite->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio) -> void {
+auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio)
+    -> void {
   // Check that I can turn in requested direction
   if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
     // setSpriteForHeading

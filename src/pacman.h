@@ -6,8 +6,8 @@
 
 #include "SDL.h"
 
-#include "constants.h"
 #include "audio-system.h"
+#include "constants.h"
 #include "game-state.h"
 #include "grid.h"
 #include "sprite.h"

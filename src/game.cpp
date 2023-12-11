@@ -3,8 +3,8 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
-#include "game.h"
 #include "audio-system.h"
+#include "game.h"
 
 const int kGameWidth = 224;
 const int kGameHeight = 288;

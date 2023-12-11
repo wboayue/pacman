@@ -12,9 +12,9 @@ public:
   ~AudioSystem();
 
   AudioSystem(const AudioSystem &) = delete;
-  AudioSystem& operator=(const AudioSystem &) = delete;
+  AudioSystem &operator=(const AudioSystem &) = delete;
   AudioSystem(const AudioSystem &&) = delete;
-  AudioSystem& operator=(const AudioSystem &&) = delete;
+  AudioSystem &operator=(const AudioSystem &&) = delete;
 
   void PlaySync(Sound sound);
   void PlayAsync(Sound sound);
