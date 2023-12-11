@@ -11,7 +11,7 @@ Pacman::Pacman(SDL_Renderer *renderer)
   sprite->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state) -> void {
+auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio) -> void {
   // Check that I can turn in requested direction
   if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
     // setSpriteForHeading
@@ -66,8 +66,10 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state) -> void
     if (pellet->IsEnergizer()) {
       state.score += 50;
       state.mode = GhostMode::kScared;
+      audio.PlayAsync(Sound::kPowerPellet, 5);
     } else {
       state.score += 10;
+      audio.PlayAsync(Sound::kMunch1);
     }
     state.pelletsConsumed += 1;
     if (state.pelletsConsumed == 244) {

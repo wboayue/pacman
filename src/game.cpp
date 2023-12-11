@@ -4,6 +4,7 @@
 #include "SDL_image.h"
 
 #include "game.h"
+#include "audio-system.h"
 
 const int kGameWidth = 224;
 const int kGameHeight = 288;
@@ -62,6 +63,11 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
   running_ = true;
 
   ticks_count_ = SDL_GetTicks();
+
+  update(1);
+  render();
+  SDL_Delay(10);
+  audio.PlaySync(Sound::kIntro);
 
   while (running_) {
     frame_start = SDL_GetTicks();
@@ -157,7 +163,7 @@ auto Game::processInput() -> void {
 }
 
 auto Game::update(const float deltaTime) -> void {
-  pacman->Update(deltaTime, grid, state);
+  pacman->Update(deltaTime, grid, state, audio);
   for (auto &ghost : ghosts) {
     ghost->Update(deltaTime, grid, state, *pacman, *blinky);
   }

@@ -7,6 +7,7 @@
 #include "SDL.h"
 
 #include "constants.h"
+#include "audio-system.h"
 #include "game-state.h"
 #include "grid.h"
 #include "sprite.h"
@@ -16,7 +17,7 @@ class Pacman {
 public:
   Pacman(SDL_Renderer *renderer);
 
-  auto Update(const float deltaTime, Grid &grid, GameState &state) -> void;
+  auto Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio) -> void;
   auto Render(SDL_Renderer *renderer) -> void;
   auto ProcessInput(const Uint8 *state) -> void;
 

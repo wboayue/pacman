@@ -7,6 +7,7 @@
 
 #include "SDL.h"
 
+#include "audio-system.h"
 #include "board-manager.h"
 #include "game-state.h"
 #include "ghost.h"
@@ -51,6 +52,7 @@ private:
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
   GameState state{0, 2, 0, 0, false, GhostMode::kChase};
+  AudioSystem audio{};
 };
 
 #endif
