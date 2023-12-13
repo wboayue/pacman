@@ -1,10 +1,11 @@
 #ifndef AUDIO_SYSTEM_H
 #define AUDIO_SYSTEM_H
 
+#include <functional>
 #include <memory>
 #include <string_view>
 
-enum class Sound { kIntro, kMunch1, kMunch2, kPowerPellet };
+enum class Sound { kIntro, kMunch1, kMunch2, kPowerPellet, kDeath };
 
 class AudioSystem {
 public:
@@ -17,6 +18,7 @@ public:
   AudioSystem &operator=(const AudioSystem &&) = delete;
 
   void PlaySync(Sound sound);
+  void PlaySync(Sound sound, std::function<void()> callback);
   void PlayAsync(Sound sound);
   void PlayAsync(Sound sound, int loop);
 

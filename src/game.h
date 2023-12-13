@@ -51,7 +51,7 @@ private:
   std::unique_ptr<BoardManager> board;
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
-  GameState state{0, 2, 0, 0, false, GhostMode::kChase};
+  GameState state{};
   AudioSystem audio{};
 };
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -29,7 +30,7 @@ auto Grid::ConsumePellet(const Vec2 &position) -> std::unique_ptr<Pellet> {
 auto Grid::CreatePellets(SDL_Renderer *renderer) -> void {
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
-      Vec2 position{(float)x, (float)y};
+      Vec2 position{static_cast<float>(x), (float)y};
       if (GetCell(position) == Cell::kPowerPellet) {
         pellets[position] = std::make_unique<Pellet>(renderer, position, true);
       } else if (GetCell(position) == Cell::kPellet) {

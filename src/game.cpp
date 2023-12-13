@@ -64,14 +64,14 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 
   ticks_count_ = SDL_GetTicks();
 
-  update(1);
+  //  processInput();
+  update(0);
   render();
-  SDL_Delay(10);
-  audio.PlaySync(Sound::kIntro);
+  audio.PlaySync(Sound::kIntro, [this]() { this->processInput(); });
 
   while (running_) {
     frame_start = SDL_GetTicks();
-    float deltaTime = (frame_start - ticks_count_) / 1000.0f;
+    float deltaTime = static_cast<float>(frame_start - ticks_count_) / 1000.0f;
     ticks_count_ = SDL_GetTicks();
 
     processInput();
@@ -104,6 +104,8 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
     }
 
     if (killed) {
+      audio.PlaySync(Sound::kDeath);
+
       for (auto &ghost : ghosts) {
         ghost->Reset();
       }

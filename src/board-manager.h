@@ -27,8 +27,8 @@ private:
   Sprite text;
 
   std::string score;
-  int extraLives;
-  int level;
+  int extraLives{0};
+  int level{0};
 };
 
 #endif

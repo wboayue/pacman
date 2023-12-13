@@ -8,11 +8,12 @@ enum class GhostMode {
 };
 
 struct GameState {
-  int score;
-  int extraLives;
-  int level;
-  int pelletsConsumed;
-  bool levelCompleted;
+  int score{0};
+  int extraLives{2};
+  int level{0};
+  int pelletsConsumed{0};
+  bool levelCompleted{false};
+  bool paused{false};
   GhostMode mode;
 
   auto NextLevel() -> void;

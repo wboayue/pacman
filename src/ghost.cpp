@@ -328,9 +328,9 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
     auto d = me.GetCell().Distance(pacman.GetGridPosition());
     if (d > kClydeRelaxDistance) {
       return pacman.GetGridPosition();
-    } else {
-      return me.GetScatterCell();
     }
+     
+    return me.GetScatterCell();
   };
 }
 

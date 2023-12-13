@@ -36,6 +36,38 @@ void AudioSystem::PlaySync(Sound sound_) {
     return;
   }
 
+  std::string soundFile{"../assets/sounds/game_start.wav"};
+  if (sound_ == Sound::kDeath) {
+    soundFile = "../assets/sounds/death_1.wav";
+  }
+
+  // Load a sound file
+  Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
+  if (sound == nullptr) {
+    printf("Failed to load sound file! SDL_mixer Error: %s\n", Mix_GetError());
+    return;
+  }
+
+  // Play the sound synchronously
+  if (Mix_PlayChannelTimed(-1, sound, 0, -1) == -1) {
+    printf("Failed to play sound! SDL_mixer Error: %s\n", Mix_GetError());
+  }
+
+  // Wait for the sound to finish playing
+  while (Mix_Playing(-1) != 0) {
+    SDL_Delay(100); // Add a short delay to reduce CPU usage
+  }
+
+  // Free the loaded sound
+  Mix_FreeChunk(sound);
+}
+
+//   void PlaySync(Sound sound, std::function<void()> callback);
+void AudioSystem::PlaySync(Sound sound_, std::function<void()> callback) {
+  if (!enabled_) {
+    return;
+  }
+
   const std::string soundFile{"../assets/sounds/game_start.wav"};
 
   // Load a sound file
@@ -52,6 +84,7 @@ void AudioSystem::PlaySync(Sound sound_) {
 
   // Wait for the sound to finish playing
   while (Mix_Playing(-1) != 0) {
+    callback();
     SDL_Delay(100); // Add a short delay to reduce CPU usage
   }
 
