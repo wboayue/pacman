@@ -28,18 +28,18 @@ public:
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
 private:
-  std::random_device dev;
-  std::mt19937 engine;
-  std::uniform_int_distribution<int> random_w;
-  std::uniform_int_distribution<int> random_h;
-
-  int score{0};
-
   void processInput();
   void update(const float deltaTime);
   void render();
 
   void createGhosts(SDL_Renderer *renderer);
+
+  std::random_device dev{};
+  std::mt19937 engine{};
+  std::uniform_int_distribution<int> random_w{};
+  std::uniform_int_distribution<int> random_h{};
+
+  int score{0};
 
   bool ready_{false};
   bool running_{false};
@@ -47,7 +47,7 @@ private:
   Uint32 ticks_count_{0};
 
   std::unique_ptr<Pacman> pacman;
-  Grid grid;
+  Grid grid{};
   std::unique_ptr<BoardManager> board;
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;

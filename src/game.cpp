@@ -47,6 +47,7 @@ auto Game::createGhosts(SDL_Renderer *renderer) -> void {
   ghosts.push_back(inky);
 
   auto pinky = std::make_shared<Ghost>(PinkyConfig{renderer});
+  pinky->Activate();
   ghosts.push_back(pinky);
 
   auto clyde = std::make_shared<Ghost>(ClydeConfig{renderer});
@@ -64,10 +65,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 
   ticks_count_ = SDL_GetTicks();
 
-  //  processInput();
-  update(0);
-  render();
-  audio.PlaySync(Sound::kIntro, [this]() { this->processInput(); });
+  audio.PlayAsync(Sound::kIntro);
 
   while (running_) {
     frame_start = SDL_GetTicks();
@@ -147,7 +145,7 @@ auto Game::processInput() -> void {
       int newWidth = event.window.data1;
       int newHeight = event.window.data2;
       float newAspectRatio = (float)newWidth / (float)newHeight;
-      if (newAspectRatio > aspectRatio) {
+      if (newAspectRatio < aspectRatio) {
         newWidth = (int)((float)newHeight * aspectRatio);
       } else {
         newHeight = (int)((float)newWidth / aspectRatio);

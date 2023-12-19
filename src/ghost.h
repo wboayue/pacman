@@ -34,13 +34,14 @@ public:
   void Reset();
   Vec2 GetCell();
   Vec2 GetScatterCell() { return scatterCell; };
+  void Activate() { active = true; }
 
 private:
   void setFramesForHeading(Direction heading);
   void setVelocityForHeading(Direction heading);
   bool isInPen();
-  void exitPen();
-  void penDance();
+  void exitPen(const float deltaTime);
+  void penDance(const float deltaTime);
   void chase(Grid &grid, const Vec2 &target);
   bool inCellCenter();
   std::vector<Candidate> candidates(Grid &grid);

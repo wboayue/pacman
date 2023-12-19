@@ -13,5 +13,6 @@ auto main() -> int {
 
   game.Run(kMilliSecondsPerSecond / kFramesPerSecond);
   std::cout << "Game has terminated successfully!!\n";
+  
   return 0;
 }

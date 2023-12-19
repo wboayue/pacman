@@ -11,6 +11,8 @@ static constexpr std::array<Candidate, 4> options{
 
 static constexpr auto kGhostFps = 4;
 static constexpr auto kGhostFrameWidth = 16;
+static constexpr auto kPenTop = 17.0f * 8.0f;
+static constexpr auto kPenBottom = 18.0f * 8.0f;
 
 static constexpr auto kBlinkyStartCell = Vec2{14, 14};
 static constexpr auto kBlinkyScatterCell = Vec2{24, 0};
@@ -54,9 +56,9 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
                    Ghost &blinky) -> void {
   if (isInPen()) {
     if (active) {
-      exitPen();
+      exitPen(deltaTime);
     } else {
-      penDance();
+      penDance(deltaTime);
     }
   } else {
     auto target = targeter(*this, pacman, blinky, state.mode);
@@ -207,9 +209,34 @@ auto Ghost::GetCell() -> Vec2 {
   return {floor(t.x), floor(t.y)};
 }
 
-auto Ghost::exitPen() -> void {}
+auto Ghost::exitPen(const float deltaTime) -> void {
+  heading = Direction::kNorth;
+  
+  setFramesForHeading(heading);
+  setVelocityForHeading(heading);
 
-auto Ghost::penDance() -> void {}
+  position += (velocity/2.0 * deltaTime);
+}
+
+auto Ghost::penDance(const float deltaTime) -> void {
+  setFramesForHeading(heading);
+  setVelocityForHeading(heading);
+
+  position += (velocity/2.0 * deltaTime);
+
+  if (position.y < kPenTop) {
+    position.y = kPenTop;
+    heading = reverseDirection(heading);
+  }
+
+  if (position.y > kPenBottom) {
+    position.y = kPenBottom;
+    heading = reverseDirection(heading);
+  }
+
+  setFramesForHeading(heading);
+  setVelocityForHeading(heading);
+}
 
 // Blinky
 
