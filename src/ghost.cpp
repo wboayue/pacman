@@ -46,7 +46,7 @@ auto reverseDirection(Direction direction) -> Direction {
 Ghost::Ghost(const GhostConfig &config)
     : initialPosition{config.GetInitialPosition()}, heading{config.GetInitialHeading()},
       targeter{config.GetTargeter()},
-      scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()} {
+      scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()} {
   position = initialPosition;
   setFramesForHeading(heading);
   currentCell = GetCell();
@@ -211,7 +211,7 @@ auto Ghost::GetCell() -> Vec2 {
 
 auto Ghost::exitPen(const float deltaTime) -> void {
   heading = Direction::kNorth;
-  
+
   setFramesForHeading(heading);
   setVelocityForHeading(heading);
 
@@ -240,7 +240,7 @@ auto Ghost::penDance(const float deltaTime) -> void {
 
 // Blinky
 
-BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
+BlinkyConfig::BlinkyConfig(SDL_Renderer *renderer) : GhostConfig{renderer} {}
 
 auto BlinkyConfig::GetTargeter() const -> Targeter {
   return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
@@ -266,7 +266,7 @@ auto BlinkyConfig::GetInitialHeading() const -> Direction { return Direction::kW
 
 // Inky
 
-InkyConfig::InkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
+InkyConfig::InkyConfig(SDL_Renderer *renderer) : GhostConfig{renderer} {}
 
 auto InkyConfig::GetTargeter() const -> Targeter {
   return [](Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode) {
@@ -306,7 +306,7 @@ auto InkyConfig::GetInitialHeading() const -> Direction { return Direction::kNor
 
 // Pinky
 
-PinkyConfig::PinkyConfig(SDL_Renderer *renderer) : renderer{renderer} {}
+PinkyConfig::PinkyConfig(SDL_Renderer *renderer) : GhostConfig{renderer} {}
 
 auto PinkyConfig::GetTargeter() const -> Targeter {
   return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
@@ -344,7 +344,7 @@ auto PinkyConfig::GetInitialHeading() const -> Direction { return Direction::kSo
 
 // Clyde
 
-ClydeConfig::ClydeConfig(SDL_Renderer *renderer) : renderer{renderer} {}
+ClydeConfig::ClydeConfig(SDL_Renderer *renderer) : GhostConfig{renderer} {}
 
 auto ClydeConfig::GetTargeter() const -> Targeter {
   return [](Ghost &me, Pacman &pacman, [[maybe_unused]] Ghost &blinky, GhostMode mode) {
@@ -372,3 +372,10 @@ auto ClydeConfig::GetInitialPosition() const -> Vec2 {
 }
 
 auto ClydeConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }
+
+GhostConfig::GhostConfig(SDL_Renderer *renderer) : renderer{renderer} {
+}
+
+auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
+  return std::make_unique<Sprite>(renderer, "../assets/scared-ghost.png", kGhostFps, kGhostFrameWidth);
+}

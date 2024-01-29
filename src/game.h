@@ -16,15 +16,52 @@
 #include "pellet.h"
 #include "renderer.h"
 
+/**
+ * The Game class manages game entities and runs the game loop.
+ */
 class Game {
 public:
+  /**
+   * Initializes the game.
+   */
   Game();
+
+  /**
+   * Cleans up allocated resources.
+   */
   ~Game();
 
-  auto Run(std::size_t target_frame_duration) -> void;
+  /**
+   * Runs the game loop. The game loop consists of:
+   * 1. getting user input
+   * 2. updating game entities
+   * 3. rendering the game
+   * 
+   * @param target_frame_duration target duration for each frame 
+   */
+  auto Run(std::size_t targetFrameDuration) -> void;
+
+  /**
+   * Gets the current score.
+   * 
+   * @return current score 
+   */
   auto GetScore() const -> int;
+
+  /**
+   * Checks if game initialization was successful.
+   * 
+   * @return true if game initialized successfully, else false. 
+   */
   auto Ready() const -> bool;
 
+  /**
+   * Loads a SDL_Texture from a file.
+   * 
+   * @param fileName file to load texture from.
+   * 
+   * @return SDL_Texture* 
+   */
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
 private:
@@ -39,10 +76,10 @@ private:
   std::uniform_int_distribution<int> random_w{};
   std::uniform_int_distribution<int> random_h{};
 
-  int score{0};
+  int score{0}; // game score
 
-  bool ready_{false};
-  bool running_{false};
+  bool ready_{false}; // initialization flag
+  bool running_{false}; // running flag
   std::shared_ptr<Renderer> renderer_;
   Uint32 ticks_count_{0};
 
