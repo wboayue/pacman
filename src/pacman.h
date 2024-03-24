@@ -25,15 +25,14 @@ public:
   auto GetHeading() const -> Direction;
   auto GetGridPosition() const -> Vec2;
   auto NextGridPosition(const Direction &direction) const -> Vec2;
-  auto NextGridPosition() const -> Vec2;
   auto Reset() -> void;
 
 private:
-  Vec2 position;
-  Vec2 velocity;
-  Direction heading;
+  Vec2 position_;
+  Vec2 velocity_;
+  Direction heading_;
 
-  std::unique_ptr<Sprite> sprite;
+  std::unique_ptr<Sprite> sprite_;
 };
 
 #endif

@@ -1,62 +1,57 @@
 #include <cmath>
 #include <iostream>
 
+#include "constants.h"
 #include "pacman.h"
 
-static constexpr Vec2 kHomePosition{14 * 8 + 4, 26 * 8 + 4};
+static constexpr Vec2 kHomePosition{14 * kCellSize + 4, 26 * kCellSize + 4};
+
+auto framesForHeading(const Direction &direction) -> std::vector<int>;
+auto velocityForHeading(const Direction &direction) -> Vec2;
+auto headingForVelocity(const Vec2& velocity) -> Direction;
+
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : position{kHomePosition}, velocity{0, 0}, heading{Direction::kNeutral} {
-  sprite = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
-  sprite->SetFrames({1, 2});
+    : position_{kHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
+  sprite_ = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
+  sprite_->SetFrames({1, 2});
 }
 
 auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio)
     -> void {
-  // Check that I can turn in requested direction
-  if (grid.GetCell(NextGridPosition(heading)) != Cell::kWall) {
-    // setSpriteForHeading
-    if (heading == Direction::kEast) {
-      sprite->SetFrames({1, 2});
-      velocity = Vec2{kMaxSpeed * 0.8f, 0};
-    } else if (heading == Direction::kWest) {
-      sprite->SetFrames({3, 4});
-      velocity = Vec2{-kMaxSpeed * 0.8f, 0};
-    } else if (heading == Direction::kNorth) {
-      sprite->SetFrames({5, 6});
-      velocity = Vec2{0, -kMaxSpeed * 0.8f};
-    } else if (heading == Direction::kSouth) {
-      sprite->SetFrames({7, 8});
-      velocity = Vec2{0, kMaxSpeed * 0.8f};
-    } else {
-      sprite->SetFrames({1, 2});
-    }
+
+  // Updates velocity based on user input.
+  auto requestedPosition = NextGridPosition(heading_);
+  if (grid.GetCell(requestedPosition) != Cell::kWall) {
+    sprite_->SetFrames(framesForHeading(heading_));
+    velocity_ = velocityForHeading(heading_);
   }
 
-  auto nextPosition = NextGridPosition();
+  auto nextPosition = NextGridPosition(headingForVelocity(velocity_));
   if (grid.GetCell(nextPosition) == Cell::kWall) {
+    // use heading
     // handle collision with wall
-    float x = position.x / 8.0;
-    float y = position.y / 8.0;
-    if (velocity.x > 0) {
+    float x = position_.x / 8.0;
+    float y = position_.y / 8.0;
+    if (velocity_.x > 0) {
       if ((x - floor(x)) > 0.5) {
-        velocity.x = 0;
-        position.x = floor(x) * 8 + 4;
+        velocity_.x = 0;
+        position_.x = floor(x) * 8 + 4;
       }
-    } else if (velocity.x < 0) {
+    } else if (velocity_.x < 0) {
       if (!((x - floor(x)) < 0.5)) {
-        velocity.x = 0;
-        position.x = floor(x) * 8 + 4;
+        velocity_.x = 0;
+        position_.x = floor(x) * 8 + 4;
       }
-    } else if (velocity.y > 0) {
+    } else if (velocity_.y > 0) {
       if ((y - floor(y)) > 0.5) {
-        velocity.y = 0;
-        position.y = floor(y) * 8 + 4;
+        velocity_.y = 0;
+        position_.y = floor(y) * 8 + 4;
       }
-    } else if (velocity.y < 0) {
+    } else if (velocity_.y < 0) {
       if ((y - floor(y)) < 0.5) {
-        velocity.y = 0;
-        position.y = floor(y) * 8 + 4;
+        velocity_.y = 0;
+        position_.y = floor(y) * 8 + 4;
       }
     }
   }
@@ -79,74 +74,55 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSy
     // std::cout << "pellets  " << state.pelletsConsumed << std::endl;
   } else {
     // update position
-    position += (velocity * deltaTime);
+    position_ += (velocity_ * deltaTime);
 
-    if (velocity.x > 0 || velocity.x < 0) {
-      position.y = floor(((int)position.y / 8) * 8 + 4);
+    if (velocity_.x > 0 || velocity_.x < 0) {
+      position_.y = floor(((int)position_.y / 8) * 8 + 4);
     }
-    if (velocity.y > 0 || velocity.y < 0) {
-      position.x = floor(((int)position.x / 8) * 8 + 4);
+    if (velocity_.y > 0 || velocity_.y < 0) {
+      position_.x = floor(((int)position_.x / 8) * 8 + 4);
     }
   }
 
   // teleport on side
-  if (position.x < -16) {
-    position.x = kGridWidth * 8 + 16;
-  } else if (position.x > kGridWidth * 8 + 16) {
-    position.x = -16;
+  if (position_.x < -16) {
+    position_.x = kGridWidth * kCellSize + 16;
+  } else if (position_.x > kGridWidth * kCellSize + 16) {
+    position_.x = -16;
   }
 
-  sprite->Update(deltaTime);
+  sprite_->Update(deltaTime);
 }
 
 auto Pacman::Reset() -> void {
-  velocity = Vec2{0, 0};
-  position = Vec2{14 * 8 + 4, 26 * 8 + 4};
-  heading = Direction::kNeutral;
+  velocity_ = Vec2{0, 0};
+  position_ = Vec2{14 * kCellSize + 4, 26 * kCellSize + 4};
+  heading_ = Direction::kNeutral;
 }
 
 auto Pacman::Render(SDL_Renderer *renderer) -> void {
-  sprite->Render(renderer, {floor(position.x - 8), floor(position.y - 8)});
+  sprite_->Render(renderer, {floor(position_.x - kCellSize), floor(position_.y - kCellSize)});
 }
 
 auto Pacman::ProcessInput(const Uint8 *state) -> void {
   if (state[SDL_SCANCODE_RIGHT]) {
-    heading = Direction::kEast;
+    heading_ = Direction::kEast;
   } else if (state[SDL_SCANCODE_LEFT]) {
-    heading = Direction::kWest;
+    heading_ = Direction::kWest;
   } else if (state[SDL_SCANCODE_UP]) {
-    heading = Direction::kNorth;
+    heading_ = Direction::kNorth;
   } else if (state[SDL_SCANCODE_DOWN]) {
-    heading = Direction::kSouth;
+    heading_ = Direction::kSouth;
   }
 }
 
-auto Pacman::GetPosition() const -> Vec2 { return position; }
+auto Pacman::GetPosition() const -> Vec2 { return position_; }
 
-auto Pacman::GetHeading() const -> Direction { return heading; }
+auto Pacman::GetHeading() const -> Direction { return heading_; }
 
 auto Pacman::GetGridPosition() const -> Vec2 {
-  auto t = position / 8;
+  auto t = position_ / kCellSize;
   return {floor(t.x), floor(t.y)};
-}
-
-auto Pacman::NextGridPosition() const -> Vec2 {
-  auto currentPosition = GetGridPosition();
-
-  if (velocity.x > 0) {
-    return {currentPosition.x + 1, currentPosition.y};
-  }
-  if (velocity.x < 0) {
-    return {currentPosition.x - 1, currentPosition.y};
-  }
-  if (velocity.y > 0) {
-    return {currentPosition.x, currentPosition.y + 1};
-  }
-  if (velocity.y < 0) {
-    return {currentPosition.x, currentPosition.y - 1};
-  }
-
-  return currentPosition;
 }
 
 auto Pacman::NextGridPosition(const Direction &direction) const -> Vec2 {
@@ -167,5 +143,59 @@ auto Pacman::NextGridPosition(const Direction &direction) const -> Vec2 {
 
   default:
     return currentPosition;
+  }
+}
+
+/**
+ * Determines the sequence of frames to animate for movement in given heading.
+ * @param direction direction pacman is moving
+ * @return sequence of frames to animate
+ */
+auto framesForHeading(const Direction &direction) -> std::vector<int> {
+  switch (direction) {
+    case Direction::kEast:
+      return {1, 2};
+    case Direction::kWest:
+      return {3, 4};
+    case Direction::kNorth:
+      return {5, 6};
+    case Direction::kSouth:
+      return {7, 8};
+    case Direction::kNeutral:
+      return {1, 2};
+  }
+}
+
+/**
+ * Computes the velocity Vector for the given heading
+ * @param direction direction pacman is moving
+ * @return velocity vector
+ */
+auto velocityForHeading(const Direction &direction) -> Vec2 {
+  switch (direction) {
+    case Direction::kEast:
+      return Vec2{kMaxSpeed * 0.8f, 0};
+    case Direction::kWest:
+      return Vec2{-kMaxSpeed * 0.8f, 0};
+    case Direction::kNorth:
+      return Vec2{0, -kMaxSpeed * 0.8f};
+    case Direction::kSouth:
+      return Vec2{0, kMaxSpeed * 0.8f};
+    case Direction::kNeutral:
+      return Vec2{kMaxSpeed * 0.8f, 0};
+  }
+}
+
+auto headingForVelocity(const Vec2& velocity) -> Direction {
+  if (velocity.x > 0) {
+    return Direction::kEast;
+  } else if (velocity.x < 0) {
+    return Direction::kWest;
+  } else if (velocity.y > 0) {
+    return Direction::kSouth;
+  } else if (velocity.y < 0) {
+    return Direction::kNorth;
+  } else {
+    return Direction::kNeutral;
   }
 }
