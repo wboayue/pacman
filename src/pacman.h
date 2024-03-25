@@ -28,6 +28,9 @@ public:
   auto Reset() -> void;
 
 private:
+
+  auto updatePosition(float timeDelta) -> void;
+
   Vec2 position_;
   Vec2 velocity_;
   Direction heading_;

@@ -9,6 +9,9 @@ static constexpr Vec2 kHomePosition{14 * kCellSize + 4, 26 * kCellSize + 4};
 auto framesForHeading(const Direction &direction) -> std::vector<int>;
 auto velocityForHeading(const Direction &direction) -> Vec2;
 auto headingForVelocity(const Vec2& velocity) -> Direction;
+auto center(float pos) -> float;
+auto boundUpper(float pos) -> float;
+auto boundLower(float pos) -> float;
 
 
 Pacman::Pacman(SDL_Renderer *renderer)
@@ -17,7 +20,7 @@ Pacman::Pacman(SDL_Renderer *renderer)
   sprite_->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio)
+auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio)
     -> void {
 
   // Updates velocity based on user input.
@@ -27,32 +30,26 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSy
     velocity_ = velocityForHeading(heading_);
   }
 
-  auto nextPosition = NextGridPosition(headingForVelocity(velocity_));
+  updatePosition(deltaTime);
+
+  auto currentHeading = headingForVelocity(velocity_);
+  auto nextPosition = NextGridPosition(currentHeading);
   if (grid.GetCell(nextPosition) == Cell::kWall) {
-    // use heading
-    // handle collision with wall
-    float x = position_.x / 8.0;
-    float y = position_.y / 8.0;
-    if (velocity_.x > 0) {
-      if ((x - floor(x)) > 0.5) {
-        velocity_.x = 0;
-        position_.x = floor(x) * 8 + 4;
-      }
-    } else if (velocity_.x < 0) {
-      if (!((x - floor(x)) < 0.5)) {
-        velocity_.x = 0;
-        position_.x = floor(x) * 8 + 4;
-      }
-    } else if (velocity_.y > 0) {
-      if ((y - floor(y)) > 0.5) {
-        velocity_.y = 0;
-        position_.y = floor(y) * 8 + 4;
-      }
-    } else if (velocity_.y < 0) {
-      if ((y - floor(y)) < 0.5) {
-        velocity_.y = 0;
-        position_.y = floor(y) * 8 + 4;
-      }
+    switch (currentHeading) {
+      case Direction::kEast:
+        position_.x = boundUpper(position_.x);
+        break;
+      case Direction::kWest:
+        position_.x = boundLower(position_.x);
+        break;
+      case Direction::kNorth:
+        position_.y = boundLower(position_.y);
+        break;
+      case Direction::kSouth:
+        position_.y = boundUpper(position_.y);
+        break;
+      default:
+        break;
     }
   }
 
@@ -71,18 +68,18 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSy
     if (state.pelletsConsumed == 244) {
       state.levelCompleted = true;
     }
-    // std::cout << "pellets  " << state.pelletsConsumed << std::endl;
-  } else {
-    // update position
-    position_ += (velocity_ * deltaTime);
+  } 
 
-    if (velocity_.x > 0 || velocity_.x < 0) {
-      position_.y = floor(((int)position_.y / 8) * 8 + 4);
-    }
-    if (velocity_.y > 0 || velocity_.y < 0) {
-      position_.x = floor(((int)position_.x / 8) * 8 + 4);
-    }
-  }
+  sprite_->Update(deltaTime);
+}
+
+/**
+ * Updates the position of Pacman given time change
+ * 
+ * @param timeDelta 
+ */
+auto Pacman::updatePosition(float timeDelta) -> void {
+  position_ += (velocity_ * timeDelta);
 
   // teleport on side
   if (position_.x < -16) {
@@ -91,7 +88,20 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameState &state, AudioSy
     position_.x = -16;
   }
 
-  sprite_->Update(deltaTime);
+  // Ensures Pacman is centered in Grid
+  // TODO - allow diagonal drift
+  switch (headingForVelocity(velocity_)) {
+    case Direction::kEast:
+    case Direction::kWest:
+      position_.y = center(position_.y);
+      break;
+    case Direction::kNorth:
+    case Direction::kSouth:
+      position_.x = center(position_.x);
+      break;
+    default:
+      break;
+  }
 }
 
 auto Pacman::Reset() -> void {
@@ -198,4 +208,18 @@ auto headingForVelocity(const Vec2& velocity) -> Direction {
   } else {
     return Direction::kNeutral;
   }
+}
+
+auto center(float pos) -> float {
+  return floor(((int)pos / kCellSize) * kCellSize + (kCellSize/2));
+}
+
+auto boundUpper(float pos) -> float {
+  auto max = center(pos);
+  return pos > max ? max : pos;
+}
+
+auto boundLower(float pos) -> float {
+  auto min = center(pos);
+  return pos < min ? min : pos;
 }
