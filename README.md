@@ -45,3 +45,14 @@ cmake .. && make
 ```
 
 https://www.sounds-resource.com/arcade/pacman/sound/10603/
+
+
+brew install SDL2
+brew install SDL2_image
+brew install SDL2_ttf
+brew install sdl2_mixer
+
+
+brew install llvm
+
+https://stackoverflow.com/questions/53111082/how-to-install-clang-tidy-on-macos
