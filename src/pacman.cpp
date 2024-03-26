@@ -23,11 +23,13 @@ Pacman::Pacman(SDL_Renderer *renderer)
 auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio)
     -> void {
 
-  // Updates velocity based on user input.
-  auto requestedPosition = NextGridPosition(heading_);
-  if (grid.GetCell(requestedPosition) != Cell::kWall) {
-    sprite_->SetFrames(framesForHeading(heading_));
-    velocity_ = velocityForHeading(heading_);
+  if (!isInTunnel()) {
+    // Updates velocity based on input if not in tunnel.
+    auto requestedPosition = NextGridPosition(heading_);
+    if (grid.GetCell(requestedPosition) != Cell::kWall) {
+      sprite_->SetFrames(framesForHeading(heading_));
+      velocity_ = velocityForHeading(heading_);
+    }
   }
 
   updatePosition(deltaTime);
@@ -57,20 +59,29 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     // handle energizer
     auto pellet = grid.ConsumePellet(GetGridPosition());
     if (pellet->IsEnergizer()) {
-      state.score += 50;
+      state.score += kEnergizerPoints;
       state.mode = GhostMode::kScared;
       audio.PlayAsync(Sound::kPowerPellet, 5);
     } else {
-      state.score += 10;
+      state.score += kPelletPoints;
       audio.PlayAsync(Sound::kMunch1);
     }
+
     state.pelletsConsumed += 1;
-    if (state.pelletsConsumed == 244) {
-      state.levelCompleted = true;
-    }
+    state.levelCompleted = state.pelletsConsumed == kTotalPellets;
   } 
 
   sprite_->Update(deltaTime);
+}
+
+auto Pacman::isInTunnel() -> bool {
+  auto currentPosition = GetGridPosition();
+
+  if (currentPosition.y != kTunnelRow) {
+    return false;
+  }
+
+  return currentPosition.x < 4 || currentPosition.x > 22;
 }
 
 /**
@@ -89,7 +100,6 @@ auto Pacman::updatePosition(float timeDelta) -> void {
   }
 
   // Ensures Pacman is centered in Grid
-  // TODO - allow diagonal drift
   switch (headingForVelocity(velocity_)) {
     case Direction::kEast:
     case Direction::kWest:

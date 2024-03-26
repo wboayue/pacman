@@ -11,5 +11,10 @@ enum class Direction {
 
 static constexpr float kMaxSpeed = 75.75757625;
 static constexpr int kCellSize = 8;
+static constexpr int kTunnelRow = 17;
+
+static constexpr int kPelletPoints = 10;
+static constexpr int kEnergizerPoints = 50;
+static constexpr int kTotalPellets = 244;
 
 #endif

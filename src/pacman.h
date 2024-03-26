@@ -30,6 +30,7 @@ public:
 private:
 
   auto updatePosition(float timeDelta) -> void;
+  auto isInTunnel() -> bool;
 
   Vec2 position_;
   Vec2 velocity_;
