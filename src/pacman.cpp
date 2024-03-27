@@ -20,7 +20,7 @@ Pacman::Pacman(SDL_Renderer *renderer)
   sprite_->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio)
+auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts)
     -> void {
 
   if (!isInTunnel()) {
@@ -55,11 +55,28 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     }
   }
 
+  energizedFor_ -= deltaTime;
+  if (energizedFor_ < 0.0) {
+    energizedFor_ = 0.0;
+  }
+
+  if (IsEnergized()) {
+    auto currentPosition = GetGridPosition();
+    for (auto &ghost : ghosts) {
+      if (currentPosition == ghost->GetCell()) {
+        state.score += kEnergizerPoints;
+        audio.PlayAsync(Sound::kPowerPellet, 5);
+        ghost->Reset(); // to eyes
+      }
+    }
+  }
+
   if (grid.HasPellet(GetGridPosition())) {
     // handle energizer
     auto pellet = grid.ConsumePellet(GetGridPosition());
     if (pellet->IsEnergizer()) {
       state.score += kEnergizerPoints;
+      energizedFor_ = 6.0;
       state.mode = GhostMode::kScared;
       audio.PlayAsync(Sound::kPowerPellet, 5);
     } else {

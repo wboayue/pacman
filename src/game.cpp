@@ -93,16 +93,17 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 
     for (auto &ghost : ghosts) {
       if (ghost->GetCell() == pacman->GetGridPosition()) {
-        pacman->Reset();
-        state.extraLives -= 1;
-        state.mode = GhostMode::kChase;
         killed = true;
         break;
       }
     }
 
     if (killed) {
+      state.extraLives -= 1;
+      state.mode = GhostMode::kChase;
+
       audio.PlaySync(Sound::kDeath);
+      pacman->Reset();
 
       for (auto &ghost : ghosts) {
         ghost->Reset();
@@ -163,7 +164,7 @@ auto Game::processInput() -> void {
 }
 
 auto Game::update(const float deltaTime) -> void {
-  pacman->Update(deltaTime, grid, state, audio);
+  pacman->Update(deltaTime, grid, state, audio, ghosts);
   for (auto &ghost : ghosts) {
     ghost->Update(deltaTime, grid, state, *pacman, *blinky);
   }

@@ -14,6 +14,7 @@ struct Candidate {
 };
 
 class Ghost;
+class Pacman;
 
 using Targeter = Vec2 (*)(Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode);
 
@@ -62,6 +63,7 @@ private:
   Vec2 currentCell;
   Vec2 scatterCell;
   bool newCell;
+  GhostMode mode_{GhostMode::kChase};
 
   std::unique_ptr<Sprite> sprite;
   std::unique_ptr<Sprite> scaredSprite;

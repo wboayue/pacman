@@ -10,14 +10,18 @@
 #include "constants.h"
 #include "game-state.h"
 #include "grid.h"
+#include "ghost.h"
 #include "sprite.h"
 #include "vector2.h"
+
+class Ghost;
 
 class Pacman {
 public:
   Pacman(SDL_Renderer *renderer);
 
-  auto Update(const float deltaTime, Grid &grid, GameState &state, AudioSystem &audio) -> void;
+  auto Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts
+) -> void;
   auto Render(SDL_Renderer *renderer) -> void;
   auto ProcessInput(const Uint8 *state) -> void;
 
@@ -26,6 +30,7 @@ public:
   auto GetGridPosition() const -> Vec2;
   auto NextGridPosition(const Direction &direction) const -> Vec2;
   auto Reset() -> void;
+  auto IsEnergized() -> bool const { return energizedFor_ > 0.0; };
 
 private:
 
@@ -35,6 +40,7 @@ private:
   Vec2 position_;
   Vec2 velocity_;
   Direction heading_;
+  float energizedFor_ = 0.0;
 
   std::unique_ptr<Sprite> sprite_;
 };

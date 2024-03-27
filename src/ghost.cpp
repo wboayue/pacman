@@ -61,7 +61,13 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
       penDance(deltaTime);
     }
   } else {
-    auto target = targeter(*this, pacman, blinky, state.mode);
+    if (pacman.IsEnergized()) {
+      mode_ = GhostMode::kScared; 
+    } else {
+      mode_ = GhostMode::kChase;
+    }
+
+    auto target = targeter(*this, pacman, blinky, mode_);
     chase(grid, target);
 
     setFramesForHeading(heading);
@@ -77,6 +83,7 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   }
 
   sprite->Update(deltaTime);
+  scaredSprite->Update(deltaTime);
 }
 
 auto Ghost::chase(Grid &grid, const Vec2 &target) -> void {
@@ -144,7 +151,11 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
 }
 
 auto Ghost::Render(SDL_Renderer *renderer) -> void {
-  sprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
+  if (mode_ == GhostMode::kScared) {
+    scaredSprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
+  } else {
+    sprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
+  }
 }
 
 auto Ghost::Reset() -> void { position = initialPosition; }
