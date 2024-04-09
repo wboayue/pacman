@@ -39,9 +39,9 @@ public:
   void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
   void Reset();
-  Vec2 GetCell();
+  Vec2 GetCell() const;
   Vec2 GetScatterCell() { return scatterCell; };
-  void Activate() { active = true; }
+  void Activate() { active_ = true; }
 
 private:
   void setFramesForHeading(Direction heading);
@@ -52,8 +52,10 @@ private:
   void chase(Grid &grid, const Vec2 &target);
   bool inCellCenter();
   std::vector<Candidate> candidates(Grid &grid);
+  auto isInTunnel() -> bool;
+  auto nextCell(const Direction &direction) const -> Vec2;
 
-  bool active;
+  bool active_;
   Vec2 position;
   Vec2 initialPosition;
   Vec2 velocity;

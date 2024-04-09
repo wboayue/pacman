@@ -28,6 +28,10 @@ static constexpr auto kInkyStartCell = Vec2{12, 17};
 static constexpr auto kInkyScatterCell = Vec2{27, 34};
 static constexpr auto kInkyPacmanOffset = 2.0f;
 
+auto center(float pos) -> float;
+auto boundUpper(float pos) -> float;
+auto boundLower(float pos) -> float;
+
 auto reverseDirection(Direction direction) -> Direction {
   switch (direction) {
   case Direction::kNorth:
@@ -55,7 +59,7 @@ Ghost::Ghost(const GhostConfig &config)
 auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
                    Ghost &blinky) -> void {
   if (isInPen()) {
-    if (active) {
+    if (active_) {
       exitPen(deltaTime);
     } else {
       penDance(deltaTime);
@@ -73,17 +77,70 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
     setFramesForHeading(heading);
     setVelocityForHeading(heading);
     position += (velocity * deltaTime);
+
+    auto nextPosition = nextCell(heading);
+    if (grid.GetCell(nextPosition) == Cell::kWall) {
+      switch (heading) {
+        case Direction::kEast:
+          position.x = boundUpper(position.x);
+          break;
+        case Direction::kWest:
+          position.x = boundLower(position.x);
+          break;
+        case Direction::kNorth:
+          position.y = boundLower(position.y);
+          break;
+        case Direction::kSouth:
+          position.y = boundUpper(position.y);
+          break;
+        default:
+          break;
+      }
+    }
   }
 
-  // teleport
-  if (position.x < -(kCellSize * 2)) {
-    position.x = kGridWidth * kCellSize + (kCellSize * 2);
-  } else if (position.x > kGridWidth * kCellSize + (kCellSize * 2)) {
-    position.x = -(kCellSize * 2);
+  if (isInTunnel()) {
+    // teleport on side
+    if (position.x < -16) {
+      position.x = kGridWidth * kCellSize + 16;
+    } else if (position.x > kGridWidth * kCellSize + 16) {
+      position.x = -16;
+    }
   }
 
   sprite->Update(deltaTime);
   scaredSprite->Update(deltaTime);
+}
+
+auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
+  auto currentPosition = GetCell();
+
+  switch (direction) {
+  case Direction::kEast:
+    return {currentPosition.x + 1, currentPosition.y};
+
+  case Direction::kWest:
+    return {currentPosition.x - 1, currentPosition.y};
+
+  case Direction::kNorth:
+    return {currentPosition.x, currentPosition.y - 1};
+
+  case Direction::kSouth:
+    return {currentPosition.x, currentPosition.y + 1};
+
+  default:
+    return currentPosition;
+  }
+}
+
+auto Ghost::isInTunnel() -> bool {
+  auto currentCell = GetCell();
+
+  if (currentCell.y != kTunnelRow) {
+    return false;
+  }
+
+  return currentCell.x < 4 || currentCell.x > 22;
 }
 
 auto Ghost::chase(Grid &grid, const Vec2 &target) -> void {
@@ -142,6 +199,12 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
     auto pos = GetCell() + option.position;
     if (grid.GetCell(pos) == Cell::kWall) {
       continue;
+    }
+
+    if (isInTunnel()) {
+      if (option.heading == Direction::kNorth || option.heading == Direction::kSouth) {
+        continue;
+      }
     }
 
     results.push_back(Candidate{pos, option.heading});
@@ -215,7 +278,7 @@ auto Ghost::isInPen() -> bool {
   return pos.x >= 12 && pos.x <= 16 && pos.y >= 17 && pos.y <= 18;
 }
 
-auto Ghost::GetCell() -> Vec2 {
+auto Ghost::GetCell() const -> Vec2 {
   auto t = position / kCellSize;
   return {floor(t.x), floor(t.y)};
 }
@@ -390,3 +453,18 @@ GhostConfig::GhostConfig(SDL_Renderer *renderer) : renderer{renderer} {
 auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, "../assets/scared-ghost.png", kGhostFps, kGhostFrameWidth);
 }
+
+
+// auto center(float pos) -> float {
+//   return floor(((int)pos / kCellSize) * kCellSize + (kCellSize/2));
+// }
+
+// auto boundUpper(float pos) -> float {
+//   auto max = center(pos);
+//   return pos > max ? max : pos;
+// }
+
+// auto boundLower(float pos) -> float {
+//   auto min = center(pos);
+//   return pos < min ? min : pos;
+// }

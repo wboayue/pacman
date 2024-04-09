@@ -30,7 +30,7 @@ public:
   auto GetGridPosition() const -> Vec2;
   auto NextGridPosition(const Direction &direction) const -> Vec2;
   auto Reset() -> void;
-  auto IsEnergized() -> bool const { return energizedFor_ > 0.0; };
+  auto IsEnergized() const -> bool { return energizedFor_ > 0.0; };
 
 private:
 

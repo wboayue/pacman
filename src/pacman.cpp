@@ -98,7 +98,7 @@ auto Pacman::isInTunnel() -> bool {
     return false;
   }
 
-  return currentPosition.x < 4 || currentPosition.x > 22;
+  return currentPosition.x < 1 || currentPosition.x > 2;
 }
 
 /**
