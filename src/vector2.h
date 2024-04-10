@@ -9,6 +9,7 @@ struct Vec2 {
   float y;
 
   auto Distance(const Vec2 &rhs) const -> float;
+  auto Floor() const -> Vec2;
 
   auto operator+(const Vec2 &rhs) const -> Vec2;
   auto operator-(const Vec2 &rhs) const -> Vec2;

@@ -92,7 +92,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
     bool killed = false;
 
     for (auto &ghost : ghosts) {
-      if (ghost->GetCell() == pacman->GetGridPosition()) {
+      if (ghost->GetCell() == pacman->GetCell()) {
         killed = true;
         break;
       }

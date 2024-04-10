@@ -322,7 +322,7 @@ auto BlinkyConfig::GetTargeter() const -> Targeter {
       return me.GetScatterCell();
     }
 
-    return pacman.GetGridPosition();
+    return pacman.GetCell();
   };
 }
 
@@ -347,7 +347,7 @@ auto InkyConfig::GetTargeter() const -> Targeter {
     if (mode == GhostMode::kScatter || mode == GhostMode::kScared) {
       return me.GetScatterCell();
     }
-    Vec2 target = pacman.GetGridPosition();
+    Vec2 target = pacman.GetCell();
 
     if (pacman.GetHeading() == Direction::kNorth) {
       target += Vec2{0, -kInkyPacmanOffset};
@@ -388,7 +388,7 @@ auto PinkyConfig::GetTargeter() const -> Targeter {
       return me.GetScatterCell();
     }
 
-    Vec2 target = pacman.GetGridPosition();
+    Vec2 target = pacman.GetCell();
 
     if (pacman.GetHeading() == Direction::kNorth) {
       target += Vec2{0, -4};
@@ -426,9 +426,9 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
       return me.GetScatterCell();
     }
 
-    auto d = me.GetCell().Distance(pacman.GetGridPosition());
+    auto d = me.GetCell().Distance(pacman.GetCell());
     if (d > kClydeRelaxDistance) {
-      return pacman.GetGridPosition();
+      return pacman.GetCell();
     }
      
     return me.GetScatterCell();

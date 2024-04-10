@@ -61,7 +61,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
   }
 
   if (IsEnergized()) {
-    auto currentPosition = GetGridPosition();
+    auto currentPosition = GetCell();
     for (auto &ghost : ghosts) {
       if (currentPosition == ghost->GetCell()) {
         state.score += kEnergizerPoints;
@@ -71,9 +71,9 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     }
   }
 
-  if (grid.HasPellet(GetGridPosition())) {
+  if (grid.HasPellet(GetCell())) {
     // handle energizer
-    auto pellet = grid.ConsumePellet(GetGridPosition());
+    auto pellet = grid.ConsumePellet(GetCell());
     if (pellet->IsEnergizer()) {
       state.score += kEnergizerPoints;
       energizedFor_ = 6.0;
@@ -92,13 +92,13 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
 }
 
 auto Pacman::isInTunnel() -> bool {
-  auto currentPosition = GetGridPosition();
+  auto currentPosition = GetCell();
 
   if (currentPosition.y != kTunnelRow) {
     return false;
   }
 
-  return currentPosition.x < 1 || currentPosition.x > 2;
+  return currentPosition.x < 1 || currentPosition.x > 26;
 }
 
 /**
@@ -157,13 +157,12 @@ auto Pacman::GetPosition() const -> Vec2 { return position_; }
 
 auto Pacman::GetHeading() const -> Direction { return heading_; }
 
-auto Pacman::GetGridPosition() const -> Vec2 {
-  auto t = position_ / kCellSize;
-  return {floor(t.x), floor(t.y)};
+auto Pacman::GetCell() const -> Vec2 {
+  return (position_ / kCellSize).Floor();
 }
 
 auto Pacman::NextGridPosition(const Direction &direction) const -> Vec2 {
-  auto currentPosition = GetGridPosition();
+  auto currentPosition = GetCell();
 
   switch (direction) {
   case Direction::kEast:
