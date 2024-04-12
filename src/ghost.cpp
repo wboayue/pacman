@@ -48,50 +48,73 @@ auto reverseDirection(Direction direction) -> Direction {
 }
 
 Ghost::Ghost(const GhostConfig &config)
-    : initialPosition{config.GetInitialPosition()}, heading{config.GetInitialHeading()},
+    : initialPosition{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
       targeter{config.GetTargeter()},
-      scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()} {
-  position = initialPosition;
-  setFramesForHeading(heading);
+      scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
+  position_ = initialPosition;
+  setFramesForHeading(heading_);
   currentCell = GetCell();
 }
 
 auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
                    Ghost &blinky) -> void {
   if (isInPen()) {
+    // update penned
     if (active_) {
       exitPen(deltaTime);
     } else {
       penDance(deltaTime);
     }
+  } else if (isInTunnel()) {
+    position_ += (velocity_ * deltaTime);
+
+    // teleport on side
+    if (position_.x < -16) {
+      position_.x = kGridWidth * kCellSize + 16;
+    } else if (position_.x > kGridWidth * kCellSize + 16) {
+      position_.x = -16;
+    }
   } else {
-    if (pacman.IsEnergized()) {
-      mode_ = GhostMode::kScared; 
-    } else {
-      mode_ = GhostMode::kChase;
+    // update active
+
+    if (mode_ != GhostMode::kReSpawn) {
+      if (pacman.IsEnergized()) {
+        mode_ = GhostMode::kScared; 
+      } else {
+        mode_ = GhostMode::kChase;
+      }
     }
 
-    auto target = targeter(*this, pacman, blinky, mode_);
-    chase(grid, target);
+    if (inCellCenter()) {
+      auto candidates_ = candidates(grid);
 
-    setFramesForHeading(heading);
-    setVelocityForHeading(heading);
-    position += (velocity * deltaTime);
+      if (candidates_.size() == 1) {
+        heading_ = candidates_[0].heading;
+      } else {
+        auto target = targeter(*this, pacman, blinky, mode_);
+        moveTowards(grid, target);
+      }
 
-    auto nextPosition = nextCell(heading);
+      setFramesForHeading(heading_);
+      setVelocityForHeading(heading_);
+    }
+
+    position_ += (velocity_ * deltaTime);
+
+    auto nextPosition = nextCell(heading_);
     if (grid.GetCell(nextPosition) == Cell::kWall) {
-      switch (heading) {
+      switch (heading_) {
         case Direction::kEast:
-          position.x = boundUpper(position.x);
+          position_.x = boundUpper(position_.x);
           break;
         case Direction::kWest:
-          position.x = boundLower(position.x);
+          position_.x = boundLower(position_.x);
           break;
         case Direction::kNorth:
-          position.y = boundLower(position.y);
+          position_.y = boundLower(position_.y);
           break;
         case Direction::kSouth:
-          position.y = boundUpper(position.y);
+          position_.y = boundUpper(position_.y);
           break;
         default:
           break;
@@ -99,37 +122,29 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
     }
   }
 
-  if (isInTunnel()) {
-    // teleport on side
-    if (position.x < -16) {
-      position.x = kGridWidth * kCellSize + 16;
-    } else if (position.x > kGridWidth * kCellSize + 16) {
-      position.x = -16;
-    }
-  }
-
   sprite->Update(deltaTime);
   scaredSprite->Update(deltaTime);
+  reSpawnSprite->Update(deltaTime);
 }
 
 auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
-  auto currentPosition = GetCell();
+  auto currentCell = GetCell();
 
   switch (direction) {
   case Direction::kEast:
-    return {currentPosition.x + 1, currentPosition.y};
+    return {currentCell.x + 1, currentCell.y};
 
   case Direction::kWest:
-    return {currentPosition.x - 1, currentPosition.y};
+    return {currentCell.x - 1, currentCell.y};
 
   case Direction::kNorth:
-    return {currentPosition.x, currentPosition.y - 1};
+    return {currentCell.x, currentCell.y - 1};
 
   case Direction::kSouth:
-    return {currentPosition.x, currentPosition.y + 1};
+    return {currentCell.x, currentCell.y + 1};
 
   default:
-    return currentPosition;
+    return currentCell;
   }
 }
 
@@ -143,68 +158,83 @@ auto Ghost::isInTunnel() -> bool {
   return currentCell.x < 4 || currentCell.x > 22;
 }
 
-auto Ghost::chase(Grid &grid, const Vec2 &target) -> void {
-  auto cell = GetCell();
-  if (!(currentCell == cell)) {
-    currentCell = cell;
-    newCell = true;
-  }
-
-  if (!(newCell && inCellCenter())) {
-    return;
-  }
-
+auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> Direction {
   auto candidates_ = candidates(grid);
+  
   if (candidates_.empty()) {
-    heading = reverseDirection(heading);
+    heading_ = reverseDirection(heading_);
   } else {
-    auto closet = candidates_.at(0);
+    auto closest = candidates_.at(0);
     for (auto &candidate : candidates_) {
-      if (candidate.position.Distance(target) < closet.position.Distance(target)) {
-        closet = candidate;
+      if (candidate.position.Distance(target) < closest.position.Distance(target)) {
+        closest = candidate;
       }
     }
-    heading = closet.heading;
+    heading_ = closest.heading;
   }
 
-  if (heading == Direction::kEast || heading == Direction::kWest) {
-    position.y = floor(((int)position.y / kCellSize) * kCellSize + (kCellSize / 2));
+  if (heading_ == Direction::kEast || heading_ == Direction::kWest) {
+    position_.y = floor(((int)position_.y / kCellSize) * kCellSize + (kCellSize / 2));
   }
-  if (heading == Direction::kNorth || heading == Direction::kSouth) {
-    position.x = floor(((int)position.x / kCellSize) * kCellSize + (kCellSize / 2));
+  if (heading_ == Direction::kNorth || heading_ == Direction::kSouth) {
+    position_.x = floor(((int)position_.x / kCellSize) * kCellSize + (kCellSize / 2));
   }
-
-  newCell = false;
 }
 
 auto Ghost::inCellCenter() -> bool {
+  float centerX = center(position_.x);
+  float centerY = center(position_.y);
+
+  return (heading_ == Direction::kNorth && position_.y <= centerY) ||
+         (heading_ == Direction::kSouth && position_.y >= centerY) ||
+         (heading_ == Direction::kEast && position_.x >= centerX) ||
+         (heading_ == Direction::kWest && position_.x <= centerX);
+}
+
+auto Ghost::atDecisionPoint(Grid &grid) const -> bool {
   static constexpr auto kMidPoint = 0.5f;
 
-  float x = position.x - floor(position.x);
-  float y = position.y - floor(position.y);
+  float x = position_.x - floor(position_.x);
+  float y = position_.y - floor(position_.y);
 
-  return (heading == Direction::kNorth && y <= kMidPoint) ||
-         (heading == Direction::kSouth && y >= kMidPoint) ||
-         (heading == Direction::kEast && x >= kMidPoint) ||
-         (heading == Direction::kWest && x <= kMidPoint);
+  // reach middle of cell?
+  if ((heading_ == Direction::kNorth && y > kMidPoint) ||
+      (heading_ == Direction::kSouth && y < kMidPoint) ||
+      (heading_ == Direction::kEast && x < kMidPoint) ||
+      (heading_ == Direction::kWest && x > kMidPoint)) {
+    return false;
+  }
+
+  // will i run into a wall?
+  if (grid.GetCell(nextCell(heading_)) == Cell::kWall) {
+    return true;
+  }
+
+  switch (heading_) {
+    case Direction::kNorth:
+    case Direction::kSouth:
+      return grid.GetCell(nextCell(Direction::kEast)) != Cell::kWall ||
+              grid.GetCell(nextCell(Direction::kWest)) != Cell::kWall;
+    case Direction::kEast:
+    case Direction::kWest:
+      return grid.GetCell(nextCell(Direction::kNorth)) == Cell::kWall ||
+              grid.GetCell(nextCell(Direction::kSouth)) == Cell::kWall;
+    default:
+      return true;
+  }
 }
 
 auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
 
   auto results = std::vector<Candidate>{};
   for (auto option : options) {
-    if (option.heading == reverseDirection(heading)) {
-      continue;
-    }
-    auto pos = GetCell() + option.position;
-    if (grid.GetCell(pos) == Cell::kWall) {
+    if (option.heading == reverseDirection(heading_)) {
       continue;
     }
 
-    if (isInTunnel()) {
-      if (option.heading == Direction::kNorth || option.heading == Direction::kSouth) {
-        continue;
-      }
+    auto pos = GetCell() + option.position;
+    if (grid.GetCell(pos) == Cell::kWall) {
+      continue;
     }
 
     results.push_back(Candidate{pos, option.heading});
@@ -215,30 +245,43 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
 
 auto Ghost::Render(SDL_Renderer *renderer) -> void {
   if (mode_ == GhostMode::kScared) {
-    scaredSprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
+    scaredSprite->Render(renderer, {floor(position_.x - kCellSize), floor(position_.y - kCellSize)});
+  } else if (mode_ == GhostMode::kReSpawn) {
+    reSpawnSprite->Render(renderer, {floor(position_.x - kCellSize), floor(position_.y - kCellSize)});
   } else {
-    sprite->Render(renderer, {floor(position.x - kCellSize), floor(position.y - kCellSize)});
+    sprite->Render(renderer, {floor(position_.x - kCellSize), floor(position_.y - kCellSize)});
   }
 }
 
-auto Ghost::Reset() -> void { position = initialPosition; }
+auto Ghost::Reset() -> void { 
+  position_ = initialPosition;
+  mode_ = GhostMode::kChase;
+}
+
+auto Ghost::ReSpawn() -> void { 
+  mode_ = GhostMode::kReSpawn;
+}
 
 auto Ghost::setFramesForHeading(Direction heading) -> void {
   switch (heading) {
   case Direction::kNorth:
     sprite->SetFrames({4, 5});
+    reSpawnSprite->SetFrames({2});
     break;
 
   case Direction::kSouth:
     sprite->SetFrames({6, 7});
+    reSpawnSprite->SetFrames({3});
     break;
 
   case Direction::kEast:
     sprite->SetFrames({0, 1});
+    reSpawnSprite->SetFrames({1});
     break;
 
   case Direction::kWest:
     sprite->SetFrames({2, 3});
+    reSpawnSprite->SetFrames({1});
     break;
 
   default:
@@ -252,23 +295,23 @@ auto Ghost::setVelocityForHeading(Direction heading) -> void {
   float speed = 0.73;
   switch (heading) {
   case Direction::kNorth:
-    velocity = Vec2{0, kMaxSpeed * -speed};
+    velocity_ = Vec2{0, kMaxSpeed * -speed};
     break;
 
   case Direction::kSouth:
-    velocity = Vec2{0, kMaxSpeed * speed};
+    velocity_ = Vec2{0, kMaxSpeed * speed};
     break;
 
   case Direction::kEast:
-    velocity = Vec2{kMaxSpeed * speed, 0};
+    velocity_ = Vec2{kMaxSpeed * speed, 0};
     break;
 
   case Direction::kWest:
-    velocity = Vec2{kMaxSpeed * -speed, 0};
+    velocity_ = Vec2{kMaxSpeed * -speed, 0};
     break;
 
   default:
-    velocity = Vec2{0, 0};
+    velocity_ = Vec2{0, 0};
     break;
   }
 }
@@ -279,37 +322,37 @@ auto Ghost::isInPen() -> bool {
 }
 
 auto Ghost::GetCell() const -> Vec2 {
-  auto t = position / kCellSize;
+  auto t = position_ / kCellSize;
   return {floor(t.x), floor(t.y)};
 }
 
 auto Ghost::exitPen(const float deltaTime) -> void {
-  heading = Direction::kNorth;
+  heading_ = Direction::kNorth;
 
-  setFramesForHeading(heading);
-  setVelocityForHeading(heading);
+  setFramesForHeading(heading_);
+  setVelocityForHeading(heading_);
 
-  position += (velocity/2.0 * deltaTime);
+  position_ += (velocity_/2.0 * deltaTime);
 }
 
 auto Ghost::penDance(const float deltaTime) -> void {
-  setFramesForHeading(heading);
-  setVelocityForHeading(heading);
+  setFramesForHeading(heading_);
+  setVelocityForHeading(heading_);
 
-  position += (velocity/2.0 * deltaTime);
+  position_ += (velocity_/2.0 * deltaTime);
 
-  if (position.y < kPenTop) {
-    position.y = kPenTop;
-    heading = reverseDirection(heading);
+  if (position_.y < kPenTop) {
+    position_.y = kPenTop;
+    heading_ = reverseDirection(heading_);
   }
 
-  if (position.y > kPenBottom) {
-    position.y = kPenBottom;
-    heading = reverseDirection(heading);
+  if (position_.y > kPenBottom) {
+    position_.y = kPenBottom;
+    heading_ = reverseDirection(heading_);
   }
 
-  setFramesForHeading(heading);
-  setVelocityForHeading(heading);
+  setFramesForHeading(heading_);
+  setVelocityForHeading(heading_);
 }
 
 // Blinky
@@ -454,17 +497,6 @@ auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, "../assets/scared-ghost.png", kGhostFps, kGhostFrameWidth);
 }
 
-
-// auto center(float pos) -> float {
-//   return floor(((int)pos / kCellSize) * kCellSize + (kCellSize/2));
-// }
-
-// auto boundUpper(float pos) -> float {
-//   auto max = center(pos);
-//   return pos > max ? max : pos;
-// }
-
-// auto boundLower(float pos) -> float {
-//   auto min = center(pos);
-//   return pos < min ? min : pos;
-// }
+auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
+  return std::make_unique<Sprite>(renderer, "../assets/ghost-eyes.png", kGhostFps, kGhostFrameWidth);
+}

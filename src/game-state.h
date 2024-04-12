@@ -5,6 +5,7 @@ enum class GhostMode {
   kScatter,
   kChase,
   kScared,
+  kReSpawn,
 };
 
 struct GameState {
@@ -14,7 +15,6 @@ struct GameState {
   int pelletsConsumed{0};
   bool levelCompleted{false};
   bool paused{false};
-  GhostMode mode{GhostMode::kChase};
 
   auto NextLevel() -> void;
 };

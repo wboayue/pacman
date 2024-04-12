@@ -28,7 +28,7 @@ public:
   auto GetPosition() const -> Vec2;
   auto GetHeading() const -> Direction;
   auto GetCell() const -> Vec2;
-  auto NextGridPosition(const Direction &direction) const -> Vec2;
+  auto NextCell(const Direction &direction) const -> Vec2;
   auto Reset() -> void;
   auto IsEnergized() const -> bool { return energizedFor_ > 0.0; };
 

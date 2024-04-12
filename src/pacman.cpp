@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "pacman.h"
 
-static constexpr Vec2 kHomePosition{14 * kCellSize + 4, 26 * kCellSize + 4};
+static constexpr Vec2 kHomePosition{13 * kCellSize + (kCellSize/2.0), 26 * kCellSize + (kCellSize/2.0)};
 
 auto framesForHeading(const Direction &direction) -> std::vector<int>;
 auto velocityForHeading(const Direction &direction) -> Vec2;
@@ -25,7 +25,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
 
   if (!isInTunnel()) {
     // Updates velocity based on input if not in tunnel.
-    auto requestedPosition = NextGridPosition(heading_);
+    auto requestedPosition = NextCell(heading_);
     if (grid.GetCell(requestedPosition) != Cell::kWall) {
       sprite_->SetFrames(framesForHeading(heading_));
       velocity_ = velocityForHeading(heading_);
@@ -35,7 +35,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
   updatePosition(deltaTime);
 
   auto currentHeading = headingForVelocity(velocity_);
-  auto nextPosition = NextGridPosition(currentHeading);
+  auto nextPosition = NextCell(currentHeading);
   if (grid.GetCell(nextPosition) == Cell::kWall) {
     switch (currentHeading) {
       case Direction::kEast:
@@ -66,7 +66,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
       if (currentPosition == ghost->GetCell()) {
         state.score += kEnergizerPoints;
         audio.PlayAsync(Sound::kPowerPellet, 5);
-        ghost->Reset(); // to eyes
+        ghost->ReSpawn();
       }
     }
   }
@@ -77,7 +77,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     if (pellet->IsEnergizer()) {
       state.score += kEnergizerPoints;
       energizedFor_ = 6.0;
-      state.mode = GhostMode::kScared;
+//      state.mode = GhostMode::kScared;
       audio.PlayAsync(Sound::kPowerPellet, 5);
     } else {
       state.score += kPelletPoints;
@@ -109,7 +109,7 @@ auto Pacman::isInTunnel() -> bool {
 auto Pacman::updatePosition(float timeDelta) -> void {
   position_ += (velocity_ * timeDelta);
 
-  // teleport on side
+  //  teleport on side
   if (position_.x < -16) {
     position_.x = kGridWidth * kCellSize + 16;
   } else if (position_.x > kGridWidth * kCellSize + 16) {
@@ -133,7 +133,7 @@ auto Pacman::updatePosition(float timeDelta) -> void {
 
 auto Pacman::Reset() -> void {
   velocity_ = Vec2{0, 0};
-  position_ = Vec2{14 * kCellSize + 4, 26 * kCellSize + 4};
+  position_ = kHomePosition;
   heading_ = Direction::kNeutral;
 }
 
@@ -155,30 +155,44 @@ auto Pacman::ProcessInput(const Uint8 *state) -> void {
 
 auto Pacman::GetPosition() const -> Vec2 { return position_; }
 
+/**
+ * GetHeading return Pacman's current heading
+ * @return current heading (Direction) 
+ */
 auto Pacman::GetHeading() const -> Direction { return heading_; }
 
+/**
+ * GetCell returns the current cell occupied by Pacman.
+ * @return current cell (Vec2) 
+ */
 auto Pacman::GetCell() const -> Vec2 {
   return (position_ / kCellSize).Floor();
 }
 
-auto Pacman::NextGridPosition(const Direction &direction) const -> Vec2 {
-  auto currentPosition = GetCell();
+/**
+ * NextCell determines next cell that Pacman will occupy
+ * based on `direction` and current cell.
+ * @param direction cardinal heading of Pacman.
+ * @return next cell based on heading (Vec2)
+ */
+auto Pacman::NextCell(const Direction &direction) const -> Vec2 {
+  auto currentCell = GetCell();
 
   switch (direction) {
   case Direction::kEast:
-    return {currentPosition.x + 1, currentPosition.y};
+    return {currentCell.x + 1, currentCell.y};
 
   case Direction::kWest:
-    return {currentPosition.x - 1, currentPosition.y};
+    return {currentCell.x - 1, currentCell.y};
 
   case Direction::kNorth:
-    return {currentPosition.x, currentPosition.y - 1};
+    return {currentCell.x, currentCell.y - 1};
 
   case Direction::kSouth:
-    return {currentPosition.x, currentPosition.y + 1};
+    return {currentCell.x, currentCell.y + 1};
 
   default:
-    return currentPosition;
+    return currentCell;
   }
 }
 

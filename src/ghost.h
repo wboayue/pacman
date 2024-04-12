@@ -22,6 +22,8 @@ struct GhostConfig {
   GhostConfig(SDL_Renderer *renderer);
 
   std::unique_ptr<Sprite> GetScaredSprite() const;
+  auto GetReSpawnSprite() const -> std::unique_ptr<Sprite>;
+
   virtual std::unique_ptr<Sprite> GetSprite() const = 0;
   virtual Vec2 GetInitialPosition() const = 0;
   virtual Direction GetInitialHeading() const = 0;
@@ -39,9 +41,11 @@ public:
   void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
   void Reset();
+  auto ReSpawn() -> void;
   Vec2 GetCell() const;
   Vec2 GetScatterCell() { return scatterCell; };
-  void Activate() { active_ = true; }
+  void Activate() { active_ = true; };
+  auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
 
 private:
   void setFramesForHeading(Direction heading);
@@ -49,26 +53,27 @@ private:
   bool isInPen();
   void exitPen(const float deltaTime);
   void penDance(const float deltaTime);
-  void chase(Grid &grid, const Vec2 &target);
+  auto moveTowards(Grid &grid, const Vec2 &target) -> Direction;
   bool inCellCenter();
+  bool atDecisionPoint(Grid &grid) const;
   std::vector<Candidate> candidates(Grid &grid);
   auto isInTunnel() -> bool;
   auto nextCell(const Direction &direction) const -> Vec2;
 
   bool active_;
-  Vec2 position;
+  Vec2 position_;
   Vec2 initialPosition;
-  Vec2 velocity;
-  Direction heading;
+  Vec2 velocity_;
+  Direction heading_;
   Targeter targeter;
 
   Vec2 currentCell;
   Vec2 scatterCell;
-  bool newCell;
   GhostMode mode_{GhostMode::kChase};
 
   std::unique_ptr<Sprite> sprite;
   std::unique_ptr<Sprite> scaredSprite;
+  std::unique_ptr<Sprite> reSpawnSprite;
 };
 
 struct BlinkyConfig : public GhostConfig {

@@ -92,7 +92,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
     bool killed = false;
 
     for (auto &ghost : ghosts) {
-      if (ghost->GetCell() == pacman->GetCell()) {
+      if (ghost->IsChasing() && (ghost->GetCell() == pacman->GetCell())) {
         killed = true;
         break;
       }
@@ -100,9 +100,8 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 
     if (killed) {
       state.extraLives -= 1;
-      state.mode = GhostMode::kChase;
 
-      audio.PlaySync(Sound::kDeath);
+//      audio.PlaySync(Sound::kDeath);
       pacman->Reset();
 
       for (auto &ghost : ghosts) {
