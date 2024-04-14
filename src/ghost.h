@@ -46,6 +46,7 @@ public:
   Vec2 GetScatterCell() { return scatterCell; };
   void Activate() { active_ = true; };
   auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
+  auto IsReSpawning() const  -> bool { return mode_ == GhostMode::kReSpawn; }; 
 
 private:
   void setFramesForHeading(Direction heading);
@@ -60,15 +61,17 @@ private:
   auto isInTunnel() -> bool;
   auto nextCell(const Direction &direction) const -> Vec2;
 
-  bool active_;
-  Vec2 position_;
+  bool active_{false};
+  Vec2 position_{};
   Vec2 initialPosition;
-  Vec2 velocity_;
+  Vec2 velocity_{};
   Direction heading_;
   Targeter targeter;
 
-  Vec2 currentCell;
-  Vec2 scatterCell;
+  Direction previousHeading_{Direction::kNeutral};
+  Vec2 previousCell_{0, 0};
+  Vec2 scatterCell{0, 0};
+
   GhostMode mode_{GhostMode::kChase};
 
   std::unique_ptr<Sprite> sprite;

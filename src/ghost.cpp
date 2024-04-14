@@ -53,7 +53,6 @@ Ghost::Ghost(const GhostConfig &config)
       scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
   position_ = initialPosition;
   setFramesForHeading(heading_);
-  currentCell = GetCell();
 }
 
 auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
@@ -87,7 +86,6 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
 
     if (inCellCenter()) {
       auto candidates_ = candidates(grid);
-
       if (candidates_.size() == 1) {
         heading_ = candidates_[0].heading;
       } else {
@@ -98,6 +96,12 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
       setFramesForHeading(heading_);
       setVelocityForHeading(heading_);
     }
+
+    if (previousCell_ != GetCell()) {
+      previousHeading_ = heading_;   
+    }
+
+    previousCell_ = GetCell();
 
     position_ += (velocity_ * deltaTime);
 
@@ -228,7 +232,7 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
 
   auto results = std::vector<Candidate>{};
   for (auto option : options) {
-    if (option.heading == reverseDirection(heading_)) {
+    if (reverseDirection(option.heading) == previousHeading_) {
       continue;
     }
 
@@ -292,7 +296,8 @@ auto Ghost::setFramesForHeading(Direction heading) -> void {
 
 // velocity for heading
 auto Ghost::setVelocityForHeading(Direction heading) -> void {
-  float speed = 0.73;
+  static constexpr float speed = 0.73;
+
   switch (heading) {
   case Direction::kNorth:
     velocity_ = Vec2{0, kMaxSpeed * -speed};
@@ -339,7 +344,7 @@ auto Ghost::penDance(const float deltaTime) -> void {
   setFramesForHeading(heading_);
   setVelocityForHeading(heading_);
 
-  position_ += (velocity_/2.0 * deltaTime);
+  position_ += (velocity_/2.0 * deltaTime); // NOLINT(cppcoreguidlines-avoid-magic-numbers)
 
   if (position_.y < kPenTop) {
     position_.y = kPenTop;

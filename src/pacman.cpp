@@ -63,7 +63,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
   if (IsEnergized()) {
     auto currentPosition = GetCell();
     for (auto &ghost : ghosts) {
-      if (currentPosition == ghost->GetCell()) {
+      if (currentPosition == ghost->GetCell() && !ghost->IsReSpawning()) {
         state.score += kEnergizerPoints;
         audio.PlayAsync(Sound::kPowerPellet, 5);
         ghost->ReSpawn();
