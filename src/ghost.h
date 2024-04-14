@@ -63,7 +63,7 @@ private:
 
   bool active_{false};
   Vec2 position_{};
-  Vec2 initialPosition;
+  Vec2 initialPosition_;
   Vec2 velocity_{};
   Direction heading_;
   Targeter targeter;
