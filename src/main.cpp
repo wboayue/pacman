@@ -6,7 +6,7 @@ static constexpr std::size_t kFramesPerSecond{60};
 static constexpr std::size_t kMilliSecondsPerSecond{1000};
 
 /**
- * Initializes the game and enters the main game loop.
+ * Initializes the game and starts the game loop.
  * 
  * @return returns 0 if the game exits successfully, 1 if there is an initialization failure.
  */

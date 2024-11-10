@@ -35,7 +35,7 @@ public:
    * Runs the game loop. The game loop consists of:
    * 1. getting user input
    * 2. updating game entities
-   * 3. rendering the game
+   * 3. rendering the game entities
    * 
    * @param target_frame_duration target duration for each frame 
    */
@@ -70,11 +70,6 @@ private:
   void render();
 
   void createGhosts(SDL_Renderer *renderer);
-
-  std::random_device dev{};
-  std::mt19937 engine{};
-  std::uniform_int_distribution<int> random_w{};
-  std::uniform_int_distribution<int> random_h{};
 
   int score{0}; // game score
 

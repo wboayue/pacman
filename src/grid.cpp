@@ -70,8 +70,11 @@ auto Grid::Load(const std::string &gridPath) -> std::vector<std::vector<Cell>> {
     for (auto &ch : line) {
       switch (ch) {
       case '#':
-      case '-':
         row.push_back(Cell::kWall);
+        break;
+
+      case '-':
+        row.push_back(Cell::kGate);
         break;
 
       case '.':
