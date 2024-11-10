@@ -1,3 +1,6 @@
 .github/**
 build
 .vscode
+sandbox
+**/.DS_Store
+cmake

@@ -2,6 +2,8 @@
 #define RENDERER_H
 
 #include "SDL.h"
+#include "sprite.h"
+#include <string>
 #include <vector>
 
 class Renderer {
@@ -10,12 +12,19 @@ public:
   ~Renderer();
 
   void SetWindowSize(int width, int height);
-private:
-  SDL_Window *sdl_window;
+
+  void Clear();
+  void Present();
+
+  SDL_Texture *CreateTextureFromSurface(SDL_Surface *surface);
+
   SDL_Renderer *sdl_renderer;
 
-  const std::size_t screen_width;
-  const std::size_t screen_height;
+  Sprite *CreateSprite(std::string fileName);
+
+private:
+  SDL_Window *sdl_window;
+  // SDL_Renderer *sdl_renderer;
 };
 
 #endif
