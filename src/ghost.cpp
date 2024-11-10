@@ -47,11 +47,16 @@ auto reverseDirection(Direction direction) -> Direction {
   }
 }
 
+auto toCell(const Vec2& position) -> Vec2 {
+  auto t = position / kCellSize;
+  return {floor(t.x), floor(t.y)};
+}
+
 Ghost::Ghost(const GhostConfig &config)
-    : initialPosition{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
+    : initialPosition_{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
       targeter{config.GetTargeter()},
       scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
-  position_ = initialPosition;
+  position_ = initialPosition_;
   setFramesForHeading(heading_);
 }
 
@@ -90,6 +95,9 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
         heading_ = candidates_[0].heading;
       } else {
         auto target = targeter(*this, pacman, blinky, mode_);
+        if (mode_ == GhostMode::kReSpawn) {
+          target = toCell(initialPosition_); 
+        }
         moveTowards(grid, target);
       }
 
@@ -102,6 +110,10 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
     }
 
     previousCell_ = GetCell();
+
+    if (mode_ == GhostMode::kReSpawn && previousCell_ == toCell(initialPosition_)) {
+      mode_ = GhostMode::kChase;
+    }
 
     position_ += (velocity_ * deltaTime);
 
@@ -258,7 +270,7 @@ auto Ghost::Render(SDL_Renderer *renderer) -> void {
 }
 
 auto Ghost::Reset() -> void { 
-  position_ = initialPosition;
+  position_ = initialPosition_;
   mode_ = GhostMode::kChase;
 }
 

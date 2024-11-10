@@ -2,23 +2,36 @@
 
 #include "game.h"
 
-static constexpr std::size_t kFramesPerSecond{60};
-static constexpr std::size_t kMilliSecondsPerSecond{1000};
+// Exit codes
+enum class ExitCode {
+    Success = 0,
+    RuntimeError = 1
+};
+
+// Game configuration
+struct GameConfig {
+  static constexpr std::size_t kFramesPerSecond{60};
+  static constexpr std::size_t kMilliSecondsPerSecond{1000};
+  static constexpr std::size_t kFrameDuration = kMilliSecondsPerSecond / kFramesPerSecond;
+};
 
 /**
- * Initializes the game and starts the game loop.
- * 
- * @return returns 0 if the game exits successfully, 1 if there is an initialization failure.
+ * Initializes the game and enters the main game loop.
+ *
+ * @return ExitCode::Success on successful completion
+ *         ExitCode::RuntimeError if an unhandled exception occurs
  */
 auto main() -> int {
-  auto game = Game{};
-  if (!game.Ready()) {
-    std::cerr << "Game initialization failed.\n";
-    return 1;
-  }
+  try {
+    auto game = Game{};
 
-  game.Run(kMilliSecondsPerSecond / kFramesPerSecond);
-  std::cout << "Game has terminated successfully.\n";
-  
-  return 0;
+    game.Run(GameConfig::kFrameDuration);
+    std::cout << "Game has terminated successfully.\n";
+
+    return static_cast<int>(ExitCode::Success);;
+  }
+  catch (const std::exception& e) {
+    std::cerr << "Unhandled Exception: " << e.what() << std::endl;
+    return static_cast<int>(ExitCode::RuntimeError);
+  }
 }
