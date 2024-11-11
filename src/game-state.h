@@ -17,6 +17,7 @@ struct GameState {
   bool paused{false};
 
   auto NextLevel() -> void;
+  auto Reset() -> void;
 };
 
 #endif

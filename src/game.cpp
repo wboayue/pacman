@@ -5,9 +5,33 @@
 
 #include "audio-system.h"
 #include "game.h"
+#include <map>
 
 const int kGameWidth = 224;
 const int kGameHeight = 288;
+
+// The following classes model the game state and game state machine.
+
+enum class GameStates {
+    kReady,
+    kPlay,
+    kPaused,
+    kDying,
+    kLevelComplete
+};
+
+// Base state interface
+class StateMachine {
+public:
+    virtual ~StateMachine() = default;
+    
+    // Core state methods
+    virtual auto Enter(Game& game) -> void = 0;
+    virtual auto Exit(Game& game) -> void = 0;
+    virtual auto Run(Game& game, float deltaTime) -> GameStates = 0;
+};
+
+auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>>;
 
 Game::Game() {
   // Initialize SDL
@@ -61,60 +85,24 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
   Uint32 frame_end{0};
   Uint32 frame_duration{0};
 
-  running_ = true;
+  auto currentState = GameStates::kReady;
+  auto states = initializeStates();
+
+  states[currentState]->Enter(*this);
 
   ticks_count_ = SDL_GetTicks();
-
-  audio.PlayAsync(Sound::kIntro);
+  running_ = true;
 
   while (running_) {
     frame_start = SDL_GetTicks();
     float deltaTime = static_cast<float>(frame_start - ticks_count_) / 1000.0f;
     ticks_count_ = SDL_GetTicks();
 
-    processInput();
-    update(deltaTime);
-    render();
-
-    if (state.levelCompleted) {
-      SDL_Delay(500);
-
-      // play sound
-      grid.Reset(renderer_->sdl_renderer);
-      pacman->Reset();
-      state.NextLevel();
-
-      for (auto &ghost : ghosts) {
-        ghost->Reset();
-      }
-    }
-
-    bool killed = false;
-
-    for (auto &ghost : ghosts) {
-      if (ghost->IsChasing() && (ghost->GetCell() == pacman->GetCell())) {
-        killed = true;
-        break;
-      }
-    }
-
-    if (killed) {
-      state.extraLives -= 1;
-
-//      audio.PlaySync(Sound::kDeath);
-      pacman->Reset();
-
-      for (auto &ghost : ghosts) {
-        ghost->Reset();
-      }
-
-      if (state.extraLives < 0) {
-        state.score = 0;
-        state.extraLives = 2;
-        state.level = 0;
-        state.pelletsConsumed = 0;
-        state.levelCompleted = false;
-      }
+    auto nextState = states[currentState]->Run(*this, deltaTime);
+    if (nextState != currentState) {
+      states[currentState]->Exit(*this);
+      currentState = nextState;
+      states[currentState]->Enter(*this);
     }
 
     frame_end = SDL_GetTicks();
@@ -132,7 +120,7 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
   }
 }
 
-auto Game::processInput() -> void {
+auto Game::processInput() -> const Uint8 * {
   static constexpr auto aspectRatio = 224.0f / 288.0f;
 
   SDL_Event event;
@@ -159,7 +147,7 @@ auto Game::processInput() -> void {
     running_ = false;
   }
 
-  pacman->ProcessInput(state);
+  return state;
 }
 
 auto Game::update(const float deltaTime) -> void {
@@ -203,3 +191,189 @@ auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
 }
 
 auto Game::GetScore() const -> int { return score; }
+
+
+struct ReadyState : StateMachine {  
+  auto Enter(Game& game) -> void override {
+    std::cout << "Entering Ready State\n";
+    elapsedTime = 0.0f;
+    game.pacman->Reset();
+    game.audio.PlayAsync(Sound::kIntro);
+  }
+
+  auto Exit(Game& game) -> void override {
+    std::cout << "Exiting Ready State\n";
+  }
+
+  auto Run(Game& game, float deltaTime) -> GameStates override {
+    game.processInput();
+    game.update(deltaTime);
+    game.render();
+
+    if (elapsedTime > 2.0f) {
+      return GameStates::kPlay;
+    }
+
+    elapsedTime += deltaTime;
+
+    return GameStates::kReady;
+  }
+
+  private:
+    float elapsedTime{0.0f};
+};
+
+struct PlayState :StateMachine {
+  auto Enter(Game& game) -> void override {
+    std::cout << "Entering Play State\n";
+  }
+
+  auto Exit(Game& game) -> void override {
+    std::cout << "Exiting Play State\n";
+  }
+
+  auto Run(Game& game, float deltaTime) -> GameStates override {
+    auto keyState = game.processInput();
+    game.pacman->ProcessInput(keyState);
+
+    game.update(deltaTime);
+    game.render();
+
+    if (keyState[SDL_SCANCODE_P] != 0u) {
+      return GameStates::kPaused;
+    }
+
+    if (WasKilled(game)) {
+      return GameStates::kDying;
+    }
+
+    return GameStates::kPlay;
+  }
+
+  auto WasKilled(Game& game) -> bool {
+    for (auto &ghost : game.ghosts) {
+      if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+struct PausedState : StateMachine {
+  auto Enter(Game& game) -> void override {
+    std::cout << "Entering Paused State\n";
+  }
+
+  auto Exit(Game& game) -> void override {
+    std::cout << "Exiting Paused State\n";
+  }
+
+  auto Run(Game& game, float deltaTime) -> GameStates override {
+    auto keyState = game.processInput();
+    game.update(deltaTime);
+    game.render();
+
+    if (keyState[SDL_SCANCODE_P] != 0u) {
+      return GameStates::kPlay;
+    }
+
+    return GameStates::kPaused;
+  }
+};
+
+struct DyingState : StateMachine {
+  auto Enter(Game& game) -> void override {
+    std::cout << "Entering Dying State\n";
+    elapsedTime = 0.0f;
+    game.audio.PlayAsync(Sound::kDeath);
+    game.state.extraLives -= 1;
+  }
+
+  auto Exit(Game& game) -> void override {
+    std::cout << "Exiting Dying State\n";
+  }
+
+  auto Run(Game& game, float deltaTime) -> GameStates override {
+    game.processInput();
+    game.update(deltaTime);
+    game.render();
+
+    if (elapsedTime > 2.0f) {
+      if (game.state.extraLives < 0) {
+        return GameStates::kReady;
+      }
+
+      Reset(game);
+
+      return GameStates::kPlay;
+    }
+
+    elapsedTime += deltaTime;
+
+    return GameStates::kDying;
+  }
+
+  auto Reset(Game& game) -> void {
+    game.pacman->Reset();
+
+    for (auto &ghost : game.ghosts) {
+      ghost->Reset();
+    }
+
+    game.state.Reset();
+  }
+
+  private:
+    float elapsedTime{0.0f};
+
+};
+
+struct LevelCompleteState : StateMachine {
+  auto Enter(Game& game) -> void override {
+    std::cout << "Entering Level Complete State\n";
+    elapsedTime = 0.0f;
+    // play sound
+  }
+
+  auto Exit(Game& game) -> void override {
+    std::cout << "Exiting Level Complete State\n";
+  }
+
+  auto Run(Game& game, float deltaTime) -> GameStates override {
+    game.processInput();
+    game.update(deltaTime);
+    game.render();
+
+    if (elapsedTime > 2.0f) {
+      game.grid.Reset(game.renderer_->sdl_renderer);
+      game.pacman->Reset();
+      game.state.NextLevel();
+
+      for (auto &ghost : game.ghosts) {
+        ghost->Reset();
+      }
+
+      return GameStates::kPlay;
+    }
+
+    elapsedTime += deltaTime;
+
+    return GameStates::kLevelComplete;
+  }
+
+  private:
+    float elapsedTime{0.0f};
+};
+
+auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>> {
+  auto states = std::map<GameStates, std::unique_ptr<StateMachine>>{};
+
+  states.emplace(GameStates::kReady, std::make_unique<ReadyState>());
+  states.emplace(GameStates::kPlay, std::make_unique<PlayState>());
+  states.emplace(GameStates::kPaused, std::make_unique<PausedState>());
+  states.emplace(GameStates::kDying, std::make_unique<DyingState>());
+  states.emplace(GameStates::kLevelComplete, std::make_unique<LevelCompleteState>());
+
+  return states;
+}

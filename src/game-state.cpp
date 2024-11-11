@@ -5,3 +5,11 @@ auto GameState::NextLevel() -> void {
   level += 1;
   levelCompleted = false;
 }
+
+auto GameState::Reset() -> void {
+  score = 0;
+  extraLives = 2;
+  level = 0;
+  pelletsConsumed = 0;
+  levelCompleted = false;
+}

@@ -64,8 +64,13 @@ public:
    */
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
+  friend struct ReadyState;
+  friend struct PlayState;
+  friend struct PausedState;
+  friend struct DyingState;
+  friend struct LevelCompleteState;
 private:
-  void processInput();
+  const Uint8 * processInput();
   void update(const float deltaTime);
   void render();
 
