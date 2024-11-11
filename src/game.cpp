@@ -210,7 +210,7 @@ struct ReadyState : StateMachine {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime > 2.0f) {
+    if (elapsedTime > 4.0f) {
       return GameStates::kPlay;
     }
 

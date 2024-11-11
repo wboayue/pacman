@@ -102,6 +102,8 @@ void AudioSystem::PlayAsync(Sound sound_) {
     soundFile = "../assets/sounds/munch_1.wav";
   } else if (sound_ == Sound::kPowerPellet) {
     soundFile = "../assets/sounds/power_pellet.wav";
+  } else if (sound_ == Sound::kDeath) {
+    soundFile = "../assets/sounds/death_1.wav";
   } else {
     soundFile = "../assets/sounds/game_start.wav";
   }
