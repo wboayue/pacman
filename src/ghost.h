@@ -47,6 +47,8 @@ public:
   void Activate() { active_ = true; };
   auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
   auto IsReSpawning() const  -> bool { return mode_ == GhostMode::kReSpawn; }; 
+  auto Pause() -> void;
+  auto Resume() -> void;
 
 private:
   void setFramesForHeading(Direction heading);

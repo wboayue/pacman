@@ -196,6 +196,14 @@ auto Pacman::NextCell(const Direction &direction) const -> Vec2 {
   }
 }
 
+auto Pacman::Pause() -> void {
+
+}
+
+auto Pacman::Resume() -> void {
+
+}
+
 /**
  * Determines the sequence of frames to animate for movement in given heading.
  * @param direction direction pacman is moving
@@ -232,7 +240,7 @@ auto velocityForHeading(const Direction &direction) -> Vec2 {
     case Direction::kSouth:
       return Vec2{0, kMaxSpeed * 0.8f};
     case Direction::kNeutral:
-      return Vec2{kMaxSpeed * 0.8f, 0};
+      return Vec2{0, 0};
   }
 }
 

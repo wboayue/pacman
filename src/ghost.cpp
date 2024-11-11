@@ -143,6 +143,14 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   reSpawnSprite->Update(deltaTime);
 }
 
+auto Ghost::Pause() -> void {
+
+}
+
+auto Ghost::Resume() -> void {
+  
+}
+
 auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
   auto currentCell = GetCell();
 

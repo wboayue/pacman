@@ -26,9 +26,8 @@ public:
     virtual ~StateMachine() = default;
     
     // Core state methods
-    virtual auto Enter(Game& game) -> void = 0;
-    virtual auto Exit(Game& game) -> void = 0;
-    virtual auto Run(Game& game, float deltaTime) -> GameStates = 0;
+    virtual auto Enter(Game& game) -> void {};
+    virtual auto Tick(Game& game, float deltaTime) -> GameStates = 0;
 };
 
 auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>>;
@@ -98,9 +97,8 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
     float deltaTime = static_cast<float>(frame_start - ticks_count_) / 1000.0f;
     ticks_count_ = SDL_GetTicks();
 
-    auto nextState = states[currentState]->Run(*this, deltaTime);
+    auto nextState = states[currentState]->Tick(*this, deltaTime);
     if (nextState != currentState) {
-      states[currentState]->Exit(*this);
       currentState = nextState;
       states[currentState]->Enter(*this);
     }
@@ -192,6 +190,13 @@ auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
 
 auto Game::GetScore() const -> int { return score; }
 
+// The following classes implement the game state machine.
+// Valid transitions are:
+// Ready -> Play
+// Play -> Paused, Dying, LevelComplete
+// Paused -> Play
+// Dying -> Ready
+// LevelComplete -> Ready
 
 struct ReadyState : StateMachine {  
   auto Enter(Game& game) -> void override {
@@ -201,11 +206,7 @@ struct ReadyState : StateMachine {
     game.audio.PlayAsync(Sound::kIntro);
   }
 
-  auto Exit(Game& game) -> void override {
-    std::cout << "Exiting Ready State\n";
-  }
-
-  auto Run(Game& game, float deltaTime) -> GameStates override {
+  auto Tick(Game& game, float deltaTime) -> GameStates override {
     game.processInput();
     game.update(deltaTime);
     game.render();
@@ -224,15 +225,11 @@ struct ReadyState : StateMachine {
 };
 
 struct PlayState :StateMachine {
-  auto Enter(Game& game) -> void override {
-    std::cout << "Entering Play State\n";
-  }
+  // auto Enter(Game& game) -> void override {
+  //   std::cout << "Entering Play State\n";
+  // }
 
-  auto Exit(Game& game) -> void override {
-    std::cout << "Exiting Play State\n";
-  }
-
-  auto Run(Game& game, float deltaTime) -> GameStates override {
+  auto Tick(Game& game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.pacman->ProcessInput(keyState);
 
@@ -243,14 +240,16 @@ struct PlayState :StateMachine {
       return GameStates::kPaused;
     }
 
-    if (WasKilled(game)) {
+    if (wasKilled(game)) {
       return GameStates::kDying;
     }
 
     return GameStates::kPlay;
   }
 
-  auto WasKilled(Game& game) -> bool {
+private:
+
+  auto wasKilled(Game& game) -> bool {
     for (auto &ghost : game.ghosts) {
       if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
         return true;
@@ -261,24 +260,42 @@ struct PlayState :StateMachine {
 };
 
 struct PausedState : StateMachine {
+
   auto Enter(Game& game) -> void override {
-    std::cout << "Entering Paused State\n";
+    pause(game);
   }
 
-  auto Exit(Game& game) -> void override {
-    std::cout << "Exiting Paused State\n";
-  }
-
-  auto Run(Game& game, float deltaTime) -> GameStates override {
+  auto Tick(Game& game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.update(deltaTime);
     game.render();
 
-    if (keyState[SDL_SCANCODE_P] != 0u) {
+    if (resumeRequested(keyState)) {
+      resume(game);
       return GameStates::kPlay;
     }
 
     return GameStates::kPaused;
+  }
+
+private:
+
+  auto pause(Game& game) -> void {
+    game.pacman->Pause();
+    for (auto &ghost : game.ghosts) {
+      ghost->Pause();
+    }
+  }
+
+  auto resume(Game& game) -> void {
+    game.pacman->Resume();
+    for (auto &ghost : game.ghosts) {
+      ghost->Resume();
+    }
+  }
+
+  auto resumeRequested(const Uint8 *keyState) -> bool {
+    return keyState[SDL_SCANCODE_P] != 0u;
   }
 };
 
@@ -290,11 +307,7 @@ struct DyingState : StateMachine {
     game.state.extraLives -= 1;
   }
 
-  auto Exit(Game& game) -> void override {
-    std::cout << "Exiting Dying State\n";
-  }
-
-  auto Run(Game& game, float deltaTime) -> GameStates override {
+  auto Tick(Game& game, float deltaTime) -> GameStates override {
     game.processInput();
     game.update(deltaTime);
     game.render();
@@ -336,11 +349,7 @@ struct LevelCompleteState : StateMachine {
     // play sound
   }
 
-  auto Exit(Game& game) -> void override {
-    std::cout << "Exiting Level Complete State\n";
-  }
-
-  auto Run(Game& game, float deltaTime) -> GameStates override {
+  auto Tick(Game& game, float deltaTime) -> GameStates override {
     game.processInput();
     game.update(deltaTime);
     game.render();
@@ -354,7 +363,7 @@ struct LevelCompleteState : StateMachine {
         ghost->Reset();
       }
 
-      return GameStates::kPlay;
+      return GameStates::kReady;
     }
 
     elapsedTime += deltaTime;

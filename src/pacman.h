@@ -31,7 +31,8 @@ public:
   auto NextCell(const Direction &direction) const -> Vec2;
   auto Reset() -> void;
   auto IsEnergized() const -> bool { return energizedFor_ > 0.0; };
-
+  auto Pause() -> void;
+  auto Resume() -> void;
 private:
 
   auto updatePosition(float timeDelta) -> void;
