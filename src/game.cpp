@@ -198,9 +198,10 @@ auto Game::GetScore() const -> int { return score; }
 // Dying -> Ready
 // LevelComplete -> Ready
 
-struct ReadyState : StateMachine {  
+struct ReadyState : StateMachine {
+  static constexpr int READY_DURATION = 4.0f;  
+
   auto Enter(Game& game) -> void override {
-    std::cout << "Entering Ready State\n";
     elapsedTime = 0.0f;
     game.pacman->Reset();
     game.audio.PlayAsync(Sound::kIntro);
@@ -211,7 +212,7 @@ struct ReadyState : StateMachine {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime > 4.0f) {
+    if (elapsedTime >= READY_DURATION) {
       return GameStates::kPlay;
     }
 
@@ -249,7 +250,7 @@ struct PlayState :StateMachine {
 
 private:
 
-  auto wasKilled(Game& game) -> bool {
+  auto wasKilled(Game& game) const -> bool {
     for (auto &ghost : game.ghosts) {
       if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
         return true;
@@ -280,26 +281,28 @@ struct PausedState : StateMachine {
 
 private:
 
-  auto pause(Game& game) -> void {
+  auto pause(Game& game) const -> void {
     game.pacman->Pause();
     for (auto &ghost : game.ghosts) {
       ghost->Pause();
     }
   }
 
-  auto resume(Game& game) -> void {
+  auto resume(Game& game) const -> void {
     game.pacman->Resume();
     for (auto &ghost : game.ghosts) {
       ghost->Resume();
     }
   }
 
-  auto resumeRequested(const Uint8 *keyState) -> bool {
+  auto resumeRequested(const Uint8 *keyState) const -> bool {
     return keyState[SDL_SCANCODE_P] != 0u;
   }
 };
 
 struct DyingState : StateMachine {
+  static constexpr int DYING_DURATION = 2.0f;  
+
   auto Enter(Game& game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
@@ -312,12 +315,12 @@ struct DyingState : StateMachine {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime > 2.0f) {
+    if (elapsedTime >= DYING_DURATION) {
+      reset(game);
+
       if (game.state.extraLives < 0) {
         return GameStates::kReady;
       }
-
-      Reset(game);
 
       return GameStates::kPlay;
     }
@@ -327,7 +330,8 @@ struct DyingState : StateMachine {
     return GameStates::kDying;
   }
 
-  auto Reset(Game& game) -> void {
+private:
+  auto reset(Game& game) const -> void {
     game.pacman->Reset();
 
     for (auto &ghost : game.ghosts) {
@@ -337,9 +341,7 @@ struct DyingState : StateMachine {
     game.state.Reset();
   }
 
-  private:
-    float elapsedTime{0.0f};
-
+  float elapsedTime{0.0f};
 };
 
 struct LevelCompleteState : StateMachine {
