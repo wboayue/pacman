@@ -69,6 +69,11 @@ public:
   friend struct PausedState;
   friend struct DyingState;
   friend struct LevelCompleteState;
+
+  auto Pause() -> void;
+  auto Resume() -> void;
+  auto PlaySound(Sound sound) -> void;
+
 private:
   const Uint8 * processInput();
   void update(const float deltaTime);

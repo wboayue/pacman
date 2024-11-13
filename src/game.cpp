@@ -190,6 +190,24 @@ auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
 
 auto Game::GetScore() const -> int { return score; }
 
+auto Game::Pause() -> void {
+  pacman->Pause();
+  for (auto &ghost : ghosts) {
+    ghost->Pause();
+  }
+}
+
+auto Game::Resume() -> void {
+  pacman->Resume();
+  for (auto &ghost : ghosts) {
+    ghost->Resume();
+  }
+}
+
+auto Game::PlaySound(Sound sound) -> void {
+  audio.PlayAsync(sound);
+}
+
 // The following classes implement the game state machine.
 // Valid transitions are:
 // Ready -> Play
@@ -204,7 +222,7 @@ struct ReadyState : StateMachine {
   auto Enter(Game& game) -> void override {
     elapsedTime = 0.0f;
     game.pacman->Reset();
-    game.audio.PlayAsync(Sound::kIntro);
+    game.PlaySound(Sound::kIntro);
   }
 
   auto Tick(Game& game, float deltaTime) -> GameStates override {
@@ -221,15 +239,11 @@ struct ReadyState : StateMachine {
     return GameStates::kReady;
   }
 
-  private:
-    float elapsedTime{0.0f};
+private:
+  float elapsedTime{0.0f};
 };
 
-struct PlayState :StateMachine {
-  // auto Enter(Game& game) -> void override {
-  //   std::cout << "Entering Play State\n";
-  // }
-
+struct PlayState : StateMachine {
   auto Tick(Game& game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.pacman->ProcessInput(keyState);
@@ -237,18 +251,26 @@ struct PlayState :StateMachine {
     game.update(deltaTime);
     game.render();
 
-    if (keyState[SDL_SCANCODE_P] != 0u) {
+    if (pauseRequested(keyState)) {
       return GameStates::kPaused;
-    }
-
-    if (wasKilled(game)) {
+    } else if (levelCompleted(game)) {
+      return GameStates::kLevelComplete;
+    } else if (wasKilled(game)) {
       return GameStates::kDying;
+    } else {
+      return GameStates::kPlay;
     }
-
-    return GameStates::kPlay;
   }
 
 private:
+
+  auto pauseRequested(const Uint8 *keyState) const -> bool {
+    return keyState[SDL_SCANCODE_P] != 0u;
+  }
+
+  auto levelCompleted(Game& game) const -> bool {
+    return game.state.levelCompleted;
+  }
 
   auto wasKilled(Game& game) const -> bool {
     for (auto &ghost : game.ghosts) {
@@ -274,9 +296,9 @@ struct PausedState : StateMachine {
     if (resumeRequested(keyState)) {
       resume(game);
       return GameStates::kPlay;
+    } else {
+      return GameStates::kPaused;
     }
-
-    return GameStates::kPaused;
   }
 
 private:
@@ -306,7 +328,7 @@ struct DyingState : StateMachine {
   auto Enter(Game& game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
-    game.audio.PlayAsync(Sound::kDeath);
+    game.PlaySound(Sound::kDeath);
     game.state.extraLives -= 1;
   }
 
@@ -345,6 +367,8 @@ private:
 };
 
 struct LevelCompleteState : StateMachine {
+  static constexpr int LEVEL_COMPLETE_DURATION = 2.0f;  
+
   auto Enter(Game& game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
@@ -356,15 +380,8 @@ struct LevelCompleteState : StateMachine {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime > 2.0f) {
-      game.grid.Reset(game.renderer_->sdl_renderer);
-      game.pacman->Reset();
-      game.state.NextLevel();
-
-      for (auto &ghost : game.ghosts) {
-        ghost->Reset();
-      }
-
+    if (elapsedTime > LEVEL_COMPLETE_DURATION) {
+      completeLevel(game);
       return GameStates::kReady;
     }
 
@@ -373,8 +390,19 @@ struct LevelCompleteState : StateMachine {
     return GameStates::kLevelComplete;
   }
 
-  private:
-    float elapsedTime{0.0f};
+private:
+
+  auto completeLevel(Game& game) const -> void {
+    game.grid.Reset(game.renderer_->sdl_renderer);
+    game.pacman->Reset();
+    game.state.NextLevel();
+
+    for (auto &ghost : game.ghosts) {
+      ghost->Reset();
+    }
+  }
+
+  float elapsedTime{0.0f};
 };
 
 auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>> {
