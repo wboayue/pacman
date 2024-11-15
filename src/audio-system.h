@@ -1,9 +1,10 @@
 #ifndef AUDIO_SYSTEM_H
 #define AUDIO_SYSTEM_H
 
-#include <functional>
-#include <memory>
-#include <string_view>
+#include <condition_variable>
+#include <future>
+#include <mutex>
+#include <queue>
 
 enum class Sound { kIntro, kMunch1, kMunch2, kPowerPellet, kDeath };
 
@@ -13,19 +14,27 @@ public:
   ~AudioSystem();
 
   AudioSystem(const AudioSystem &) = delete;
-  AudioSystem &operator=(const AudioSystem &) = delete;
   AudioSystem(const AudioSystem &&) = delete;
+  AudioSystem &operator=(const AudioSystem &) = delete;
   AudioSystem &operator=(const AudioSystem &&) = delete;
 
-  void PlaySync(Sound sound);
-  void PlaySync(Sound sound, std::function<void()> callback);
-  void PlayAsync(Sound sound);
-  void PlayAsync(Sound sound, int loop);
+  auto PlaySound(Sound sound, std::optional<int> loop) -> std::future<void>;
 
 private:
-  bool enabled_{false};
-};
+  struct AudioRequest {
+    Sound sound;
+    std::optional<int> loop;
+    std::shared_ptr<std::promise<void>> completion;
+  };
 
-auto playSound(const std::string &sound) -> int;
+  auto processAudioQueue() -> void;
+
+  bool initialized_{false};
+  bool running_{true};
+  std::thread audioThread_;
+  std::queue<AudioRequest> audioQueue_;
+  std::mutex queueMutex_;
+  std::condition_variable conditionVariable_;
+};
 
 #endif

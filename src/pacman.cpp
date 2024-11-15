@@ -65,7 +65,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     for (auto &ghost : ghosts) {
       if (currentPosition == ghost->GetCell() && !ghost->IsReSpawning()) {
         state.score += kEnergizerPoints;
-        audio.PlayAsync(Sound::kPowerPellet, 5);
+        audio.PlaySound(Sound::kPowerPellet, 5);
         ghost->ReSpawn();
       }
     }
@@ -78,10 +78,10 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
       state.score += kEnergizerPoints;
       energizedFor_ = 6.0;
 //      state.mode = GhostMode::kScared;
-      audio.PlayAsync(Sound::kPowerPellet, 5);
+      audio.PlaySound(Sound::kPowerPellet, 5);
     } else {
       state.score += kPelletPoints;
-      audio.PlayAsync(Sound::kMunch1);
+      audio.PlaySound(Sound::kMunch1, std::nullopt);
     }
 
     state.pelletsConsumed += 1;

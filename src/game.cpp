@@ -205,7 +205,7 @@ auto Game::Resume() -> void {
 }
 
 auto Game::PlaySound(Sound sound) -> void {
-  audio.PlayAsync(sound);
+  audio.PlaySound(sound, std::nullopt);
 }
 
 // The following classes implement the game state machine.
