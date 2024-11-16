@@ -5,7 +5,7 @@
 
 #include "SDL.h"
 
-#include "game-state.h"
+#include "game-context.h"
 #include "sprite.h"
 #include "vector2.h"
 

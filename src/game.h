@@ -9,7 +9,7 @@
 
 #include "audio-system.h"
 #include "board-manager.h"
-#include "game-state.h"
+#include "game-context.h"
 #include "ghost.h"
 #include "grid.h"
 #include "pacman.h"

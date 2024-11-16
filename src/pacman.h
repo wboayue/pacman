@@ -8,7 +8,7 @@
 
 #include "audio-system.h"
 #include "constants.h"
-#include "game-state.h"
+#include "game-context.h"
 #include "grid.h"
 #include "ghost.h"
 #include "sprite.h"

@@ -2,7 +2,7 @@
 #define GHOST_H
 
 #include "constants.h"
-#include "game-state.h"
+#include "game-context.h"
 #include "grid.h"
 #include "pacman.h"
 #include "sprite.h"

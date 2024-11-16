@@ -19,7 +19,7 @@ set(SOURCES
     src/vector2.cpp
     src/grid.cpp
     src/pellet.cpp
-    src/game-state.cpp
+    src/game-context.cpp
     src/ghost.cpp
     src/board-manager.cpp
 )

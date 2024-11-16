@@ -1,5 +1,5 @@
-#ifndef GAME_STATE_H
-#define GAME_STATE_H
+#ifndef GAME_CONTEXT_H
+#define GAME_CONTEXT_H
 
 enum class GhostMode {
   kScatter,

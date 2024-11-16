@@ -1,4 +1,4 @@
-#include "game-state.h"
+#include "game-context.h"
 
 auto GameState::NextLevel() -> void {
   pelletsConsumed = 0;

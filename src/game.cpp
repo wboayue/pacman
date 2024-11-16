@@ -359,8 +359,6 @@ private:
     for (auto &ghost : game.ghosts) {
       ghost->Reset();
     }
-
-    game.state.Reset();
   }
 
   float elapsedTime{0.0f};
