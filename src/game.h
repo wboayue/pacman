@@ -93,7 +93,7 @@ private:
   std::unique_ptr<BoardManager> board;
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
-  GameState state{};
+  GameContext context{};
   AudioSystem audio{};
 };
 

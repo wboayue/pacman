@@ -38,7 +38,7 @@ class Ghost {
 public:
   Ghost(const GhostConfig &config);
 
-  void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky);
+  void Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
   void Reset();
   auto ReSpawn() -> void;

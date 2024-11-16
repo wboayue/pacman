@@ -7,12 +7,12 @@ BoardManager::BoardManager(SDL_Renderer *renderer)
       fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"}
       {}
 
-void BoardManager::Update(const float deltaTime, GameState &state) {
+void BoardManager::Update(const float deltaTime, GameContext &context) {
   maze.Update(deltaTime);
 
-  score = std::to_string(state.score);
-  extraLives = state.extraLives;
-  level = state.level;
+  score = std::to_string(context.score);
+  extraLives = context.extraLives;
+  level = context.level;
 }
 
 void BoardManager::Render(SDL_Renderer *renderer) {

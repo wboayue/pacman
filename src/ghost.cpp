@@ -60,7 +60,7 @@ Ghost::Ghost(const GhostConfig &config)
   setFramesForHeading(heading_);
 }
 
-auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
+auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman,
                    Ghost &blinky) -> void {
   if (isInPen()) {
     // update penned

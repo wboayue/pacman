@@ -20,7 +20,7 @@ Pacman::Pacman(SDL_Renderer *renderer)
   sprite_->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts)
+auto Pacman::Update(const float deltaTime, Grid& grid, GameContext& context, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts)
     -> void {
 
   if (!isInTunnel()) {
@@ -64,7 +64,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     auto currentPosition = GetCell();
     for (auto &ghost : ghosts) {
       if (currentPosition == ghost->GetCell() && !ghost->IsReSpawning()) {
-        state.score += kEnergizerPoints;
+        context.score += kEnergizerPoints;
         audio.PlaySound(Sound::kPowerPellet, 5);
         ghost->ReSpawn();
       }
@@ -75,17 +75,16 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameState& state, AudioSy
     // handle energizer
     auto pellet = grid.ConsumePellet(GetCell());
     if (pellet->IsEnergizer()) {
-      state.score += kEnergizerPoints;
+      context.score += kEnergizerPoints;
       energizedFor_ = 6.0;
 //      state.mode = GhostMode::kScared;
       audio.PlaySound(Sound::kPowerPellet, 5);
     } else {
-      state.score += kPelletPoints;
+      context.score += kPelletPoints;
       audio.PlaySound(Sound::kMunch1, std::nullopt);
     }
 
-    state.pelletsConsumed += 1;
-    state.levelCompleted = state.pelletsConsumed == kTotalPellets;
+    context.pelletsConsumed += 1;
   } 
 
   sprite_->Update(deltaTime);

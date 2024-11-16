@@ -13,7 +13,7 @@ class BoardManager {
 public:
   BoardManager(SDL_Renderer *renderer);
 
-  void Update(const float deltaTime, GameState &state);
+  void Update(const float deltaTime, GameContext &context);
   void Render(SDL_Renderer *renderer);
 
 private:

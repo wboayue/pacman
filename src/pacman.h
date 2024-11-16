@@ -20,7 +20,7 @@ class Pacman {
 public:
   Pacman(SDL_Renderer *renderer);
 
-  auto Update(const float deltaTime, Grid& grid, GameState& state, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts
+  auto Update(const float deltaTime, Grid& grid, GameContext& context, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts
 ) -> void;
   auto Render(SDL_Renderer *renderer) -> void;
   auto ProcessInput(const Uint8 *state) -> void;

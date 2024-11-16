@@ -21,16 +21,16 @@ enum class GameStates {
 };
 
 // Base state interface
-class StateMachine {
+class GameState {
 public:
-    virtual ~StateMachine() = default;
+    virtual ~GameState() = default;
     
     // Core state methods
     virtual auto Enter(Game& game) -> void {};
     virtual auto Tick(Game& game, float deltaTime) -> GameStates = 0;
 };
 
-auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>>;
+auto initializeStates() -> std::map<GameStates, std::unique_ptr<GameState>>;
 
 Game::Game() {
   // Initialize SDL
@@ -149,14 +149,14 @@ auto Game::processInput() -> const Uint8 * {
 }
 
 auto Game::update(const float deltaTime) -> void {
-  pacman->Update(deltaTime, grid, state, audio, ghosts);
+  pacman->Update(deltaTime, grid, context, audio, ghosts);
   for (auto &ghost : ghosts) {
-    ghost->Update(deltaTime, grid, state, *pacman, *blinky);
+    ghost->Update(deltaTime, grid, context, *pacman, *blinky);
   }
 
   grid.Update(deltaTime);
 
-  board->Update(deltaTime, state);
+  board->Update(deltaTime, context);
 }
 
 auto Game::render() -> void {
@@ -216,7 +216,7 @@ auto Game::PlaySound(Sound sound) -> void {
 // Dying -> Ready
 // LevelComplete -> Ready
 
-struct ReadyState : StateMachine {
+struct ReadyState : GameState {
   static constexpr int READY_DURATION = 4.0f;  
 
   auto Enter(Game& game) -> void override {
@@ -243,7 +243,7 @@ private:
   float elapsedTime{0.0f};
 };
 
-struct PlayState : StateMachine {
+struct PlayState : GameState {
   auto Tick(Game& game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.pacman->ProcessInput(keyState);
@@ -269,7 +269,7 @@ private:
   }
 
   auto levelCompleted(Game& game) const -> bool {
-    return game.state.levelCompleted;
+    return game.context.LevelComplete();
   }
 
   auto wasKilled(Game& game) const -> bool {
@@ -282,7 +282,7 @@ private:
   }
 };
 
-struct PausedState : StateMachine {
+struct PausedState : GameState {
 
   auto Enter(Game& game) -> void override {
     pause(game);
@@ -322,14 +322,14 @@ private:
   }
 };
 
-struct DyingState : StateMachine {
+struct DyingState : GameState {
   static constexpr int DYING_DURATION = 2.0f;  
 
   auto Enter(Game& game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
     game.PlaySound(Sound::kDeath);
-    game.state.extraLives -= 1;
+    game.context.extraLives -= 1;
   }
 
   auto Tick(Game& game, float deltaTime) -> GameStates override {
@@ -340,7 +340,7 @@ struct DyingState : StateMachine {
     if (elapsedTime >= DYING_DURATION) {
       reset(game);
 
-      if (game.state.extraLives < 0) {
+      if (game.context.extraLives < 0) {
         return GameStates::kReady;
       }
 
@@ -364,7 +364,7 @@ private:
   float elapsedTime{0.0f};
 };
 
-struct LevelCompleteState : StateMachine {
+struct LevelCompleteState : GameState {
   static constexpr int LEVEL_COMPLETE_DURATION = 2.0f;  
 
   auto Enter(Game& game) -> void override {
@@ -393,7 +393,7 @@ private:
   auto completeLevel(Game& game) const -> void {
     game.grid.Reset(game.renderer_->sdl_renderer);
     game.pacman->Reset();
-    game.state.NextLevel();
+    game.context.NextLevel();
 
     for (auto &ghost : game.ghosts) {
       ghost->Reset();
@@ -403,8 +403,8 @@ private:
   float elapsedTime{0.0f};
 };
 
-auto initializeStates() -> std::map<GameStates, std::unique_ptr<StateMachine>> {
-  auto states = std::map<GameStates, std::unique_ptr<StateMachine>>{};
+auto initializeStates() -> std::map<GameStates, std::unique_ptr<GameState>> {
+  auto states = std::map<GameStates, std::unique_ptr<GameState>>{};
 
   states.emplace(GameStates::kReady, std::make_unique<ReadyState>());
   states.emplace(GameStates::kPlay, std::make_unique<PlayState>());
