@@ -9,7 +9,7 @@
 
 #include "audio-system.h"
 #include "board-manager.h"
-#include "game-state.h"
+#include "game-context.h"
 #include "ghost.h"
 #include "grid.h"
 #include "pacman.h"
@@ -64,8 +64,18 @@ public:
    */
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
+  friend struct ReadyState;
+  friend struct PlayState;
+  friend struct PausedState;
+  friend struct DyingState;
+  friend struct LevelCompleteState;
+
+  auto Pause() -> void;
+  auto Resume() -> void;
+  auto PlaySound(Sound sound) -> void;
+
 private:
-  void processInput();
+  const Uint8 * processInput();
   void update(const float deltaTime);
   void render();
 
@@ -83,7 +93,7 @@ private:
   std::unique_ptr<BoardManager> board;
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
-  GameState state{};
+  GameContext context{};
   AudioSystem audio{};
 };
 

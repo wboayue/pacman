@@ -2,7 +2,7 @@
 #define GHOST_H
 
 #include "constants.h"
-#include "game-state.h"
+#include "game-context.h"
 #include "grid.h"
 #include "pacman.h"
 #include "sprite.h"
@@ -38,7 +38,7 @@ class Ghost {
 public:
   Ghost(const GhostConfig &config);
 
-  void Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman, Ghost &blinky);
+  void Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky);
   void Render(SDL_Renderer *renderer);
   void Reset();
   auto ReSpawn() -> void;
@@ -47,6 +47,8 @@ public:
   void Activate() { active_ = true; };
   auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
   auto IsReSpawning() const  -> bool { return mode_ == GhostMode::kReSpawn; }; 
+  auto Pause() -> void;
+  auto Resume() -> void;
 
 private:
   void setFramesForHeading(Direction heading);

@@ -60,7 +60,7 @@ Ghost::Ghost(const GhostConfig &config)
   setFramesForHeading(heading_);
 }
 
-auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &pacman,
+auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman,
                    Ghost &blinky) -> void {
   if (isInPen()) {
     // update penned
@@ -141,6 +141,14 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameState &state, Pacman &
   sprite->Update(deltaTime);
   scaredSprite->Update(deltaTime);
   reSpawnSprite->Update(deltaTime);
+}
+
+auto Ghost::Pause() -> void {
+
+}
+
+auto Ghost::Resume() -> void {
+  
 }
 
 auto Ghost::nextCell(const Direction &direction) const -> Vec2 {

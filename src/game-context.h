@@ -1,5 +1,5 @@
-#ifndef GAME_STATE_H
-#define GAME_STATE_H
+#ifndef GAME_CONTEXT_H
+#define GAME_CONTEXT_H
 
 enum class GhostMode {
   kScatter,
@@ -8,15 +8,19 @@ enum class GhostMode {
   kReSpawn,
 };
 
-struct GameState {
+struct GameContext {
   int score{0};
   int extraLives{2};
   int level{0};
   int pelletsConsumed{0};
-  bool levelCompleted{false};
   bool paused{false};
 
+  // pacman, ghosts
+  // audio system
+
   auto NextLevel() -> void;
+  auto Reset() -> void;
+  auto LevelComplete() -> bool;
 };
 
 #endif
