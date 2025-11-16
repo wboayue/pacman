@@ -22,6 +22,7 @@ set(SOURCES
     src/game-context.cpp
     src/ghost.cpp
     src/board-manager.cpp
+    src/asset-manager.cpp
 )
 
 # Add custom cmake modules path

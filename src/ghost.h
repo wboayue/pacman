@@ -121,4 +121,20 @@ struct ClydeConfig : public GhostConfig {
   Vec2 GetScatterCell() const override;
 };
 
+struct Blinky : public Ghost {
+  Blinky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Inky : public Ghost {
+  Inky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Pinky : public Ghost {
+  Pinky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Clyde : public Ghost {
+  Clyde(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
 #endif

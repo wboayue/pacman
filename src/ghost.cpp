@@ -525,3 +525,119 @@ auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
 auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, "../assets/ghost-eyes.png", kGhostFps, kGhostFrameWidth);
 }
+
+// defines state machines for ghost behavior
+
+enum class GhostStates {
+  kPenned,
+  kExitPen,
+  kChase,
+  kScatter,
+  kScared,
+  kReSpawn,
+};
+
+// Base state interface
+class GhostState {
+public:
+  virtual ~GhostState() = default;
+  
+  // Core state methods
+  virtual auto Enter(GameContext& context, Ghost& ghost) -> void {};
+  virtual auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates = 0;
+};
+
+struct PennedState : GhostState {
+  auto Enter(GameContext& context, Ghost& ghost) -> void override {
+    ghost.Reset();
+  }
+
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (ghost.IsChasing()) {
+      return GhostStates::kExitPen;
+    }
+
+    return GhostStates::kPenned;
+  }
+};
+
+struct ExitPenState : GhostState {
+  auto Enter(GameContext& context, Ghost& ghost) -> void override {
+    ghost.Reset();
+  }
+
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (ghost.GetCell().y < kPenTop) {
+      return GhostStates::kChase;
+    }
+
+    return GhostStates::kExitPen;
+  }
+};
+
+struct ChaseState : GhostState {
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (context.paused) {
+      return GhostStates::kChase;
+    }
+
+    // ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
+
+    if (ghost.IsReSpawning()) {
+      return GhostStates::kReSpawn;
+    }
+
+    return GhostStates::kChase;
+  }
+};
+
+// blinky, pinky, inky, clyde
+
+struct ScatterState : GhostState {
+
+  ScatterState(const Vec2& scatterTarget) : scatterTarget{scatterTarget} {
+  };
+
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (context.paused) {
+      return GhostStates::kScatter;
+    }
+
+//        ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
+
+    if (ghost.IsReSpawning()) {
+      return GhostStates::kReSpawn;
+    }
+
+    return GhostStates::kScatter;
+  }
+
+private:
+  Vec2 scatterTarget;
+};
+
+struct ScaredState : GhostState {
+  auto Enter(GameContext& context, Ghost& ghost) -> void override {
+    ghost.ReSpawn();
+  }
+
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (context.paused) {
+      return GhostStates::kScared;
+    }
+    return GhostStates::kScared;
+  }
+};
+
+struct ReSpawnState : GhostState {
+  auto Enter(GameContext& context, Ghost& ghost) -> void override {
+    ghost.ReSpawn();
+  }
+
+  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+    if (context.paused) {
+      return GhostStates::kReSpawn;
+    }
+    return GhostStates::kReSpawn;
+  }
+};
