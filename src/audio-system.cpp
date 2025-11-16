@@ -1,17 +1,13 @@
 #include <iostream>
 
 #include "audio-system.h"
+#include "constants.h"
 
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-/**
- * @brief Audio system configuration constants
- */
-constexpr int kAudioFrequency = 44100;           ///< Sample rate in Hz
-constexpr int kAudioFormat = MIX_DEFAULT_FORMAT; ///< Audio format (16-bit signed)
-constexpr int kAudioChannels = 2;                ///< Stereo output
-constexpr int kAudioChunkSize = 2048;            ///< Audio buffer size in bytes
+// Audio format depends on SDL_mixer macro
+constexpr int kAudioFormat = MIX_DEFAULT_FORMAT;
 
 AudioSystem::AudioSystem() {
   // Initialize SDL audio subsystem

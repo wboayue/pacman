@@ -1,177 +1,152 @@
-# Code Review - Pacman Game
+# Pacman C++20 Project Review
 
-## Executive Summary
-This is a well-structured C++20 Pacman game implementation using SDL2. The codebase demonstrates good software engineering practices with clear separation of concerns, modern C++ features, and a clean state machine architecture. While the core functionality is solid, there are opportunities for improvement in resource management, code reuse, and configuration handling.
+**Date:** 2025-11-16
+**Reviewer:** Senior C++ Game Developer
+**Codebase:** 2,530 lines across 27 files
 
-## Strengths
+---
 
-### Architecture
-- **State Machine Pattern**: Clean implementation of game states (Ready, Play, Paused, Dying, LevelComplete) with clear transitions
-- **Separation of Concerns**: Well-organized with dedicated managers (AudioSystem, BoardManager, AssetManager)
-- **Thread Safety**: Audio system properly implements thread-safe queue-based asynchronous processing
-- **Modern C++**: Good use of C++20 features including concepts, constexpr, smart pointers, and structured bindings
+## What's Being Done Well
+
+### Architecture & Design
+- **Clean state machine pattern** - Game states (Ready/Play/Paused/Dying/LevelComplete) are well-separated with clear transitions
+- **Extensible ghost AI system** - Function pointer-based targeters make adding new ghost behaviors trivial
+- **Thread-safe audio** - Dedicated thread with mutex/condition variable prevents main loop blocking
+- **RAII compliance** - Smart pointers (`std::unique_ptr`, `std::shared_ptr`) throughout ensure proper resource cleanup
+
+### Modern C++ Usage
+- Consistent use of C++20 features: `auto` returns, trailing return types, `constexpr`, `std::optional`, lambdas
+- Proper const correctness (~90% compliance)
+- Strong naming conventions: `kConstants`, `memberVariables_`, PascalCase types
 
 ### Code Quality
-- **Naming Conventions**: Consistent use of k-prefix for constants and trailing underscore for member variables
-- **RAII Principles**: Resource management follows RAII with proper cleanup in destructors
-- **Type Safety**: Extensive use of const-correctness and auto return types
-- **Documentation**: Clear Doxygen-style comments for complex systems (especially AudioSystem)
+- Clear separation of concerns (Game/Renderer/Audio/Entities)
+- Cell-based collision system is elegant and performant
+- Ghost personalities (Blinky/Pinky/Inky/Clyde) faithfully implemented
+- Good use of `std::unordered_map` with custom hash for pellet storage
 
-### Design Patterns
-- **Entity-Component Hybrid**: Balanced approach between OOP and data-driven design
-- **Manager Pattern**: Centralized resource and system management
-- **Observer-like Pattern**: GameContext shared across entities for state synchronization
+---
 
-## Areas for Improvement
+## Critical Issues
 
-### Critical Issues
-
-#### 1. Resource Path Management
-**Location**: `game.cpp:53`, `pacman.cpp:19`, `audio-system.cpp:82-86`
+### 1. Silent Initialization Failures
 ```cpp
-// Current: Hardcoded relative paths
-Grid::Load("../assets/maze.txt");
-sprite_ = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
-```
-**Risk**: Application fails when run from different directories
-**Recommendation**: Implement configurable asset path resolution
-
-#### 2. Missing Input Validation
-**Location**: `game.cpp:131-139`
-```cpp
-// Window resize handling lacks validation
-int newWidth = event.window.data1;
-int newHeight = event.window.data2;
-float newAspectRatio = (float)newWidth / (float)newHeight; // Potential division by zero
-```
-**Risk**: Crash or undefined behavior on invalid window dimensions
-**Recommendation**: Add validation before calculations
-
-#### 3. Code Duplication
-**Location**: `game.cpp:194-205` and `game.cpp:306-318`
-```cpp
-// Duplicate pause/resume logic in Game class and PausedState
-auto Game::Pause() -> void { /* ... */ }
-auto Game::Resume() -> void { /* ... */ }
-// Same logic repeated in PausedState::pause() and PausedState::resume()
-```
-**Recommendation**: Consolidate pause/resume logic in one location
-
-### Performance Concerns
-
-#### 1. Texture Loading Without Caching
-**Location**: `game.cpp:177-189`
-```cpp
-auto Game::GetTexture(const std::string &fileName) const -> SDL_Texture * {
-    SDL_Surface *surface = IMG_Load(fileName.c_str()); // Loads from disk every call
-    // ...
+// game.cpp:31-35
+if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+  std::cerr << "SDL could not initialize.\n";
+  return;  // Constructor succeeds in broken state!
 }
 ```
-**Impact**: Unnecessary disk I/O on repeated texture requests
-**Recommendation**: Implement texture caching in AssetManager
+**Fix:** Throw exceptions for critical failures
 
-#### 2. Inefficient Collision Detection
-**Location**: `game.cpp:276-280`
+### 2. Division by Zero
 ```cpp
-for (auto &ghost : game.ghosts) {
-    if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
-        return true;
+// vector2.cpp:31-36
+if (rhs != 0) { return {x / rhs, y / rhs}; }
+else { return {std::numeric_limits<float>::infinity(), 0}; }
+```
+**Fix:** Throw `std::domain_error` or assert
+
+### 3. Unchecked Window Resize
+```cpp
+// game.cpp:131
+float newAspectRatio = (float)newWidth / (float)newHeight; // Zero check missing
+```
+
+### 4. Aggressive `std::abort()` on Missing Assets
+`sprite.cpp:69` crashes the entire program if a texture fails to load
+
+---
+
+## High Priority Improvements
+
+### 1. Complete AssetManager (Currently 14 lines)
+```cpp
+// Current - loads from disk every call
+auto Game::GetTexture(const std::string &file) {
+  return LoadTexture(renderer_->sdl_renderer, file);
+}
+```
+
+**Recommendation:** Add texture caching:
+```cpp
+class AssetManager {
+  std::unordered_map<std::string, SDL_Texture*> textureCache_;
+public:
+  auto GetTexture(const std::string& path) -> SDL_Texture* {
+    if (auto it = textureCache_.find(path); it != textureCache_.end()) {
+      return it->second;
     }
-}
+    auto* tex = LoadTexture(path);
+    textureCache_[path] = tex;
+    return tex;
+  }
+};
 ```
-**Impact**: O(n) collision checks every frame
-**Recommendation**: Consider spatial partitioning for larger ghost counts
 
-#### 3. String Allocations in Hot Path
-**Location**: `audio-system.cpp:80-87`
+### 2. Implement Rule of 5 for Sprite
+`sprite.h:16` has a `// TODO` comment - missing copy/move constructors and assignment operators
+
+### 3. No Unit Tests
+- No test framework integrated
+- Easily testable components: `Vec2` math, `Grid` validation, state transitions
+- Add GoogleTest or Catch2 to CMakeLists.txt
+
+### 4. Hardcoded Relative Asset Paths
 ```cpp
-auto getSoundFile(Sound sound) -> std::string { // Returns by value
-    switch (sound) {
-        case Sound::kMunch1: return "../assets/sounds/munch_1.wav";
-        // ...
-    }
-}
+// audio-system.cpp
+return "../assets/sounds/munch_1.wav";  // Fragile - must run from build/
 ```
-**Impact**: Unnecessary string allocations during gameplay
-**Recommendation**: Use static string references or string_view
+**Fix:** Use environment variable or config file for base path
 
-### Code Completeness
+---
 
-#### 1. Incomplete AssetManager
-**Location**: `asset-manager.cpp`
-- Missing texture management
-- No resource lifecycle management
-- No error recovery mechanisms
+## Medium Priority
 
-#### 2. Missing Rule of 5
-**Location**: `sprite.h:16`
+### Code Duplication
+Pause/resume logic repeated in `PlayState::Tick()` (lines 194-205) and `PausedState::Tick()` (lines 290-302)
+
+### Magic Numbers
 ```cpp
-// TODO implement rule of 5
+static constexpr float kEnergizerDuration = 6.0f;
+static constexpr int kReadyStateDuration = 4;
+static constexpr int kGhostScore = 50;
 ```
-**Risk**: Potential resource management issues with default copy/move operations
+Many constants are scattered or inline - consolidate into `constants.h`
 
-#### 3. Magic Numbers
-Multiple locations with unexplained constants:
-- Ghost behavior values (`ghost.cpp:22-30`)
-- Score values (`pacman.cpp:67,78,83`)
-- State duration timings (`game.cpp:220,326,368`)
+### Public SDL Renderer
+`renderer.h:21` - `SDL_Renderer *sdl_renderer` is public, breaking encapsulation. Add getters or friend access.
 
-## Recommendations
+### Vec2 Performance
+```cpp
+// Current - pow() is slower
+sqrt(pow(diff.x, 2.0) + pow(diff.y, 2.0))
 
-### High Priority
-1. **Resource Management System**
-   - Implement proper texture/sound caching
-   - Add configurable asset path resolution
-   - Complete AssetManager implementation
+// Better
+sqrt(diff.x * diff.x + diff.y * diff.y)
+```
 
-2. **Configuration System**
-   - Extract magic numbers to named constants
-   - Add JSON/YAML configuration file support
-   - Make game parameters runtime-configurable
+---
 
-3. **Error Handling**
-   - Add robust error handling for SDL operations
-   - Implement graceful degradation for missing assets
-   - Add logging system for debugging
+## Low Priority Enhancements
 
-### Medium Priority
-1. **Code Organization**
-   - Consolidate duplicate pause/resume logic
-   - Implement Rule of 5 for Sprite class
-   - Refactor state machine using std::variant
+1. **String allocations in hot path** - `getSoundFile()` returns `std::string` by value; use `std::string_view`
+2. **Add debug overlay** for FPS, ghost modes, pathfinding visualization
+3. **Doxygen coverage** - AudioSystem is well-documented, but Game/Pacman/Ghost need more
+4. **Consider `std::variant`** for state machine instead of map of base class pointers
 
-2. **Performance Optimizations**
-   - Implement texture atlas for sprites
-   - Add spatial partitioning for collision detection
-   - Optimize string handling in hot paths
+---
 
-3. **Testing Infrastructure**
-   - Add unit tests for core systems
-   - Implement integration tests for game states
-   - Add performance benchmarks
+## Overall Assessment
 
-### Low Priority
-1. **Enhancement Features**
-   - Add debug overlay system
-   - Implement replay system
-   - Add achievement/statistics tracking
+**Grade: 7.5/10**
 
-2. **Code Documentation**
-   - Complete Doxygen documentation for all public APIs
-   - Add architecture decision records (ADRs)
-   - Create developer onboarding guide
+| Category | Score | Notes |
+|----------|-------|-------|
+| Architecture | 8/10 | Clean separation, extensible design |
+| Modern C++ | 8.5/10 | Good C++20 usage, consistent style |
+| Error Handling | 4/10 | Silent failures, abort on errors |
+| Testing | 0/10 | No tests present |
+| Performance | 7/10 | Good for current scale, lacks caching |
 
-## Positive Highlights
-
-The codebase demonstrates several best practices worth preserving:
-
-1. **Clean Architecture**: The state machine pattern is well-implemented and easy to extend
-2. **Thread Safety**: The audio system's concurrent design is robust and well-thought-out
-3. **Modern C++**: Excellent use of C++20 features without over-engineering
-4. **Readable Code**: Clear naming and organization makes the codebase approachable
-
-## Conclusion
-
-This Pacman implementation is a solid foundation with good architectural decisions. The main areas for improvement center around resource management, configuration handling, and completing partially implemented features. The codebase would benefit from a systematic approach to addressing the magic numbers and adding proper error handling throughout.
-
-The code quality is generally high, with good separation of concerns and modern C++ practices. With the recommended improvements, this could serve as an excellent example of game development in modern C++.
+This is a solid foundation with professional architectural decisions. The main gaps are robustness (error handling) and completeness (AssetManager, tests, documentation). The core gameplay logic is well-implemented and extensible.

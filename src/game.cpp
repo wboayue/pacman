@@ -4,6 +4,7 @@
 #include "SDL_image.h"
 
 #include "audio-system.h"
+#include "constants.h"
 #include "game.h"
 #include <map>
 
@@ -113,8 +114,6 @@ auto Game::Run(std::size_t target_frame_duration) -> void {
 }
 
 auto Game::processInput() -> const Uint8 * {
-  static constexpr auto aspectRatio = 224.0f / 288.0f;
-
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
@@ -125,10 +124,10 @@ auto Game::processInput() -> const Uint8 * {
       int newWidth = event.window.data1;
       int newHeight = event.window.data2;
       float newAspectRatio = (float)newWidth / (float)newHeight;
-      if (newAspectRatio < aspectRatio) {
-        newWidth = (int)((float)newHeight * aspectRatio);
+      if (newAspectRatio < kAspectRatio) {
+        newWidth = (int)((float)newHeight * kAspectRatio);
       } else {
-        newHeight = (int)((float)newWidth / aspectRatio);
+        newHeight = (int)((float)newWidth / kAspectRatio);
       }
       renderer_->SetWindowSize(newWidth, newHeight);
     }
@@ -209,8 +208,6 @@ auto Game::PlaySound(Sound sound) -> void { audio.PlaySound(sound, std::nullopt)
 // LevelComplete -> Ready
 
 struct ReadyState : GameState {
-  static constexpr int READY_DURATION = 4.0f;
-
   auto Enter(Game &game) -> void override {
     elapsedTime = 0.0f;
     game.pacman->Reset();
@@ -222,7 +219,7 @@ struct ReadyState : GameState {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime >= READY_DURATION) {
+    if (elapsedTime >= kReadyStateDuration) {
       return GameStates::kPlay;
     }
 
@@ -305,8 +302,6 @@ private:
 };
 
 struct DyingState : GameState {
-  static constexpr int DYING_DURATION = 2.0f;
-
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
@@ -319,7 +314,7 @@ struct DyingState : GameState {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime >= DYING_DURATION) {
+    if (elapsedTime >= kDyingStateDuration) {
       reset(game);
 
       if (game.context.extraLives < 0) {
@@ -347,8 +342,6 @@ private:
 };
 
 struct LevelCompleteState : GameState {
-  static constexpr int LEVEL_COMPLETE_DURATION = 2.0f;
-
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
@@ -360,7 +353,7 @@ struct LevelCompleteState : GameState {
     game.update(deltaTime);
     game.render();
 
-    if (elapsedTime > LEVEL_COMPLETE_DURATION) {
+    if (elapsedTime > kLevelCompleteStateDuration) {
       completeLevel(game);
       return GameStates::kReady;
     }

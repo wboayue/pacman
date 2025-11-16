@@ -4,8 +4,6 @@
 #include "constants.h"
 #include "pacman.h"
 
-static constexpr Vec2 kHomePosition{13 * kCellSize + (kCellSize / 2.0), 26 * kCellSize + (kCellSize / 2.0)};
-
 auto framesForHeading(const Direction &direction) -> std::vector<int>;
 auto velocityForHeading(const Direction &direction) -> Vec2;
 auto headingForVelocity(const Vec2 &velocity) -> Direction;
@@ -13,7 +11,8 @@ auto center(float pos) -> float;
 auto boundUpper(float pos) -> float;
 auto boundLower(float pos) -> float;
 
-Pacman::Pacman(SDL_Renderer *renderer) : position_{kHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
+Pacman::Pacman(SDL_Renderer *renderer)
+    : position_{kPacmanHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
   sprite_ = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
   sprite_->SetFrames({1, 2});
 }
@@ -74,7 +73,7 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameContext &context, Aud
     auto pellet = grid.ConsumePellet(GetCell());
     if (pellet->IsEnergizer()) {
       context.score += kEnergizerPoints;
-      energizedFor_ = 6.0;
+      energizedFor_ = kEnergizerDuration;
       //      state.mode = GhostMode::kScared;
       audio.PlaySound(Sound::kPowerPellet, 5);
     } else {
@@ -130,7 +129,7 @@ auto Pacman::updatePosition(float timeDelta) -> void {
 
 auto Pacman::Reset() -> void {
   velocity_ = Vec2{0, 0};
-  position_ = kHomePosition;
+  position_ = kPacmanHomePosition;
   heading_ = Direction::kNeutral;
 }
 
@@ -223,13 +222,13 @@ auto framesForHeading(const Direction &direction) -> std::vector<int> {
 auto velocityForHeading(const Direction &direction) -> Vec2 {
   switch (direction) {
   case Direction::kEast:
-    return Vec2{kMaxSpeed * 0.8f, 0};
+    return Vec2{kMaxSpeed * kPacmanSpeedMultiplier, 0};
   case Direction::kWest:
-    return Vec2{-kMaxSpeed * 0.8f, 0};
+    return Vec2{-kMaxSpeed * kPacmanSpeedMultiplier, 0};
   case Direction::kNorth:
-    return Vec2{0, -kMaxSpeed * 0.8f};
+    return Vec2{0, -kMaxSpeed * kPacmanSpeedMultiplier};
   case Direction::kSouth:
-    return Vec2{0, kMaxSpeed * 0.8f};
+    return Vec2{0, kMaxSpeed * kPacmanSpeedMultiplier};
   case Direction::kNeutral:
     return Vec2{0, 0};
   }

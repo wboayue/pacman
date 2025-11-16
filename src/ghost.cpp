@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "constants.h"
 #include "ghost.h"
 
 static constexpr std::array<Candidate, 4> options{
@@ -8,25 +9,6 @@ static constexpr std::array<Candidate, 4> options{
     Candidate{{1, 0}, Direction::kEast},
     Candidate{{-1, 0}, Direction::kWest},
 };
-
-static constexpr auto kGhostFps = 4;
-static constexpr auto kGhostFrameWidth = 16;
-static constexpr auto kPenTop = 17.0f * 8.0f;
-static constexpr auto kPenBottom = 18.0f * 8.0f;
-
-static constexpr auto kBlinkyStartCell = Vec2{14, 14};
-static constexpr auto kBlinkyScatterCell = Vec2{24, 0};
-
-static constexpr auto kClydeStartCell = Vec2{16, 17};
-static constexpr auto kClydeScatterCell = Vec2{0, 34};
-static constexpr auto kClydeRelaxDistance = 8.0f;
-
-static constexpr auto kPinkyStartCell = Vec2{14, 17};
-static constexpr auto kPinkyScatterCell = Vec2{2, 0};
-
-static constexpr auto kInkyStartCell = Vec2{12, 17};
-static constexpr auto kInkyScatterCell = Vec2{27, 34};
-static constexpr auto kInkyPacmanOffset = 2.0f;
 
 auto center(float pos) -> float;
 auto boundUpper(float pos) -> float;
@@ -307,23 +289,21 @@ auto Ghost::setFramesForHeading(Direction heading) -> void {
 
 // velocity for heading
 auto Ghost::setVelocityForHeading(Direction heading) -> void {
-  static constexpr float speed = 0.73;
-
   switch (heading) {
   case Direction::kNorth:
-    velocity_ = Vec2{0, kMaxSpeed * -speed};
+    velocity_ = Vec2{0, kMaxSpeed * -kGhostSpeedMultiplier};
     break;
 
   case Direction::kSouth:
-    velocity_ = Vec2{0, kMaxSpeed * speed};
+    velocity_ = Vec2{0, kMaxSpeed * kGhostSpeedMultiplier};
     break;
 
   case Direction::kEast:
-    velocity_ = Vec2{kMaxSpeed * speed, 0};
+    velocity_ = Vec2{kMaxSpeed * kGhostSpeedMultiplier, 0};
     break;
 
   case Direction::kWest:
-    velocity_ = Vec2{kMaxSpeed * -speed, 0};
+    velocity_ = Vec2{kMaxSpeed * -kGhostSpeedMultiplier, 0};
     break;
 
   default:
@@ -450,13 +430,13 @@ auto PinkyConfig::GetTargeter() const -> Targeter {
     Vec2 target = pacman.GetCell();
 
     if (pacman.GetHeading() == Direction::kNorth) {
-      target += Vec2{0, -4};
+      target += Vec2{0, -kPinkyTargetOffset};
     } else if (pacman.GetHeading() == Direction::kSouth) {
-      target += Vec2{0, 4};
+      target += Vec2{0, kPinkyTargetOffset};
     } else if (pacman.GetHeading() == Direction::kEast) {
-      target += Vec2{4, 0};
+      target += Vec2{kPinkyTargetOffset, 0};
     } else if (pacman.GetHeading() == Direction::kWest) {
-      target += Vec2{-4, 0};
+      target += Vec2{-kPinkyTargetOffset, 0};
     }
 
     return target;

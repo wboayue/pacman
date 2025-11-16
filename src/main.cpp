@@ -1,16 +1,10 @@
 #include <iostream>
 
+#include "constants.h"
 #include "game.h"
 
 // Exit codes
 enum class ExitCode { Success = 0, RuntimeError = 1 };
-
-// Game configuration
-struct GameConfig {
-  static constexpr std::size_t kFramesPerSecond{60};
-  static constexpr std::size_t kMilliSecondsPerSecond{1000};
-  static constexpr std::size_t kFrameDuration = kMilliSecondsPerSecond / kFramesPerSecond;
-};
 
 /**
  * Initializes the game and enters the main game loop.
@@ -22,7 +16,7 @@ auto main() -> int {
   try {
     auto game = Game{};
 
-    game.Run(GameConfig::kFrameDuration);
+    game.Run(kFrameDuration);
     std::cout << "Game has terminated successfully.\n";
 
     return static_cast<int>(ExitCode::Success);
