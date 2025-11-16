@@ -36,31 +36,31 @@ public:
    * 1. getting user input
    * 2. updating game entities
    * 3. rendering the game entities
-   * 
-   * @param target_frame_duration target duration for each frame 
+   *
+   * @param target_frame_duration target duration for each frame
    */
   auto Run(std::size_t targetFrameDuration) -> void;
 
   /**
    * Gets the current score.
-   * 
-   * @return current score 
+   *
+   * @return current score
    */
   auto GetScore() const -> int;
 
   /**
    * Checks if game initialization was successful.
-   * 
-   * @return true if game initialized successfully, else false. 
+   *
+   * @return true if game initialized successfully, else false.
    */
   auto Ready() const -> bool;
 
   /**
    * Loads a SDL_Texture from a file.
-   * 
+   *
    * @param fileName file to load texture from.
-   * 
-   * @return SDL_Texture* 
+   *
+   * @return SDL_Texture*
    */
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
@@ -75,7 +75,7 @@ public:
   auto PlaySound(Sound sound) -> void;
 
 private:
-  const Uint8 * processInput();
+  const Uint8 *processInput();
   void update(const float deltaTime);
   void render();
 
@@ -83,7 +83,7 @@ private:
 
   int score{0}; // game score
 
-  bool ready_{false}; // initialization flag
+  bool ready_{false};   // initialization flag
   bool running_{false}; // running flag
   std::shared_ptr<Renderer> renderer_;
   Uint32 ticks_count_{0};

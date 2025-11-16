@@ -9,8 +9,8 @@
 #include "audio-system.h"
 #include "constants.h"
 #include "game-context.h"
-#include "grid.h"
 #include "ghost.h"
+#include "grid.h"
 #include "sprite.h"
 #include "vector2.h"
 
@@ -20,8 +20,8 @@ class Pacman {
 public:
   Pacman(SDL_Renderer *renderer);
 
-  auto Update(const float deltaTime, Grid& grid, GameContext& context, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts
-) -> void;
+  auto Update(const float deltaTime, Grid &grid, GameContext &context, AudioSystem &audio,
+              std::vector<std::shared_ptr<Ghost>> &ghosts) -> void;
   auto Render(SDL_Renderer *renderer) -> void;
   auto ProcessInput(const Uint8 *state) -> void;
 
@@ -33,8 +33,8 @@ public:
   auto IsEnergized() const -> bool { return energizedFor_ > 0.0; };
   auto Pause() -> void;
   auto Resume() -> void;
-private:
 
+private:
   auto updatePosition(float timeDelta) -> void;
   auto isInTunnel() -> bool;
 

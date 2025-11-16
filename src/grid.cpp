@@ -92,8 +92,7 @@ auto Grid::Load(const std::string &gridPath) -> std::vector<std::vector<Cell>> {
     }
 
     if (row.size() != kGridWidth) {
-      std::cerr << "row " << y << " should have " << kGridWidth << " columns. found " << row.size()
-                << "." << std::endl;
+      std::cerr << "row " << y << " should have " << kGridWidth << " columns. found " << row.size() << "." << std::endl;
       std::cerr << line << std::endl;
       std::abort();
     }

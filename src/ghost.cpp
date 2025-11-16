@@ -47,21 +47,20 @@ auto reverseDirection(Direction direction) -> Direction {
   }
 }
 
-auto toCell(const Vec2& position) -> Vec2 {
+auto toCell(const Vec2 &position) -> Vec2 {
   auto t = position / kCellSize;
   return {floor(t.x), floor(t.y)};
 }
 
 Ghost::Ghost(const GhostConfig &config)
     : initialPosition_{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
-      targeter{config.GetTargeter()},
-      scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()}, scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
+      targeter{config.GetTargeter()}, scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()},
+      scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
   position_ = initialPosition_;
   setFramesForHeading(heading_);
 }
 
-auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman,
-                   Ghost &blinky) -> void {
+auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky) -> void {
   if (isInPen()) {
     // update penned
     if (active_) {
@@ -83,7 +82,7 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacm
 
     if (mode_ != GhostMode::kReSpawn) {
       if (pacman.IsEnergized()) {
-        mode_ = GhostMode::kScared; 
+        mode_ = GhostMode::kScared;
       } else {
         mode_ = GhostMode::kChase;
       }
@@ -96,7 +95,7 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacm
       } else {
         auto target = targeter(*this, pacman, blinky, mode_);
         if (mode_ == GhostMode::kReSpawn) {
-          target = toCell(initialPosition_); 
+          target = toCell(initialPosition_);
         }
         moveTowards(grid, target);
       }
@@ -106,7 +105,7 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacm
     }
 
     if (previousCell_ != GetCell()) {
-      previousHeading_ = heading_;   
+      previousHeading_ = heading_;
     }
 
     previousCell_ = GetCell();
@@ -120,20 +119,20 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacm
     auto nextPosition = nextCell(heading_);
     if (grid.GetCell(nextPosition) == Cell::kWall) {
       switch (heading_) {
-        case Direction::kEast:
-          position_.x = boundUpper(position_.x);
-          break;
-        case Direction::kWest:
-          position_.x = boundLower(position_.x);
-          break;
-        case Direction::kNorth:
-          position_.y = boundLower(position_.y);
-          break;
-        case Direction::kSouth:
-          position_.y = boundUpper(position_.y);
-          break;
-        default:
-          break;
+      case Direction::kEast:
+        position_.x = boundUpper(position_.x);
+        break;
+      case Direction::kWest:
+        position_.x = boundLower(position_.x);
+        break;
+      case Direction::kNorth:
+        position_.y = boundLower(position_.y);
+        break;
+      case Direction::kSouth:
+        position_.y = boundUpper(position_.y);
+        break;
+      default:
+        break;
       }
     }
   }
@@ -143,13 +142,9 @@ auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacm
   reSpawnSprite->Update(deltaTime);
 }
 
-auto Ghost::Pause() -> void {
+auto Ghost::Pause() -> void {}
 
-}
-
-auto Ghost::Resume() -> void {
-  
-}
+auto Ghost::Resume() -> void {}
 
 auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
   auto currentCell = GetCell();
@@ -184,7 +179,7 @@ auto Ghost::isInTunnel() -> bool {
 
 auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> Direction {
   auto candidates_ = candidates(grid);
-  
+
   if (candidates_.empty()) {
     heading_ = reverseDirection(heading_);
   } else {
@@ -222,10 +217,8 @@ auto Ghost::atDecisionPoint(Grid &grid) const -> bool {
   float y = position_.y - floor(position_.y);
 
   // reach middle of cell?
-  if ((heading_ == Direction::kNorth && y > kMidPoint) ||
-      (heading_ == Direction::kSouth && y < kMidPoint) ||
-      (heading_ == Direction::kEast && x < kMidPoint) ||
-      (heading_ == Direction::kWest && x > kMidPoint)) {
+  if ((heading_ == Direction::kNorth && y > kMidPoint) || (heading_ == Direction::kSouth && y < kMidPoint) ||
+      (heading_ == Direction::kEast && x < kMidPoint) || (heading_ == Direction::kWest && x > kMidPoint)) {
     return false;
   }
 
@@ -235,16 +228,16 @@ auto Ghost::atDecisionPoint(Grid &grid) const -> bool {
   }
 
   switch (heading_) {
-    case Direction::kNorth:
-    case Direction::kSouth:
-      return grid.GetCell(nextCell(Direction::kEast)) != Cell::kWall ||
-              grid.GetCell(nextCell(Direction::kWest)) != Cell::kWall;
-    case Direction::kEast:
-    case Direction::kWest:
-      return grid.GetCell(nextCell(Direction::kNorth)) == Cell::kWall ||
-              grid.GetCell(nextCell(Direction::kSouth)) == Cell::kWall;
-    default:
-      return true;
+  case Direction::kNorth:
+  case Direction::kSouth:
+    return grid.GetCell(nextCell(Direction::kEast)) != Cell::kWall ||
+           grid.GetCell(nextCell(Direction::kWest)) != Cell::kWall;
+  case Direction::kEast:
+  case Direction::kWest:
+    return grid.GetCell(nextCell(Direction::kNorth)) == Cell::kWall ||
+           grid.GetCell(nextCell(Direction::kSouth)) == Cell::kWall;
+  default:
+    return true;
   }
 }
 
@@ -277,14 +270,12 @@ auto Ghost::Render(SDL_Renderer *renderer) -> void {
   }
 }
 
-auto Ghost::Reset() -> void { 
+auto Ghost::Reset() -> void {
   position_ = initialPosition_;
   mode_ = GhostMode::kChase;
 }
 
-auto Ghost::ReSpawn() -> void { 
-  mode_ = GhostMode::kReSpawn;
-}
+auto Ghost::ReSpawn() -> void { mode_ = GhostMode::kReSpawn; }
 
 auto Ghost::setFramesForHeading(Direction heading) -> void {
   switch (heading) {
@@ -357,14 +348,14 @@ auto Ghost::exitPen(const float deltaTime) -> void {
   setFramesForHeading(heading_);
   setVelocityForHeading(heading_);
 
-  position_ += (velocity_/2.0 * deltaTime);
+  position_ += (velocity_ / 2.0 * deltaTime);
 }
 
 auto Ghost::penDance(const float deltaTime) -> void {
   setFramesForHeading(heading_);
   setVelocityForHeading(heading_);
 
-  position_ += (velocity_/2.0 * deltaTime); // NOLINT(cppcoreguidlines-avoid-magic-numbers)
+  position_ += (velocity_ / 2.0 * deltaTime); // NOLINT(cppcoreguidlines-avoid-magic-numbers)
 
   if (position_.y < kPenTop) {
     position_.y = kPenTop;
@@ -498,7 +489,7 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
     if (d > kClydeRelaxDistance) {
       return pacman.GetCell();
     }
-     
+
     return me.GetScatterCell();
   };
 }
@@ -515,8 +506,7 @@ auto ClydeConfig::GetInitialPosition() const -> Vec2 {
 
 auto ClydeConfig::GetInitialHeading() const -> Direction { return Direction::kNorth; }
 
-GhostConfig::GhostConfig(SDL_Renderer *renderer) : renderer{renderer} {
-}
+GhostConfig::GhostConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, "../assets/scared-ghost.png", kGhostFps, kGhostFrameWidth);
@@ -541,18 +531,16 @@ enum class GhostStates {
 class GhostState {
 public:
   virtual ~GhostState() = default;
-  
+
   // Core state methods
-  virtual auto Enter(GameContext& context, Ghost& ghost) -> void {};
-  virtual auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates = 0;
+  virtual auto Enter(GameContext &context, Ghost &ghost) -> void {};
+  virtual auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates = 0;
 };
 
 struct PennedState : GhostState {
-  auto Enter(GameContext& context, Ghost& ghost) -> void override {
-    ghost.Reset();
-  }
+  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.Reset(); }
 
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (ghost.IsChasing()) {
       return GhostStates::kExitPen;
     }
@@ -562,11 +550,9 @@ struct PennedState : GhostState {
 };
 
 struct ExitPenState : GhostState {
-  auto Enter(GameContext& context, Ghost& ghost) -> void override {
-    ghost.Reset();
-  }
+  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.Reset(); }
 
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (ghost.GetCell().y < kPenTop) {
       return GhostStates::kChase;
     }
@@ -576,7 +562,7 @@ struct ExitPenState : GhostState {
 };
 
 struct ChaseState : GhostState {
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (context.paused) {
       return GhostStates::kChase;
     }
@@ -595,15 +581,14 @@ struct ChaseState : GhostState {
 
 struct ScatterState : GhostState {
 
-  ScatterState(const Vec2& scatterTarget) : scatterTarget{scatterTarget} {
-  };
+  ScatterState(const Vec2 &scatterTarget) : scatterTarget{scatterTarget} {};
 
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (context.paused) {
       return GhostStates::kScatter;
     }
 
-//        ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
+    //        ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
 
     if (ghost.IsReSpawning()) {
       return GhostStates::kReSpawn;
@@ -617,11 +602,9 @@ private:
 };
 
 struct ScaredState : GhostState {
-  auto Enter(GameContext& context, Ghost& ghost) -> void override {
-    ghost.ReSpawn();
-  }
+  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.ReSpawn(); }
 
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (context.paused) {
       return GhostStates::kScared;
     }
@@ -630,11 +613,9 @@ struct ScaredState : GhostState {
 };
 
 struct ReSpawnState : GhostState {
-  auto Enter(GameContext& context, Ghost& ghost) -> void override {
-    ghost.ReSpawn();
-  }
+  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.ReSpawn(); }
 
-  auto Tick(GameContext& context, Ghost& ghost, float deltaTime) -> GhostStates override {
+  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
     if (context.paused) {
       return GhostStates::kReSpawn;
     }

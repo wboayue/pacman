@@ -1,11 +1,9 @@
 #include "board-manager.h"
 #include "constants.h"
 
-
 BoardManager::BoardManager(SDL_Renderer *renderer)
     : maze{renderer, "../assets/maze.png"}, pacman{renderer, "../assets/pacman.png"},
-      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"}
-      {}
+      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"} {}
 
 void BoardManager::Update(const float deltaTime, GameContext &context) {
   maze.Update(deltaTime);
@@ -81,7 +79,7 @@ void BoardManager::WriteText(SDL_Renderer *renderer, Vec2 position, const std::s
   static constexpr int kDigitOffset = 31;
 
   SDL_Rect source{0, 0, kCellSize, kCellSize};
-  SDL_Rect destination{0 , 0, kCellSize, kCellSize};
+  SDL_Rect destination{0, 0, kCellSize, kCellSize};
 
   for (size_t i = 0; i < text.size(); ++i) {
     int ch = std::toupper(text[i]);

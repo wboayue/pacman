@@ -2,7 +2,7 @@
 
 #include "asset-manager.h"
 
-auto AssetManager::GetSound(const std::string &asset) -> Mix_Chunk* {
+auto AssetManager::GetSound(const std::string &asset) -> Mix_Chunk * {
   auto sound = Mix_LoadWAV(asset.c_str());
   if (sound == nullptr) {
     std::cerr << "Failed to load sound: " << asset << "\n";

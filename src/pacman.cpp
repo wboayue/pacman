@@ -4,24 +4,22 @@
 #include "constants.h"
 #include "pacman.h"
 
-static constexpr Vec2 kHomePosition{13 * kCellSize + (kCellSize/2.0), 26 * kCellSize + (kCellSize/2.0)};
+static constexpr Vec2 kHomePosition{13 * kCellSize + (kCellSize / 2.0), 26 * kCellSize + (kCellSize / 2.0)};
 
 auto framesForHeading(const Direction &direction) -> std::vector<int>;
 auto velocityForHeading(const Direction &direction) -> Vec2;
-auto headingForVelocity(const Vec2& velocity) -> Direction;
+auto headingForVelocity(const Vec2 &velocity) -> Direction;
 auto center(float pos) -> float;
 auto boundUpper(float pos) -> float;
 auto boundLower(float pos) -> float;
 
-
-Pacman::Pacman(SDL_Renderer *renderer)
-    : position_{kHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
+Pacman::Pacman(SDL_Renderer *renderer) : position_{kHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
   sprite_ = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
   sprite_->SetFrames({1, 2});
 }
 
-auto Pacman::Update(const float deltaTime, Grid& grid, GameContext& context, AudioSystem& audio, std::vector<std::shared_ptr<Ghost>>& ghosts)
-    -> void {
+auto Pacman::Update(const float deltaTime, Grid &grid, GameContext &context, AudioSystem &audio,
+                    std::vector<std::shared_ptr<Ghost>> &ghosts) -> void {
 
   if (!isInTunnel()) {
     // Updates velocity based on input if not in tunnel.
@@ -38,20 +36,20 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameContext& context, Aud
   auto nextPosition = NextCell(currentHeading);
   if (grid.GetCell(nextPosition) == Cell::kWall) {
     switch (currentHeading) {
-      case Direction::kEast:
-        position_.x = boundUpper(position_.x);
-        break;
-      case Direction::kWest:
-        position_.x = boundLower(position_.x);
-        break;
-      case Direction::kNorth:
-        position_.y = boundLower(position_.y);
-        break;
-      case Direction::kSouth:
-        position_.y = boundUpper(position_.y);
-        break;
-      default:
-        break;
+    case Direction::kEast:
+      position_.x = boundUpper(position_.x);
+      break;
+    case Direction::kWest:
+      position_.x = boundLower(position_.x);
+      break;
+    case Direction::kNorth:
+      position_.y = boundLower(position_.y);
+      break;
+    case Direction::kSouth:
+      position_.y = boundUpper(position_.y);
+      break;
+    default:
+      break;
     }
   }
 
@@ -77,7 +75,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameContext& context, Aud
     if (pellet->IsEnergizer()) {
       context.score += kEnergizerPoints;
       energizedFor_ = 6.0;
-//      state.mode = GhostMode::kScared;
+      //      state.mode = GhostMode::kScared;
       audio.PlaySound(Sound::kPowerPellet, 5);
     } else {
       context.score += kPelletPoints;
@@ -85,7 +83,7 @@ auto Pacman::Update(const float deltaTime, Grid& grid, GameContext& context, Aud
     }
 
     context.pelletsConsumed += 1;
-  } 
+  }
 
   sprite_->Update(deltaTime);
 }
@@ -102,8 +100,8 @@ auto Pacman::isInTunnel() -> bool {
 
 /**
  * Updates the position of Pacman given time change
- * 
- * @param timeDelta 
+ *
+ * @param timeDelta
  */
 auto Pacman::updatePosition(float timeDelta) -> void {
   position_ += (velocity_ * timeDelta);
@@ -117,16 +115,16 @@ auto Pacman::updatePosition(float timeDelta) -> void {
 
   // Ensures Pacman is centered in Grid
   switch (headingForVelocity(velocity_)) {
-    case Direction::kEast:
-    case Direction::kWest:
-      position_.y = center(position_.y);
-      break;
-    case Direction::kNorth:
-    case Direction::kSouth:
-      position_.x = center(position_.x);
-      break;
-    default:
-      break;
+  case Direction::kEast:
+  case Direction::kWest:
+    position_.y = center(position_.y);
+    break;
+  case Direction::kNorth:
+  case Direction::kSouth:
+    position_.x = center(position_.x);
+    break;
+  default:
+    break;
   }
 }
 
@@ -156,17 +154,15 @@ auto Pacman::GetPosition() const -> Vec2 { return position_; }
 
 /**
  * GetHeading return Pacman's current heading
- * @return current heading (Direction) 
+ * @return current heading (Direction)
  */
 auto Pacman::GetHeading() const -> Direction { return heading_; }
 
 /**
  * GetCell returns the current cell occupied by Pacman.
- * @return current cell (Vec2) 
+ * @return current cell (Vec2)
  */
-auto Pacman::GetCell() const -> Vec2 {
-  return (position_ / kCellSize).Floor();
-}
+auto Pacman::GetCell() const -> Vec2 { return (position_ / kCellSize).Floor(); }
 
 /**
  * NextCell determines next cell that Pacman will occupy
@@ -195,13 +191,9 @@ auto Pacman::NextCell(const Direction &direction) const -> Vec2 {
   }
 }
 
-auto Pacman::Pause() -> void {
+auto Pacman::Pause() -> void {}
 
-}
-
-auto Pacman::Resume() -> void {
-
-}
+auto Pacman::Resume() -> void {}
 
 /**
  * Determines the sequence of frames to animate for movement in given heading.
@@ -210,16 +202,16 @@ auto Pacman::Resume() -> void {
  */
 auto framesForHeading(const Direction &direction) -> std::vector<int> {
   switch (direction) {
-    case Direction::kEast:
-      return {1, 2};
-    case Direction::kWest:
-      return {3, 4};
-    case Direction::kNorth:
-      return {5, 6};
-    case Direction::kSouth:
-      return {7, 8};
-    case Direction::kNeutral:
-      return {1, 2};
+  case Direction::kEast:
+    return {1, 2};
+  case Direction::kWest:
+    return {3, 4};
+  case Direction::kNorth:
+    return {5, 6};
+  case Direction::kSouth:
+    return {7, 8};
+  case Direction::kNeutral:
+    return {1, 2};
   }
 }
 
@@ -230,20 +222,20 @@ auto framesForHeading(const Direction &direction) -> std::vector<int> {
  */
 auto velocityForHeading(const Direction &direction) -> Vec2 {
   switch (direction) {
-    case Direction::kEast:
-      return Vec2{kMaxSpeed * 0.8f, 0};
-    case Direction::kWest:
-      return Vec2{-kMaxSpeed * 0.8f, 0};
-    case Direction::kNorth:
-      return Vec2{0, -kMaxSpeed * 0.8f};
-    case Direction::kSouth:
-      return Vec2{0, kMaxSpeed * 0.8f};
-    case Direction::kNeutral:
-      return Vec2{0, 0};
+  case Direction::kEast:
+    return Vec2{kMaxSpeed * 0.8f, 0};
+  case Direction::kWest:
+    return Vec2{-kMaxSpeed * 0.8f, 0};
+  case Direction::kNorth:
+    return Vec2{0, -kMaxSpeed * 0.8f};
+  case Direction::kSouth:
+    return Vec2{0, kMaxSpeed * 0.8f};
+  case Direction::kNeutral:
+    return Vec2{0, 0};
   }
 }
 
-auto headingForVelocity(const Vec2& velocity) -> Direction {
+auto headingForVelocity(const Vec2 &velocity) -> Direction {
   if (velocity.x > 0) {
     return Direction::kEast;
   } else if (velocity.x < 0) {
@@ -257,9 +249,7 @@ auto headingForVelocity(const Vec2& velocity) -> Direction {
   }
 }
 
-auto center(float pos) -> float {
-  return floor(((int)pos / kCellSize) * kCellSize + (kCellSize/2));
-}
+auto center(float pos) -> float { return floor(((int)pos / kCellSize) * kCellSize + (kCellSize / 2)); }
 
 auto boundUpper(float pos) -> float {
   auto max = center(pos);

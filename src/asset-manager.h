@@ -12,16 +12,12 @@ class AssetManager {
 public:
   AssetManager(const std::string &dataPath) : dataPath{dataPath} {};
 
-  auto GetSound(const std::string &asset) -> Mix_Chunk*;
+  auto GetSound(const std::string &asset) -> Mix_Chunk *;
   auto CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite;
 
-  auto GetImagePath(const std::string &asset) -> std::string {
-    return dataPath + asset;
-  }
+  auto GetImagePath(const std::string &asset) -> std::string { return dataPath + asset; }
 
-  auto GetImage(const std::string &asset) -> std::string {
-    return dataPath + asset;
-  }
+  auto GetImage(const std::string &asset) -> std::string { return dataPath + asset; }
 
 private:
   std::string dataPath;

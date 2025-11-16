@@ -1,57 +1,47 @@
 # Pacman
 
-Classic
+A modern C++20 implementation of the classic Pac‑Man, built with SDL2 and CMake. The codebase uses a clean state machine, resource managers, and an entity-centric design for clarity and extensibility.
 
-Assets available
+## Architecture Overview
+- States: Ready, Play, Paused, Dying, LevelComplete (centralized transitions).
+- Managers: `AssetManager` (textures), `AudioSystem` (async sound queue), `BoardManager` (maze & rules).
+- Entities: `Pacman`, `Ghost`(s), `Pellet` with shared `GameContext` for coordination.
+- Rendering & Input: `Renderer` handles drawing; `Game` orchestrates loop and input.
 
-Was an implementation specification. Games mecha
+## Project Layout
+- `src/` core modules (e.g., `game.*`, `renderer.*`, `board-manager.*`, `asset-manager.*`, `audio-system.*`, `pacman.*`, `ghost.*`, `pellet.*`, `grid.*`, `vector2.*`).
+- `assets/` sprites, sounds, and level data (e.g., `maze.txt`).
+- `CMakeLists.txt` build configuration; out-of-tree builds recommended (`build/`).
 
-Complete game.
+## Prerequisites
+- CMake ≥ 3.7, Make, and a C++20 compiler.
+- SDL2, SDL2_image, SDL2_mixer.
+- clang-tidy (optional; auto-enabled if found) and clang-format (optional targets).
 
-ECS vs object orientated. Hybrid.
-Entities mostly data
+macOS (Homebrew):
+`brew install sdl2 sdl2_image sdl2_ttf sdl2_mixer llvm`
 
-Game
+Ubuntu/Debian:
+`sudo apt-get install cmake build-essential libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev`
 
-AudioSystem
-
-
-## Dependencies for Running Locally
-* cmake >= 3.7
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1 (Linux, Mac), 3.81 (Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* SDL2 >= 2.0
-  * All installation instructions can be found [here](https://wiki.libsdl.org/Installation)
-  >Note that for Linux, an `apt` or `apt-get` installation is preferred to building from source.
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-
-## Basic Build Instructions
-
-1. Clone this repo.
-2. Make a build directory in the top level directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pacman`.
-
+## Build & Run
 ```bash
-mkdir build && cd build
-cmake .. && make
+mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make -j
+./pacman
 ```
+Notes
+- Run from the `build/` directory so asset relative paths resolve.
+- clang-tidy is optional. If installed, it runs automatically; disable via `-DENABLE_CLANG_TIDY=OFF`.
 
-https://www.sounds-resource.com/arcade/pacman/sound/10603/
+## Development
+- Formatting: `cmake --build build --target clang-format` or run `clang-format -i src/*.cpp src/*.h` (uses `.clang-format`).
+- Linting: clang-tidy is configured (modernize checks). You can expand checks via CMake if desired.
+- Recommendations: avoid magic numbers (see `constants.h`), prefer RAII and `std::string_view`, cache textures via `AssetManager`.
 
+## Testing (Optional)
+- Suggested: GoogleTest/Catch2 in `tests/` integrated with CTest; name files `<module>_test.cpp` and run `ctest` from `build/`.
 
-brew install SDL2
-brew install SDL2_image
-brew install SDL2_ttf
-brew install sdl2_mixer
-
-
-brew install llvm
-
-https://stackoverflow.com/questions/53111082/how-to-install-clang-tidy-on-macos
+## Credits
+Assets are included in `assets/`. Audio references and attributions can be added per asset source.

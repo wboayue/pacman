@@ -6,9 +6,8 @@
 
 Renderer::Renderer(const std::size_t screen_width, const std::size_t screen_height) {
   // Create Window
-  sdl_window =
-      SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width,
-                       screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+  sdl_window = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width, screen_height,
+                                SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
   if (nullptr == sdl_window) {
     std::cerr << "Window could not be created.\n";
@@ -25,9 +24,7 @@ Renderer::Renderer(const std::size_t screen_width, const std::size_t screen_heig
 
 Renderer::~Renderer() { SDL_DestroyWindow(sdl_window); }
 
-void Renderer::SetWindowSize(int width, int height) {
-  SDL_SetWindowSize(sdl_window, width, height);
-}
+void Renderer::SetWindowSize(int width, int height) { SDL_SetWindowSize(sdl_window, width, height); }
 
 auto Renderer::Clear() -> void { SDL_RenderClear(sdl_renderer); }
 

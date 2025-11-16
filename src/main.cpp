@@ -3,10 +3,7 @@
 #include "game.h"
 
 // Exit codes
-enum class ExitCode {
-    Success = 0,
-    RuntimeError = 1
-};
+enum class ExitCode { Success = 0, RuntimeError = 1 };
 
 // Game configuration
 struct GameConfig {
@@ -28,9 +25,9 @@ auto main() -> int {
     game.Run(GameConfig::kFrameDuration);
     std::cout << "Game has terminated successfully.\n";
 
-    return static_cast<int>(ExitCode::Success);;
-  }
-  catch (const std::exception& e) {
+    return static_cast<int>(ExitCode::Success);
+    ;
+  } catch (const std::exception &e) {
     std::cerr << "Unhandled Exception: " << e.what() << std::endl;
     return static_cast<int>(ExitCode::RuntimeError);
   }
