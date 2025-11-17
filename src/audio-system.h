@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <future>
 #include <mutex>
+#include <optional>
 #include <queue>
 
 /**
