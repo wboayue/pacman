@@ -89,7 +89,7 @@ auto AudioSystem::processAudioQueue() -> void {
       while (Mix_Playing(-1) != 0) {
         SDL_Delay(100);
       }
-      Mix_FreeChunk(sound);
+      // Do not free here: AssetManager owns and caches Mix_Chunk
     }
 
     // Signal completion
