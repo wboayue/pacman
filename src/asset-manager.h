@@ -2,6 +2,7 @@
 #define ASSET_MANAGER_H
 
 #include <string>
+#include <unordered_map>
 
 #include "SDL.h"
 #include "SDL_mixer.h"
@@ -25,10 +26,13 @@ public:
   /// @param assetsPath Base directory for asset files
   AssetManager(const std::string &assetsPath) : assetsPath{assetsPath} {};
 
-  /// Loads a sound effect by asset path. Returns nullptr on failure.
+  /// Destructor that cleans up cached sounds.
+  ~AssetManager();
+
+  /// Loads a sound effect by asset path. Returns cached sound or loads and caches it.
   auto GetSound(const std::string &asset) -> Mix_Chunk *;
 
-  /// Loads a sound effect by Sound enum. Returns nullptr on failure.
+  /// Loads a sound effect by Sound enum. Returns cached sound or loads and caches it.
   auto GetSound(Sound sound) -> Mix_Chunk *;
 
   /// Creates an animated sprite from a sprite sheet.
@@ -43,6 +47,7 @@ public:
 private:
   std::string assetsPath;
   SDL_Renderer *renderer;
+  std::unordered_map<std::string, Mix_Chunk *> soundCache;
 };
 
 #endif

@@ -2,10 +2,28 @@
 
 #include "asset-manager.h"
 
+AssetManager::~AssetManager() {
+  for (auto &[path, chunk] : soundCache) {
+    if (chunk != nullptr) {
+      Mix_FreeChunk(chunk);
+    }
+  }
+  soundCache.clear();
+}
+
 auto AssetManager::GetSound(const std::string &asset) -> Mix_Chunk * {
+  // Check cache first
+  auto it = soundCache.find(asset);
+  if (it != soundCache.end()) {
+    return it->second;
+  }
+
+  // Load and cache the sound
   auto sound = Mix_LoadWAV(asset.c_str());
   if (sound == nullptr) {
     std::cerr << "Failed to load sound: " << asset << "\n";
+  } else {
+    soundCache[asset] = sound;
   }
   return sound;
 }
