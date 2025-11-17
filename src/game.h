@@ -1,12 +1,14 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <cstdlib>
 #include <random>
 #include <string>
 #include <vector>
 
 #include "SDL.h"
 
+#include "asset-manager.h"
 #include "audio-system.h"
 #include "board-manager.h"
 #include "game-context.h"
@@ -16,52 +18,28 @@
 #include "pellet.h"
 #include "renderer.h"
 
-/**
- * The Game class manages game entities and runs the game loop.
- */
+/// Main game orchestrator managing the game loop, entities, and subsystems.
+/// Uses a state machine pattern (Ready, Play, Paused, Dying, LevelComplete).
+/// Asset path configurable via ASSET_PATH environment variable.
 class Game {
 public:
-  /**
-   * Initializes the game.
-   */
+  /// Initializes SDL, renderer, and all game entities.
   Game();
 
-  /**
-   * Cleans up allocated resources.
-   */
+  /// Cleans up SDL resources.
   ~Game();
 
-  /**
-   * Runs the game loop. The game loop consists of:
-   * 1. getting user input
-   * 2. updating game entities
-   * 3. rendering the game entities
-   *
-   * @param target_frame_duration target duration for each frame
-   */
+  /// Runs the main game loop (input -> update -> render).
+  /// @param targetFrameDuration Target frame duration in milliseconds
   auto Run(std::size_t targetFrameDuration) -> void;
 
-  /**
-   * Gets the current score.
-   *
-   * @return current score
-   */
+  /// Returns the current score.
   auto GetScore() const -> int;
 
-  /**
-   * Checks if game initialization was successful.
-   *
-   * @return true if game initialized successfully, else false.
-   */
+  /// Returns true if initialization succeeded.
   auto Ready() const -> bool;
 
-  /**
-   * Loads a SDL_Texture from a file.
-   *
-   * @param fileName file to load texture from.
-   *
-   * @return SDL_Texture*
-   */
+  /// Loads a texture from file.
   auto GetTexture(const std::string &fileName) const -> SDL_Texture *;
 
   friend struct ReadyState;
@@ -70,8 +48,13 @@ public:
   friend struct DyingState;
   friend struct LevelCompleteState;
 
+  /// Pauses all entity animations.
   auto Pause() -> void;
+
+  /// Resumes all entity animations.
   auto Resume() -> void;
+
+  /// Plays a sound effect asynchronously.
   auto PlaySound(Sound sound) -> void;
 
 private:
@@ -95,6 +78,12 @@ private:
   std::shared_ptr<Ghost> blinky;
   GameContext context{};
   AudioSystem audio{};
+
+  std::string assetPath{[]() {
+    const char* env = std::getenv("ASSET_PATH");
+    return env ? env : "../assets";
+  }()};
+  AssetManager assetManager{assetPath};
 };
 
 #endif

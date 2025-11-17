@@ -8,19 +8,26 @@
 
 #include "sprite.h"
 
+/// Centralized resource loader for game assets (sounds, sprites, images).
 class AssetManager {
 public:
-  AssetManager(const std::string &dataPath) : dataPath{dataPath} {};
+  /// @param assetsPath Base directory for asset files
+  AssetManager(const std::string &assetsPath) : assetsPath{assetsPath} {};
 
+  /// Loads a sound effect. Returns nullptr on failure.
   auto GetSound(const std::string &asset) -> Mix_Chunk *;
+
+  /// Creates an animated sprite from a sprite sheet.
   auto CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite;
 
-  auto GetImagePath(const std::string &asset) -> std::string { return dataPath + asset; }
+  /// Returns full path to an image asset.
+  auto GetImagePath(const std::string &asset) -> std::string { return assetsPath + asset; }
 
-  auto GetImage(const std::string &asset) -> std::string { return dataPath + asset; }
+  /// Alias for GetImagePath.
+  auto GetImage(const std::string &asset) -> std::string { return assetsPath + asset; }
 
 private:
-  std::string dataPath;
+  std::string assetsPath;
   SDL_Renderer *renderer;
 };
 
