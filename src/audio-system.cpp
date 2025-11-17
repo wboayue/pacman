@@ -9,7 +9,7 @@
 // Audio format depends on SDL_mixer macro
 constexpr int kAudioFormat = MIX_DEFAULT_FORMAT;
 
-AudioSystem::AudioSystem() {
+AudioSystem::AudioSystem(AssetManager &assetManager) : assetManager_(assetManager) {
   // Initialize SDL audio subsystem
   if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -67,25 +67,6 @@ auto AudioSystem::PlaySound(Sound sound, std::optional<int> loop) -> std::future
   return future;
 }
 
-/**
- * @brief Maps Sound enum to corresponding audio file path
- *
- * @param sound The sound effect to map
- * @return std::string Path to the sound file
- */
-auto getSoundFile(Sound sound) -> std::string {
-  switch (sound) {
-  case Sound::kMunch1:
-    return "../assets/sounds/munch_1.wav";
-  case Sound::kPowerPellet:
-    return "../assets/sounds/power_pellet.wav";
-  case Sound::kDeath:
-    return "../assets/sounds/death_1.wav";
-  default:
-    return "../assets/sounds/game_start.wav";
-  }
-}
-
 auto AudioSystem::processAudioQueue() -> void {
   while (true) {
     AudioRequest request;
@@ -102,14 +83,13 @@ auto AudioSystem::processAudioQueue() -> void {
     }
 
     // Play the sound
-    std::string soundFile = getSoundFile(request.sound);
-    Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
+    Mix_Chunk *sound = assetManager_.GetSound(request.sound);
     if (sound != nullptr) {
       Mix_PlayChannel(-1, sound, request.loop.value_or(0));
       while (Mix_Playing(-1) != 0) {
         SDL_Delay(100);
       }
-      Mix_FreeChunk(sound);
+      // Do not free here: AssetManager owns and caches Mix_Chunk
     }
 
     // Signal completion
