@@ -46,7 +46,7 @@ public:
   Vec2 GetScatterCell() { return scatterCell; };
   void Activate() { active_ = true; };
   auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
-  auto IsReSpawning() const  -> bool { return mode_ == GhostMode::kReSpawn; }; 
+  auto IsReSpawning() const -> bool { return mode_ == GhostMode::kReSpawn; };
   auto Pause() -> void;
   auto Resume() -> void;
 
@@ -119,6 +119,22 @@ struct ClydeConfig : public GhostConfig {
   Direction GetInitialHeading() const override;
   Targeter GetTargeter() const override;
   Vec2 GetScatterCell() const override;
+};
+
+struct Blinky : public Ghost {
+  Blinky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Inky : public Ghost {
+  Inky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Pinky : public Ghost {
+  Pinky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+};
+
+struct Clyde : public Ghost {
+  Clyde(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
 };
 
 #endif

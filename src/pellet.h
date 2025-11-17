@@ -1,6 +1,7 @@
 #ifndef PELLET_H
 #define PELLET_H
 
+#include <memory>
 #include <string>
 #include <vector>
 

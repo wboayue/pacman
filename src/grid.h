@@ -3,7 +3,9 @@
 
 #include <fstream>
 #include <math.h>
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "SDL.h"
@@ -18,7 +20,7 @@ const int kGridHeight = 36;
 
 class Grid {
 public:
-  Grid(){};
+  Grid() {};
   Grid(std::vector<std::vector<Cell>> cells) : cells{cells} {};
 
   auto Update(const float deltaTime) -> void;

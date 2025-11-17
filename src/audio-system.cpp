@@ -1,17 +1,13 @@
 #include <iostream>
 
 #include "audio-system.h"
+#include "constants.h"
 
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-/**
- * @brief Audio system configuration constants
- */
-constexpr int kAudioFrequency = 44100;  ///< Sample rate in Hz
-constexpr int kAudioFormat = MIX_DEFAULT_FORMAT;  ///< Audio format (16-bit signed)
-constexpr int kAudioChannels = 2;       ///< Stereo output
-constexpr int kAudioChunkSize = 2048;   ///< Audio buffer size in bytes
+// Audio format depends on SDL_mixer macro
+constexpr int kAudioFormat = MIX_DEFAULT_FORMAT;
 
 AudioSystem::AudioSystem() {
   // Initialize SDL audio subsystem
@@ -44,7 +40,7 @@ AudioSystem::~AudioSystem() {
   }
 
   conditionVariable_.notify_one();
-  
+
   if (audioThread_.joinable()) {
     audioThread_.join();
   }
@@ -53,9 +49,9 @@ AudioSystem::~AudioSystem() {
   SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-auto AudioSystem::PlaySound(Sound sound, std::optional<int> loop) -> std::future<void> {  
+auto AudioSystem::PlaySound(Sound sound, std::optional<int> loop) -> std::future<void> {
   if (!initialized_) {
-    return std::async(std::launch::deferred, [](){});
+    return std::async(std::launch::deferred, []() {});
   }
 
   auto promise = std::make_shared<std::promise<void>>();
@@ -73,17 +69,21 @@ auto AudioSystem::PlaySound(Sound sound, std::optional<int> loop) -> std::future
 
 /**
  * @brief Maps Sound enum to corresponding audio file path
- * 
+ *
  * @param sound The sound effect to map
  * @return std::string Path to the sound file
  */
 auto getSoundFile(Sound sound) -> std::string {
-    switch (sound) {
-      case Sound::kMunch1: return "../assets/sounds/munch_1.wav";
-      case Sound::kPowerPellet: return "../assets/sounds/power_pellet.wav";
-      case Sound::kDeath: return "../assets/sounds/death_1.wav";
-      default: return "../assets/sounds/game_start.wav";
-    }
+  switch (sound) {
+  case Sound::kMunch1:
+    return "../assets/sounds/munch_1.wav";
+  case Sound::kPowerPellet:
+    return "../assets/sounds/power_pellet.wav";
+  case Sound::kDeath:
+    return "../assets/sounds/death_1.wav";
+  default:
+    return "../assets/sounds/game_start.wav";
+  }
 }
 
 auto AudioSystem::processAudioQueue() -> void {
@@ -91,21 +91,19 @@ auto AudioSystem::processAudioQueue() -> void {
     AudioRequest request;
     {
       std::unique_lock<std::mutex> lock(queueMutex_);
-      conditionVariable_.wait(lock, [this]() { 
-          return !audioQueue_.empty() || !running_; 
-      });
-      
+      conditionVariable_.wait(lock, [this]() { return !audioQueue_.empty() || !running_; });
+
       if (!running_ && audioQueue_.empty()) {
-          return;
+        return;
       }
-      
+
       request = audioQueue_.front();
       audioQueue_.pop();
     }
 
     // Play the sound
     std::string soundFile = getSoundFile(request.sound);
-    Mix_Chunk* sound = Mix_LoadWAV(soundFile.c_str());
+    Mix_Chunk *sound = Mix_LoadWAV(soundFile.c_str());
     if (sound != nullptr) {
       Mix_PlayChannel(-1, sound, request.loop.value_or(0));
       while (Mix_Playing(-1) != 0) {

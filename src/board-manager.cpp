@@ -1,11 +1,9 @@
 #include "board-manager.h"
 #include "constants.h"
 
-
 BoardManager::BoardManager(SDL_Renderer *renderer)
     : maze{renderer, "../assets/maze.png"}, pacman{renderer, "../assets/pacman.png"},
-      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"}
-      {}
+      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"} {}
 
 void BoardManager::Update(const float deltaTime, GameContext &context) {
   maze.Update(deltaTime);
@@ -24,24 +22,16 @@ void BoardManager::Render(SDL_Renderer *renderer) {
   RenderFruits(renderer);
 
   // Display score
-  static constexpr auto kHighScoreCell = Vec2{9, 0};
-  static constexpr auto k1UpCell = Vec2{3, 0};
-  static constexpr auto kScoreCell = Vec2{4, 1};
-
   WriteText(renderer, kHighScoreCell, "HIGH SCORE");
   WriteText(renderer, k1UpCell, "1UP");
   WriteText(renderer, kScoreCell, score);
 }
 
 void BoardManager::RenderExtraLives(SDL_Renderer *renderer) {
-  static constexpr int kLifeSize = 16;
-  static constexpr int kSpriteFrame = 4;
-  static constexpr Vec2 kLifeCell{4, 34};
-
   SDL_Rect source;
   source.w = kLifeSize;
   source.h = kLifeSize;
-  source.x = kSpriteFrame * kLifeSize;
+  source.x = kLifeSpriteFrame * kLifeSize;
   source.y = 0;
 
   for (auto i = 0; i < extraLives; ++i) {
@@ -57,9 +47,6 @@ void BoardManager::RenderExtraLives(SDL_Renderer *renderer) {
 }
 
 void BoardManager::RenderFruits(SDL_Renderer *renderer) {
-  static constexpr int kFruitSize = 16;
-  static constexpr Vec2 kFruitCell{24, 34};
-
   SDL_Rect source;
   source.w = kFruitSize;
   source.h = kFruitSize;
@@ -77,11 +64,8 @@ void BoardManager::RenderFruits(SDL_Renderer *renderer) {
 }
 
 void BoardManager::WriteText(SDL_Renderer *renderer, Vec2 position, const std::string &text) {
-  static constexpr int kLetterOffset = 1;
-  static constexpr int kDigitOffset = 31;
-
   SDL_Rect source{0, 0, kCellSize, kCellSize};
-  SDL_Rect destination{0 , 0, kCellSize, kCellSize};
+  SDL_Rect destination{0, 0, kCellSize, kCellSize};
 
   for (size_t i = 0; i < text.size(); ++i) {
     int ch = std::toupper(text[i]);

@@ -13,7 +13,4 @@ auto GameContext::Reset() -> void {
   pelletsConsumed = 0;
 }
 
-auto GameContext::LevelComplete() -> bool {
-  return pelletsConsumed >= kTotalPellets;
-}
-
+auto GameContext::LevelComplete() -> bool { return pelletsConsumed >= kTotalPellets; }

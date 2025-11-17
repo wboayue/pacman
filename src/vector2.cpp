@@ -1,3 +1,4 @@
+#include <cmath>
 #include <limits>
 
 #include "vector2.h"
@@ -40,9 +41,7 @@ auto Vec2::operator/(const float &rhs) const -> Vec2 {
 auto Vec2::operator*(const float &rhs) const -> Vec2 { return {x * rhs, y * rhs}; }
 
 // Checks two vectors for equality
-auto operator==(const Vec2 &lhs, const Vec2 &rhs) -> bool {
-  return lhs.x == rhs.x && lhs.y == rhs.y;
-};
+auto operator==(const Vec2 &lhs, const Vec2 &rhs) -> bool { return lhs.x == rhs.x && lhs.y == rhs.y; };
 
 // Computes floor of all vector components.
 auto Vec2::Floor() const -> Vec2 { return {std::floor(x), std::floor(y)}; }
