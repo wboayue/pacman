@@ -77,13 +77,13 @@ private:
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
   GameContext context{};
-  AudioSystem audio{};
 
   std::string assetPath{[]() {
     const char* env = std::getenv("ASSET_PATH");
     return env ? env : "../assets";
   }()};
   AssetManager assetManager{assetPath};
+  AudioSystem audio{assetManager};
 };
 
 #endif

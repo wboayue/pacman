@@ -7,16 +7,7 @@
 #include <optional>
 #include <queue>
 
-/**
- * @brief Enumeration of available sound effects in the game.
- */
-enum class Sound {
-  kIntro,       ///< Game intro/start sound
-  kMunch1,      ///< Pacman eating pellet sound
-  kMunch2,      ///< Alternative pellet eating sound
-  kPowerPellet, ///< Power pellet consumed sound
-  kDeath        ///< Pacman death sound
-};
+#include "asset-manager.h"
 
 /**
  * @brief Manages the game's audio system including sound effect playback.
@@ -32,8 +23,9 @@ public:
    *
    * Sets up SDL audio subsystem and SDL_mixer with default parameters.
    * Starts the audio processing thread.
+   * @param assetManager Reference to the asset manager for loading sounds
    */
-  AudioSystem();
+  explicit AudioSystem(AssetManager &assetManager);
 
   /**
    * @brief Cleans up audio system resources.
@@ -81,6 +73,7 @@ private:
   std::queue<AudioRequest> audioQueue_;       ///< Pending audio requests
   std::mutex queueMutex_;                     ///< Queue access protection
   std::condition_variable conditionVariable_; ///< New request notification
+  AssetManager &assetManager_;                ///< Reference to asset manager
 };
 
 #endif
