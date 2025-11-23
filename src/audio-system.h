@@ -108,6 +108,14 @@ private:
    */
   static auto channelFinishedCallback(int channel) -> void;
 
+  /**
+   * @brief Removes an active sound from all tracking maps and signals completion.
+   *
+   * Must be called while holding activeSoundsMutex_.
+   * @param handle The sound handle to remove
+   */
+  auto removeActiveSoundLocked(SoundHandle handle) -> void;
+
   bool initialized_{false};                   ///< Audio system initialization state
   bool running_{true};                        ///< Audio thread running state
   std::thread audioThread_;                   ///< Audio processing thread

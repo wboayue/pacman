@@ -215,6 +215,28 @@ auto AudioSystem::CancelAllSounds() -> void {
   }
 }
 
+auto AudioSystem::removeActiveSoundLocked(SoundHandle handle) -> void {
+  auto it = activeSounds_.find(handle);
+  if (it == activeSounds_.end()) {
+    return;
+  }
+
+  // Remove from channel mapping
+  channelToHandle_.erase(it->second.channel);
+
+  // Remove from sound type tracking if this was the active instance
+  auto typeIt = soundTypeToHandle_.find(it->second.sound);
+  if (typeIt != soundTypeToHandle_.end() && typeIt->second == handle) {
+    soundTypeToHandle_.erase(typeIt);
+  }
+
+  // Signal completion
+  it->second.completion->set_value();
+
+  // Remove from active sounds
+  activeSounds_.erase(it);
+}
+
 auto AudioSystem::cleanupFinishedSounds() -> void {
   std::lock_guard<std::mutex> lock(activeSoundsMutex_);
 
@@ -229,23 +251,7 @@ auto AudioSystem::cleanupFinishedSounds() -> void {
 
   // Remove finished sounds
   for (SoundHandle handle : finishedHandles) {
-    auto it = activeSounds_.find(handle);
-    if (it != activeSounds_.end()) {
-      // Remove from channel mapping
-      channelToHandle_.erase(it->second.channel);
-
-      // Remove from sound type tracking if this was the active instance
-      auto typeIt = soundTypeToHandle_.find(it->second.sound);
-      if (typeIt != soundTypeToHandle_.end() && typeIt->second == handle) {
-        soundTypeToHandle_.erase(typeIt);
-      }
-
-      // Signal completion
-      it->second.completion->set_value();
-
-      // Remove from active sounds
-      activeSounds_.erase(it);
-    }
+    removeActiveSoundLocked(handle);
   }
 }
 
@@ -259,25 +265,6 @@ auto AudioSystem::channelFinishedCallback(int channel) -> void {
   // Find the handle for this channel
   auto channelIt = instance_->channelToHandle_.find(channel);
   if (channelIt != instance_->channelToHandle_.end()) {
-    SoundHandle handle = channelIt->second;
-
-    // Find the active sound
-    auto soundIt = instance_->activeSounds_.find(handle);
-    if (soundIt != instance_->activeSounds_.end()) {
-      // Remove from sound type tracking if this was the active instance
-      auto typeIt = instance_->soundTypeToHandle_.find(soundIt->second.sound);
-      if (typeIt != instance_->soundTypeToHandle_.end() && typeIt->second == handle) {
-        instance_->soundTypeToHandle_.erase(typeIt);
-      }
-
-      // Signal completion
-      soundIt->second.completion->set_value();
-
-      // Remove from active sounds
-      instance_->activeSounds_.erase(soundIt);
-    }
-
-    // Remove from channel mapping
-    instance_->channelToHandle_.erase(channelIt);
+    instance_->removeActiveSoundLocked(channelIt->second);
   }
 }
