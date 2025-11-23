@@ -197,7 +197,9 @@ auto Game::Resume() -> void {
   }
 }
 
-auto Game::PlaySound(Sound sound) -> void { audio.PlaySound(sound, std::nullopt); }
+auto Game::PlaySound(Sound sound) -> void {
+  [[maybe_unused]] auto [handle, future] = audio.PlaySound(sound, std::nullopt);
+}
 
 // The following classes implement the game state machine.
 // Valid transitions are:
@@ -345,6 +347,7 @@ struct LevelCompleteState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
+    // game.audio.CancelAllSounds();
     // play sound
   }
 
