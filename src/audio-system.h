@@ -1,13 +1,18 @@
 #ifndef AUDIO_SYSTEM_H
 #define AUDIO_SYSTEM_H
 
+#include <atomic>
 #include <condition_variable>
 #include <future>
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <unordered_map>
 
 #include "asset-manager.h"
+
+/// Unique identifier for tracking individual sounds
+using SoundHandle = uint64_t;
 
 /**
  * @brief Manages the game's audio system including sound effect playback.
@@ -45,9 +50,21 @@ public:
    *
    * @param sound The sound effect to play
    * @param loop Optional number of times to loop the sound (-1 for infinite)
-   * @return std::future<void> Future object for tracking sound completion
+   * @return std::pair<SoundHandle, std::future<void>> Handle for cancellation and future for completion
    */
-  auto PlaySound(Sound sound, std::optional<int> loop) -> std::future<void>;
+  auto PlaySound(Sound sound, std::optional<int> loop) -> std::pair<SoundHandle, std::future<void>>;
+
+  /**
+   * @brief Cancels a specific playing sound by its handle.
+   *
+   * @param handle The unique identifier of the sound to cancel
+   */
+  auto CancelSound(SoundHandle handle) -> void;
+
+  /**
+   * @brief Cancels all currently playing sounds.
+   */
+  auto CancelAllSounds() -> void;
 
 private:
   /**
@@ -55,6 +72,18 @@ private:
    */
   struct AudioRequest {
     Sound sound;                                    ///< Sound to play
+    std::optional<int> loop;                        ///< Loop count
+    SoundHandle handle;                             ///< Unique handle for this sound
+    std::shared_ptr<std::promise<void>> completion; ///< Completion notification
+  };
+
+  /**
+   * @brief Internal structure tracking an actively playing sound.
+   */
+  struct ActiveSound {
+    int channel;                                    ///< SDL_mixer channel number
+    Sound sound;                                    ///< Sound type
+    SoundHandle handle;                             ///< Unique handle
     std::optional<int> loop;                        ///< Loop count
     std::shared_ptr<std::promise<void>> completion; ///< Completion notification
   };
@@ -67,6 +96,18 @@ private:
    */
   auto processAudioQueue() -> void;
 
+  /**
+   * @brief Cleans up finished sounds from the active sound tracking.
+   *
+   * Checks all active sounds and removes those that have finished playing.
+   */
+  auto cleanupFinishedSounds() -> void;
+
+  /**
+   * @brief SDL_mixer callback when a channel finishes playing.
+   */
+  static auto channelFinishedCallback(int channel) -> void;
+
   bool initialized_{false};                   ///< Audio system initialization state
   bool running_{true};                        ///< Audio thread running state
   std::thread audioThread_;                   ///< Audio processing thread
@@ -74,6 +115,15 @@ private:
   std::mutex queueMutex_;                     ///< Queue access protection
   std::condition_variable conditionVariable_; ///< New request notification
   AssetManager &assetManager_;                ///< Reference to asset manager
+
+  // Sound tracking for cancellation support
+  std::atomic<SoundHandle> nextHandle_{1};                       ///< Counter for generating unique handles
+  std::unordered_map<SoundHandle, ActiveSound> activeSounds_;    ///< Map of handle to active sound info
+  std::unordered_map<int, SoundHandle> channelToHandle_;         ///< Map of channel to sound handle
+  std::unordered_map<Sound, SoundHandle> soundTypeToHandle_;     ///< Map of sound type to active handle (for exclusive sounds)
+  std::mutex activeSoundsMutex_;                                 ///< Protection for active sounds maps
+
+  static AudioSystem* instance_;                                 ///< Singleton instance for callbacks
 };
 
 #endif
