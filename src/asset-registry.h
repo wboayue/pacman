@@ -1,9 +1,9 @@
 #ifndef ASSET_REGISTRY_H
 #define ASSET_REGISTRY_H
 
+#include <cstdlib>
 #include <optional>
 #include <string>
-#include <cstdlib>
 
 /**
  * @brief Enumeration of available sound effects in the game.
@@ -38,11 +38,11 @@ public:
   /// @param assetsPath Base directory for asset files
   AssetRegistry(const std::string &assetsPath) : assetsPath{assetsPath} {};
 
-  AssetRegistry() : assetsPath{[]() {
-      const char *env = std::getenv("ASSET_PATH");
-      return env ? env : "../assets";
-    }()} {
-  };
+  AssetRegistry()
+      : assetsPath{[]() {
+          const char *env = std::getenv("ASSET_PATH");
+          return env ? env : "../assets";
+        }()} {};
 
   ~AssetRegistry() {};
 
