@@ -13,7 +13,7 @@ auto boundLower(float pos) -> float;
 
 Pacman::Pacman(SDL_Renderer *renderer)
     : position_{kPacmanHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
-  sprite_ = std::make_unique<Sprite>(renderer, "../assets/sprites/pacman.png", 8, 16);
+  sprite_ = std::make_unique<Sprite>(renderer, Sprites::kPacman, 8, 16);
   sprite_->SetFrames({1, 2});
 }
 

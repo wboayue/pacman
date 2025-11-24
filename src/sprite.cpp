@@ -1,19 +1,18 @@
 #include <iostream>
 
 #include "SDL_image.h"
+
+#include "asset-manager.h"
 #include "sprite.h"
 
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture *;
-
-Sprite::Sprite(SDL_Renderer *renderer, std::string fileName) : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
-  texture = LoadTexture(renderer, fileName);
+Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite) : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   frameWidth = width;
 }
 
-Sprite::Sprite(SDL_Renderer *renderer, std::string fileName, int fps, int frameWidth)
-    : fps{fps}, currentFrame{0}, frames{0} {
-  texture = LoadTexture(renderer, fileName);
+Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite, int fps, int frameWidth) : fps{fps}, currentFrame{0}, frames{0} {
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   this->frameWidth = frameWidth;
   numFrames = width / frameWidth;

@@ -6,12 +6,13 @@
 
 #include "SDL.h"
 
+#include "asset-registry.h"
 #include "vector2.h"
 
 class Sprite {
 public:
-  Sprite(SDL_Renderer *renderer, std::string fileName);
-  Sprite(SDL_Renderer *renderer, std::string fileName, int fps, int frameWidth);
+  Sprite(SDL_Renderer *renderer, Sprites sprite);
+  Sprite(SDL_Renderer *renderer, Sprites sprite, int fps, int frameWidth);
 
   // TODO implement rule of 5
   ~Sprite();

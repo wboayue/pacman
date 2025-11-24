@@ -13,6 +13,12 @@ AssetManager::~AssetManager() {
   soundCache.clear();
 }
 
+auto AssetManager::LoadTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture * {
+  // Implementation depends on how sprites are mapped to file paths.
+  // This is a placeholder implementation.
+  return nullptr;
+}
+
 auto AssetManager::getSound(const std::string &asset) -> Mix_Chunk * {
   // Check cache first
   auto it = soundCache.find(asset);
@@ -54,8 +60,4 @@ auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {
   }
 
   return getSound(*soundPath);
-}
-
-auto AssetManager::CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite {
-  return Sprite{renderer, asset, fps, frameWidth};
 }
