@@ -16,17 +16,26 @@ AssetManager::~AssetManager() {
   soundCache.clear();
 }
 
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture *;
-
 static AssetRegistry Registry;
 
-auto AssetManager::LoadSpriteTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture * {
+auto AssetManager::LoadTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture * {
   const auto assetPath = Registry.GetSpritePath(sprite);
   if (!assetPath.has_value()) {
     throw std::runtime_error("Unknown sprite enum");
   }
 
-  return LoadTexture(renderer, *assetPath);
+  SDL_Surface *surface = IMG_Load(assetPath->c_str());
+  if (!surface) {
+    SDL_Log("Failed to load texture file %s", assetPath->c_str());
+    std::abort();
+    return nullptr;
+  }
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_assert(texture != nullptr);
+  SDL_FreeSurface(surface);
+
+  return texture;
 }
 
 auto AssetManager::getSound(const std::string &asset) -> Mix_Chunk * {
@@ -70,19 +79,4 @@ auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {
   }
 
   return getSound(*soundPath);
-}
-
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture * {
-  SDL_Surface *surface = IMG_Load(fileName.c_str());
-  if (!surface) {
-    SDL_Log("Failed to load texture file %s", fileName.c_str());
-    std::abort();
-    return nullptr;
-  }
-
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_assert(texture != nullptr);
-  SDL_FreeSurface(surface);
-
-  return texture;
 }

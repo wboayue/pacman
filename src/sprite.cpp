@@ -6,13 +6,13 @@
 #include "sprite.h"
 
 Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite) : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
-  texture = AssetManager::LoadSpriteTexture(renderer, sprite);
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   frameWidth = width;
 }
 
 Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite, int fps, int frameWidth) : fps{fps}, currentFrame{0}, frames{0} {
-  texture = AssetManager::LoadSpriteTexture(renderer, sprite);
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   this->frameWidth = frameWidth;
   numFrames = width / frameWidth;
