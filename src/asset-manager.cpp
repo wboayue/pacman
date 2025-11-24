@@ -28,7 +28,6 @@ auto AssetManager::LoadTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Te
   if (!surface) {
     SDL_Log("Failed to load texture file %s", assetPath->c_str());
     std::abort();
-    return nullptr;
   }
 
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
