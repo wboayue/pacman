@@ -2,8 +2,8 @@
 #include "constants.h"
 
 BoardManager::BoardManager(SDL_Renderer *renderer)
-    : maze{renderer, "../assets/maze.png"}, pacman{renderer, "../assets/pacman.png"},
-      fruits{renderer, "../assets/fruits.png"}, text{renderer, "../assets/white-text.png"} {}
+    : maze{renderer, "../assets/sprites/maze.png"}, pacman{renderer, "../assets/sprites/pacman.png"},
+      fruits{renderer, "../assets/sprites/fruits.png"}, text{renderer, "../assets/sprites/white-text.png"} {}
 
 void BoardManager::Update(const float deltaTime, GameContext &context) {
   maze.Update(deltaTime);

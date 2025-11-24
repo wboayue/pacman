@@ -52,7 +52,7 @@ public:
    * @param loop Optional number of times to loop the sound (-1 for infinite)
    * @return std::pair<SoundHandle, std::future<void>> Handle for cancellation and future for completion
    */
-  auto PlaySound(Sound sound, std::optional<int> loop) -> std::pair<SoundHandle, std::future<void>>;
+  auto PlaySound(Sounds sound, std::optional<int> loop) -> std::pair<SoundHandle, std::future<void>>;
 
   /**
    * @brief Cancels a specific playing sound by its handle.
@@ -71,7 +71,7 @@ private:
    * @brief Internal structure representing a sound playback request.
    */
   struct AudioRequest {
-    Sound sound;                                    ///< Sound to play
+    Sounds sound;                                    ///< Sound to play
     std::optional<int> loop;                        ///< Loop count
     SoundHandle handle;                             ///< Unique handle for this sound
     std::shared_ptr<std::promise<void>> completion; ///< Completion notification
@@ -82,7 +82,7 @@ private:
    */
   struct ActiveSound {
     int channel;                                    ///< SDL_mixer channel number
-    Sound sound;                                    ///< Sound type
+    Sounds sound;                                    ///< Sound type
     SoundHandle handle;                             ///< Unique handle
     std::optional<int> loop;                        ///< Loop count
     std::shared_ptr<std::promise<void>> completion; ///< Completion notification
@@ -128,7 +128,7 @@ private:
   std::atomic<SoundHandle> nextHandle_{1};                       ///< Counter for generating unique handles
   std::unordered_map<SoundHandle, ActiveSound> activeSounds_;    ///< Map of handle to active sound info
   std::unordered_map<int, SoundHandle> channelToHandle_;         ///< Map of channel to sound handle
-  std::unordered_map<Sound, SoundHandle> soundTypeToHandle_;     ///< Map of sound type to active handle (for exclusive sounds)
+  std::unordered_map<Sounds, SoundHandle> soundTypeToHandle_;     ///< Map of sound type to active handle (for exclusive sounds)
   std::mutex activeSoundsMutex_;                                 ///< Protection for active sounds maps
 
   static AudioSystem* instance_;                                 ///< Singleton instance for callbacks
