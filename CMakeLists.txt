@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.16)
 project(pacman
     VERSION 1.0.0
     DESCRIPTION "Pacman game implementation"
@@ -6,7 +6,8 @@ project(pacman
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSION OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Define source files
 set(SOURCES
@@ -43,10 +44,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -Wpedantic
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:DEBUG>
+)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${SDL2_INCLUDE_DIRS}
-    ${SDL2_IMAGE_INCLUDE_DIRS}
-    ${SDL2_MIXER_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -55,20 +57,20 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" ON)
 if(ENABLE_CLANG_TIDY)
   find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
   if(CLANG_TIDY_EXE)
-    # Apply to all C++ compilations
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,modernize-*")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,modernize-*"
+    )
     message(STATUS "clang-tidy enabled: ${CLANG_TIDY_EXE}")
   else()
     message(STATUS "clang-tidy not found. Static analysis disabled.")
   endif()
 endif()
 
-# Link libraries
-string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
+# Link libraries (using imported targets)
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${SDL2_LIBRARIES}
-    ${SDL2_IMAGE_LIBRARIES}
-    ${SDL2_MIXER_LIBRARIES}
+    SDL2::SDL2
+    SDL2::Image
+    SDL2::Mixer
 )
 
 # Install rules

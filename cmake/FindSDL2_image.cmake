@@ -98,3 +98,13 @@ set(SDL2IMAGE_INCLUDE_DIR ${SDL2_IMAGE_INCLUDE_DIRS})
 set(SDL2IMAGE_FOUND ${SDL2_IMAGE_FOUND})
 
 mark_as_advanced(SDL2_IMAGE_LIBRARY SDL2_IMAGE_INCLUDE_DIR)
+
+if(SDL2_IMAGE_FOUND)
+  # SDL2::Image target
+  if(SDL2_IMAGE_LIBRARY AND NOT TARGET SDL2::Image)
+    add_library(SDL2::Image UNKNOWN IMPORTED)
+    set_target_properties(SDL2::Image PROPERTIES
+                          IMPORTED_LOCATION "${SDL2_IMAGE_LIBRARY}"
+                          INTERFACE_INCLUDE_DIRECTORIES "${SDL2_IMAGE_INCLUDE_DIR}")
+  endif()
+endif()

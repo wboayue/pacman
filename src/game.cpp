@@ -347,7 +347,7 @@ struct LevelCompleteState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
-    // game.audio.CancelAllSounds();
+    game.audio.CancelAllSounds();
     // play sound
   }
 
