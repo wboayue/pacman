@@ -368,7 +368,7 @@ auto BlinkyConfig::GetTargeter() const -> Targeter {
 auto BlinkyConfig::GetScatterCell() const -> Vec2 { return kBlinkyScatterCell; }
 
 auto BlinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/blinky.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/blinky.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto BlinkyConfig::GetInitialPosition() const -> Vec2 {
@@ -408,7 +408,7 @@ auto InkyConfig::GetTargeter() const -> Targeter {
 auto InkyConfig::GetScatterCell() const -> Vec2 { return kInkyScatterCell; }
 
 auto InkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/inky.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/inky.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto InkyConfig::GetInitialPosition() const -> Vec2 {
@@ -446,7 +446,7 @@ auto PinkyConfig::GetTargeter() const -> Targeter {
 auto PinkyConfig::GetScatterCell() const -> Vec2 { return kPinkyScatterCell; }
 
 auto PinkyConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/pinky.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/pinky.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto PinkyConfig::GetInitialPosition() const -> Vec2 {
@@ -477,7 +477,7 @@ auto ClydeConfig::GetTargeter() const -> Targeter {
 auto ClydeConfig::GetScatterCell() const -> Vec2 { return kClydeScatterCell; }
 
 auto ClydeConfig::GetSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/clyde.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/clyde.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto ClydeConfig::GetInitialPosition() const -> Vec2 {
@@ -489,11 +489,11 @@ auto ClydeConfig::GetInitialHeading() const -> Direction { return Direction::kNo
 GhostConfig::GhostConfig(SDL_Renderer *renderer) : renderer{renderer} {}
 
 auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/scared-ghost.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/scared-ghost.png", kGhostFps, kGhostFrameWidth);
 }
 
 auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
-  return std::make_unique<Sprite>(renderer, "../assets/ghost-eyes.png", kGhostFps, kGhostFrameWidth);
+  return std::make_unique<Sprite>(renderer, "../assets/sprites/ghost-eyes.png", kGhostFps, kGhostFrameWidth);
 }
 
 // defines state machines for ghost behavior

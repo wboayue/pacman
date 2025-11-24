@@ -67,18 +67,18 @@ AudioSystem::~AudioSystem() {
   SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-auto AudioSystem::PlaySound(Sound sound, std::optional<int> loop) -> std::pair<SoundHandle, std::future<void>> {
+auto AudioSystem::PlaySound(Sounds sound, std::optional<int> loop) -> std::pair<SoundHandle, std::future<void>> {
   if (!initialized_) {
     auto future = std::async(std::launch::deferred, []() {});
     return {0, std::move(future)};
   }
 
   // For kPowerPellet, cancel any existing one before playing the new one
-  if (sound == Sound::kPowerPellet) {
+  if (sound == Sounds::kPowerPellet) {
     SoundHandle existingHandle = 0;
     {
       std::lock_guard<std::mutex> lock(activeSoundsMutex_);
-      auto it = soundTypeToHandle_.find(Sound::kPowerPellet);
+      auto it = soundTypeToHandle_.find(Sounds::kPowerPellet);
       if (it != soundTypeToHandle_.end()) {
         existingHandle = it->second;
       }
@@ -131,7 +131,7 @@ auto AudioSystem::processAudioQueue() -> void {
         activeSounds_[request.handle] = activeSound;
         channelToHandle_[channel] = request.handle;
         // Track exclusive sounds by type (for sounds like kPowerPellet that should only have one instance)
-        if (request.sound == Sound::kPowerPellet) {
+        if (request.sound == Sounds::kPowerPellet) {
           soundTypeToHandle_[request.sound] = request.handle;
         }
       } else {

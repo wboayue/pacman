@@ -55,7 +55,7 @@ public:
   auto Resume() -> void;
 
   /// Plays a sound effect asynchronously.
-  auto PlaySound(Sound sound) -> void;
+  auto PlaySound(Sounds sound) -> void;
 
 private:
   const Uint8 *processInput();

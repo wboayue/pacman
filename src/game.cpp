@@ -197,7 +197,7 @@ auto Game::Resume() -> void {
   }
 }
 
-auto Game::PlaySound(Sound sound) -> void {
+auto Game::PlaySound(Sounds sound) -> void {
   [[maybe_unused]] auto [handle, future] = audio.PlaySound(sound, std::nullopt);
 }
 
@@ -213,7 +213,7 @@ struct ReadyState : GameState {
   auto Enter(Game &game) -> void override {
     elapsedTime = 0.0f;
     game.pacman->Reset();
-    game.PlaySound(Sound::kIntro);
+    game.PlaySound(Sounds::kIntro);
   }
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
@@ -307,7 +307,7 @@ struct DyingState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
-    game.PlaySound(Sound::kDeath);
+    game.PlaySound(Sounds::kDeath);
     game.context.extraLives -= 1;
   }
 

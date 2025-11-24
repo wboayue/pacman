@@ -12,6 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Define source files
 set(SOURCES
     src/main.cpp
+    src/asset-registry.cpp
     src/audio-system.cpp
     src/game.cpp
     src/renderer.cpp

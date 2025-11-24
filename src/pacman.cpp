@@ -13,7 +13,7 @@ auto boundLower(float pos) -> float;
 
 Pacman::Pacman(SDL_Renderer *renderer)
     : position_{kPacmanHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
-  sprite_ = std::make_unique<Sprite>(renderer, "../assets/pacman.png", 8, 16);
+  sprite_ = std::make_unique<Sprite>(renderer, "../assets/sprites/pacman.png", 8, 16);
   sprite_->SetFrames({1, 2});
 }
 
@@ -62,7 +62,7 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameContext &context, Aud
     for (auto &ghost : ghosts) {
       if (currentPosition == ghost->GetCell() && !ghost->IsReSpawning()) {
         context.score += kEnergizerPoints;
-        [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sound::kPowerPellet, 5);
+        [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sounds::kPowerPellet, 5);
         ghost->ReSpawn();
       }
     }
@@ -75,10 +75,10 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameContext &context, Aud
       context.score += kEnergizerPoints;
       energizedFor_ = kEnergizerDuration;
       //      state.mode = GhostMode::kScared;
-      [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sound::kPowerPellet, 5);
+      [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sounds::kPowerPellet, 5);
     } else {
       context.score += kPelletPoints;
-      [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sound::kMunch1, std::nullopt);
+      [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sounds::kMunch1, std::nullopt);
     }
 
     context.pelletsConsumed += 1;

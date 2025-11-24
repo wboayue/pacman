@@ -11,7 +11,7 @@ AssetManager::~AssetManager() {
   soundCache.clear();
 }
 
-auto AssetManager::GetSound(const std::string &asset) -> Mix_Chunk * {
+auto AssetManager::getSound(const std::string &asset) -> Mix_Chunk * {
   // Check cache first
   auto it = soundCache.find(asset);
   if (it != soundCache.end()) {
@@ -28,25 +28,28 @@ auto AssetManager::GetSound(const std::string &asset) -> Mix_Chunk * {
   return sound;
 }
 
-auto AssetManager::GetSound(Sound sound) -> Mix_Chunk * {
-  std::string soundFile;
-  switch (sound) {
-  case Sound::kMunch1:
-    soundFile = assetsPath + "/sounds/munch_1.wav";
-    break;
-  case Sound::kPowerPellet:
-    soundFile = assetsPath + "/sounds/power_pellet.wav";
-    break;
-  case Sound::kDeath:
-    soundFile = assetsPath + "/sounds/death_1.wav";
-    break;
-  default:
-    soundFile = assetsPath + "/sounds/game_start.wav";
-    break;
+constexpr auto toString(Sounds sound) -> std::string_view {
+    switch (sound) {
+        case Sounds::kIntro:       return "Intro";
+        case Sounds::kMunch1:      return "Munch1";
+        case Sounds::kMunch2:      return "Munch2";
+        case Sounds::kPowerPellet: return "PowerPellet";
+        case Sounds::kDeath:       return "Death";
+    }
+    return "UnknownSound";
+}
+
+auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {
+  std::optional<std::string> soundPath = registry.GetSoundPath(sound);
+
+  if (!soundPath.has_value()) {
+    throw std::runtime_error("Unknown sound enum: " + std::string(toString(sound)));
   }
-  return GetSound(soundFile);
+
+  return getSound(*soundPath);
 }
 
 auto AssetManager::CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite {
   return Sprite{renderer, asset, fps, frameWidth};
 }
+
