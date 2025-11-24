@@ -6,10 +6,11 @@
 
 auto AssetRegistry::GetSoundPath(Sounds sound) -> std::optional<std::string> {
   static const std::unordered_map<Sounds, std::string> soundMap = {
+    { Sounds::kIntro,      "/sounds/game_start.wav" },
     { Sounds::kMunch1,     "/sounds/munch_1.wav" },
+    { Sounds::kMunch2,     "/sounds/munch_2.wav" },
     { Sounds::kPowerPellet,"/sounds/power_pellet.wav" },
-    { Sounds::kDeath,      "/sounds/death_1.wav" },
-    { Sounds::kIntro,      "/sounds/game_start.wav" }
+    { Sounds::kDeath,      "/sounds/death_1.wav" }
   };
 
   auto it = soundMap.find(sound);

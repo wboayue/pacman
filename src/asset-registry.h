@@ -15,21 +15,23 @@ enum class Sounds {
   kDeath        ///< Pacman death sound
 };
 
+/// Enumeration of sprite assets.
 enum class Sprites {
-  kPacman,
-  kBlinky,
-  kPinky,
-  kInky,
-  kClyde,
-  kScaredGhost,
-  kGhostEyes,
-  kPellet,
-  kPowerPellet,
-  kFruits,
-  kMaze,
-  kWhiteText
+  kPacman,      ///< Pacman sprite sheet
+  kBlinky,      ///< Red ghost (Blinky)
+  kPinky,       ///< Pink ghost (Pinky)
+  kInky,        ///< Cyan ghost (Inky)
+  kClyde,       ///< Orange ghost (Clyde)
+  kScaredGhost, ///< Frightened ghost sprite
+  kGhostEyes,   ///< Ghost eyes (respawning)
+  kPellet,      ///< Regular pellet
+  kPowerPellet, ///< Power pellet
+  kFruits,      ///< Bonus fruit sprites
+  kMaze,        ///< Maze background
+  kWhiteText    ///< White text font
 };
 
+/// Central registry mapping asset enums to file paths.
 class AssetRegistry {
 public:
   /// @param assetsPath Base directory for asset files
@@ -37,7 +39,10 @@ public:
 
   ~AssetRegistry() {};
 
+  /// Returns full path for a sound asset, or nullopt if unknown.
   auto GetSoundPath(Sounds sound) -> std::optional<std::string>;
+
+  /// Returns full path for a sprite asset, or nullopt if unknown.
   auto GetSpritePath(Sprites sprite) -> std::optional<std::string>;
 
 private:
