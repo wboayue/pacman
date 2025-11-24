@@ -79,7 +79,7 @@ private:
   GameContext context{};
 
   std::string assetPath{[]() {
-    const char *env = std::getenv("ASSET_PATH");
+    const char *env = std::getenv("ATH");
     return env ? env : "../assets";
   }()};
   AssetManager assetManager{assetPath};

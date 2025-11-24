@@ -22,7 +22,7 @@ public:
   /// Loads a sound effect by Sound enum. Returns cached sound or loads and caches it.
   auto GetSound(Sounds sound) -> Mix_Chunk *;
 
-  static auto LoadTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture *;
+  static auto LoadSpriteTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture *;
 
 private:
   /// Loads a sound effect by asset path. Returns cached sound or loads and caches it.
