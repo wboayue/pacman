@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string_view>
+#include <stdexcept>
 
 #include "asset-manager.h"
 
@@ -52,4 +54,3 @@ auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {
 auto AssetManager::CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite {
   return Sprite{renderer, asset, fps, frameWidth};
 }
-
