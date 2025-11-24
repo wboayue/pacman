@@ -10,7 +10,7 @@
 constexpr int kAudioFormat = MIX_DEFAULT_FORMAT;
 
 // Static instance for callbacks
-AudioSystem* AudioSystem::instance_ = nullptr;
+AudioSystem *AudioSystem::instance_ = nullptr;
 
 AudioSystem::AudioSystem(AssetManager &assetManager) : assetManager_(assetManager) {
   // Initialize SDL audio subsystem

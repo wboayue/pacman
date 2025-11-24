@@ -7,9 +7,8 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
-#include "sprite.h"
 #include "asset-registry.h"
-
+#include "sprite.h"
 
 /// Centralized resource loader for game assets (sounds, sprites, images).
 class AssetManager {
@@ -27,10 +26,8 @@ public:
   auto CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite;
 
 private:
-
   /// Loads a sound effect by asset path. Returns cached sound or loads and caches it.
   auto getSound(const std::string &asset) -> Mix_Chunk *;
-
 
   AssetRegistry registry;
   SDL_Renderer *renderer;

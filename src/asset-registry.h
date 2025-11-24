@@ -1,8 +1,8 @@
 #ifndef ASSET_REGISTRY_H
 #define ASSET_REGISTRY_H
 
-#include <string>
 #include <optional>
+#include <string>
 
 /**
  * @brief Enumeration of available sound effects in the game.

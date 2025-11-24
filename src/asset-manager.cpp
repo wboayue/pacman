@@ -1,6 +1,6 @@
 #include <iostream>
-#include <string_view>
 #include <stdexcept>
+#include <string_view>
 
 #include "asset-manager.h"
 
@@ -31,14 +31,19 @@ auto AssetManager::getSound(const std::string &asset) -> Mix_Chunk * {
 }
 
 constexpr auto toString(Sounds sound) -> std::string_view {
-    switch (sound) {
-        case Sounds::kIntro:       return "Intro";
-        case Sounds::kMunch1:      return "Munch1";
-        case Sounds::kMunch2:      return "Munch2";
-        case Sounds::kPowerPellet: return "PowerPellet";
-        case Sounds::kDeath:       return "Death";
-    }
-    return "UnknownSound";
+  switch (sound) {
+  case Sounds::kIntro:
+    return "Intro";
+  case Sounds::kMunch1:
+    return "Munch1";
+  case Sounds::kMunch2:
+    return "Munch2";
+  case Sounds::kPowerPellet:
+    return "PowerPellet";
+  case Sounds::kDeath:
+    return "Death";
+  }
+  return "UnknownSound";
 }
 
 auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {

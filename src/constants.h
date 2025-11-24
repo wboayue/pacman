@@ -19,8 +19,7 @@ enum class Direction {
 // =============================================================================
 static constexpr std::size_t kFramesPerSecond = 60;
 static constexpr std::size_t kMilliSecondsPerSecond = 1000;
-static constexpr std::size_t kFrameDuration =
-    kMilliSecondsPerSecond / kFramesPerSecond;
+static constexpr std::size_t kFrameDuration = kMilliSecondsPerSecond / kFramesPerSecond;
 
 // =============================================================================
 // Game State Durations (seconds)
@@ -52,8 +51,7 @@ static constexpr float kPacmanSpeedMultiplier = 0.8f;
 static constexpr float kEnergizerDuration = 6.0f;
 static constexpr Vec2 kPacmanHomeCell = Vec2{13, 26};
 static constexpr Vec2 kPacmanHomePosition =
-    Vec2{kPacmanHomeCell.x * kCellSize + (kCellSize / 2.0f),
-         kPacmanHomeCell.y * kCellSize + (kCellSize / 2.0f)};
+    Vec2{kPacmanHomeCell.x * kCellSize + (kCellSize / 2.0f), kPacmanHomeCell.y *kCellSize + (kCellSize / 2.0f)};
 
 // =============================================================================
 // Ghost Common
