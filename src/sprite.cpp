@@ -1,19 +1,18 @@
 #include <iostream>
 
 #include "SDL_image.h"
+
+#include "asset-manager.h"
 #include "sprite.h"
 
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture *;
-
-Sprite::Sprite(SDL_Renderer *renderer, std::string fileName) : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
-  texture = LoadTexture(renderer, fileName);
+Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite) : fps{0}, numFrames{1}, currentFrame{0}, frames{0} {
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   frameWidth = width;
 }
 
-Sprite::Sprite(SDL_Renderer *renderer, std::string fileName, int fps, int frameWidth)
-    : fps{fps}, currentFrame{0}, frames{0} {
-  texture = LoadTexture(renderer, fileName);
+Sprite::Sprite(SDL_Renderer *renderer, Sprites sprite, int fps, int frameWidth) : fps{fps}, currentFrame{0}, frames{0} {
+  texture = AssetManager::LoadTexture(renderer, sprite);
   SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
   this->frameWidth = frameWidth;
   numFrames = width / frameWidth;
@@ -60,19 +59,4 @@ auto Sprite::Render(SDL_Renderer *renderer, Vec2 destination) -> void {
 
 auto Sprite::Render(SDL_Renderer *renderer, const SDL_Rect &source, const SDL_Rect &destination) -> void {
   SDL_RenderCopy(renderer, texture, &source, &destination);
-}
-
-auto LoadTexture(SDL_Renderer *renderer, std::string fileName) -> SDL_Texture * {
-  SDL_Surface *surface = IMG_Load(fileName.c_str());
-  if (!surface) {
-    SDL_Log("Failed to load texture file %s", fileName.c_str());
-    std::abort();
-    return nullptr;
-  }
-
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_assert(texture != nullptr);
-  SDL_FreeSurface(surface);
-
-  return texture;
 }

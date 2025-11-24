@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include <string_view>
 
+#include "SDL.h"
+#include "SDL_image.h"
+
 #include "asset-manager.h"
 
 AssetManager::~AssetManager() {
@@ -11,6 +14,27 @@ AssetManager::~AssetManager() {
     }
   }
   soundCache.clear();
+}
+
+static AssetRegistry Registry;
+
+auto AssetManager::LoadTexture(SDL_Renderer *renderer, Sprites sprite) -> SDL_Texture * {
+  const auto assetPath = Registry.GetSpritePath(sprite);
+  if (!assetPath.has_value()) {
+    throw std::runtime_error("Unknown sprite enum");
+  }
+
+  SDL_Surface *surface = IMG_Load(assetPath->c_str());
+  if (!surface) {
+    SDL_Log("Failed to load texture file %s", assetPath->c_str());
+    std::abort();
+  }
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_assert(texture != nullptr);
+  SDL_FreeSurface(surface);
+
+  return texture;
 }
 
 auto AssetManager::getSound(const std::string &asset) -> Mix_Chunk * {
@@ -54,8 +78,4 @@ auto AssetManager::GetSound(Sounds sound) -> Mix_Chunk * {
   }
 
   return getSound(*soundPath);
-}
-
-auto AssetManager::CreateSprite(const std::string &asset, int frameWidth, int fps) -> Sprite {
-  return Sprite{renderer, asset, fps, frameWidth};
 }

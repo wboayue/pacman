@@ -1,6 +1,7 @@
 #ifndef ASSET_REGISTRY_H
 #define ASSET_REGISTRY_H
 
+#include <cstdlib>
 #include <optional>
 #include <string>
 
@@ -36,6 +37,12 @@ class AssetRegistry {
 public:
   /// @param assetsPath Base directory for asset files
   AssetRegistry(const std::string &assetsPath) : assetsPath{assetsPath} {};
+
+  AssetRegistry()
+      : assetsPath{[]() {
+          const char *env = std::getenv("ASSET_PATH");
+          return env ? env : "../assets";
+        }()} {};
 
   ~AssetRegistry() {};
 

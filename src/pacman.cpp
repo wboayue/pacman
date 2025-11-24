@@ -12,8 +12,8 @@ auto boundUpper(float pos) -> float;
 auto boundLower(float pos) -> float;
 
 Pacman::Pacman(SDL_Renderer *renderer)
-    : position_{kPacmanHomePosition}, velocity_{0, 0}, heading_{Direction::kNeutral} {
-  sprite_ = std::make_unique<Sprite>(renderer, "../assets/sprites/pacman.png", 8, 16);
+    : position_{kPacmanHomePosition}, velocity_{.x = 0, .y = 0}, heading_{Direction::kNeutral} {
+  sprite_ = std::make_unique<Sprite>(renderer, Sprites::kPacman, 8, 16);
   sprite_->SetFrames({1, 2});
 }
 
@@ -128,13 +128,13 @@ auto Pacman::updatePosition(float timeDelta) -> void {
 }
 
 auto Pacman::Reset() -> void {
-  velocity_ = Vec2{0, 0};
+  velocity_ = Vec2{.x = 0, .y = 0};
   position_ = kPacmanHomePosition;
   heading_ = Direction::kNeutral;
 }
 
 auto Pacman::Render(SDL_Renderer *renderer) -> void {
-  sprite_->Render(renderer, {floor(position_.x - kCellSize), floor(position_.y - kCellSize)});
+  sprite_->Render(renderer, {.x = floor(position_.x - kCellSize), .y = floor(position_.y - kCellSize)});
 }
 
 auto Pacman::ProcessInput(const Uint8 *state) -> void {
@@ -174,16 +174,16 @@ auto Pacman::NextCell(const Direction &direction) const -> Vec2 {
 
   switch (direction) {
   case Direction::kEast:
-    return {currentCell.x + 1, currentCell.y};
+    return {.x = currentCell.x + 1, .y = currentCell.y};
 
   case Direction::kWest:
-    return {currentCell.x - 1, currentCell.y};
+    return {.x = currentCell.x - 1, .y = currentCell.y};
 
   case Direction::kNorth:
-    return {currentCell.x, currentCell.y - 1};
+    return {.x = currentCell.x, .y = currentCell.y - 1};
 
   case Direction::kSouth:
-    return {currentCell.x, currentCell.y + 1};
+    return {.x = currentCell.x, .y = currentCell.y + 1};
 
   default:
     return currentCell;
@@ -222,15 +222,15 @@ auto framesForHeading(const Direction &direction) -> std::vector<int> {
 auto velocityForHeading(const Direction &direction) -> Vec2 {
   switch (direction) {
   case Direction::kEast:
-    return Vec2{kMaxSpeed * kPacmanSpeedMultiplier, 0};
+    return Vec2{.x = kMaxSpeed * kPacmanSpeedMultiplier, .y = 0};
   case Direction::kWest:
-    return Vec2{-kMaxSpeed * kPacmanSpeedMultiplier, 0};
+    return Vec2{.x = -kMaxSpeed * kPacmanSpeedMultiplier, .y = 0};
   case Direction::kNorth:
-    return Vec2{0, -kMaxSpeed * kPacmanSpeedMultiplier};
+    return Vec2{.x = 0, .y = -kMaxSpeed * kPacmanSpeedMultiplier};
   case Direction::kSouth:
-    return Vec2{0, kMaxSpeed * kPacmanSpeedMultiplier};
+    return Vec2{.x = 0, .y = kMaxSpeed * kPacmanSpeedMultiplier};
   case Direction::kNeutral:
-    return Vec2{0, 0};
+    return Vec2{.x = 0, .y = 0};
   }
 }
 
