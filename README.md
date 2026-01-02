@@ -2,6 +2,8 @@
 
 A modern C++20 implementation of the classic Pac‑Man, built with SDL2 and CMake. The codebase uses a clean state machine, resource managers, and an entity-centric design for clarity and extensibility.
 
+![Gameplay Screenshot](assets/screenshots/gameplay.png)
+
 ## Architecture Overview
 - States: Ready, Play, Paused, Dying, LevelComplete (centralized transitions).
 - Managers: `AssetManager` (textures), `AudioSystem` (async sound queue), `BoardManager` (maze & rules).
