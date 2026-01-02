@@ -142,13 +142,19 @@ auto Game::processInput() -> const Uint8 * {
 }
 
 auto Game::update(const float deltaTime) -> void {
+  updateEntities(deltaTime);
+  updateAnimations(deltaTime);
+}
+
+auto Game::updateEntities(const float deltaTime) -> void {
   pacman->Update(deltaTime, grid, context, audio, ghosts);
   for (auto &ghost : ghosts) {
     ghost->Update(deltaTime, grid, context, *pacman, *blinky);
   }
+}
 
+auto Game::updateAnimations(const float deltaTime) -> void {
   grid.Update(deltaTime);
-
   board->Update(deltaTime, context);
 }
 
@@ -218,7 +224,7 @@ struct ReadyState : GameState {
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
     game.processInput();
-    game.update(deltaTime);
+    game.updateAnimations(deltaTime);
     game.render();
 
     if (elapsedTime >= kReadyStateDuration) {
@@ -313,7 +319,7 @@ struct DyingState : GameState {
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
     game.processInput();
-    game.update(deltaTime);
+    game.updateAnimations(deltaTime);
     game.render();
 
     if (elapsedTime >= kDyingStateDuration) {
@@ -353,7 +359,7 @@ struct LevelCompleteState : GameState {
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
     game.processInput();
-    game.update(deltaTime);
+    game.updateAnimations(deltaTime);
     game.render();
 
     if (elapsedTime > kLevelCompleteStateDuration) {
