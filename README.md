@@ -332,4 +332,4 @@ pacman/
 
 ## License
 
-This project is for educational purposes.
+This project is licensed under the [MIT License](LICENSE).
