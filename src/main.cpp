@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "game.h"
+#include "asset-manager.h"
 
 // Exit codes
 enum class ExitCode { Success = 0, RuntimeError = 1 };
@@ -14,13 +15,15 @@ enum class ExitCode { Success = 0, RuntimeError = 1 };
  */
 auto main() -> int {
   try {
-    auto game = Game{};
+    const char *env = std::getenv("ASSET_PATH");
+    AssetManager assetManager{env ? env : "../assets"};
+
+    auto game = Game{assetManager};
 
     game.Run(kFrameDuration);
     std::cout << "Game has terminated successfully.\n";
 
     return static_cast<int>(ExitCode::Success);
-    ;
   } catch (const std::exception &e) {
     std::cerr << "Unhandled Exception: " << e.what() << std::endl;
     return static_cast<int>(ExitCode::RuntimeError);

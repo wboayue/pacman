@@ -1,7 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <cstdlib>
 #include <random>
 #include <string>
 #include <vector>
@@ -20,11 +19,13 @@
 
 /// Main game orchestrator managing the game loop, entities, and subsystems.
 /// Uses a state machine pattern (Ready, Play, Paused, Dying, LevelComplete).
-/// Asset path configurable via ASSET_PATH environment variable.
 class Game {
 public:
   /// Initializes SDL, renderer, and all game entities.
-  Game();
+  Game(AssetManager &assetManager);
+
+  Game(const Game &) = delete;
+  Game &operator=(const Game &) = delete;
 
   /// Cleans up SDL resources.
   ~Game();
@@ -78,12 +79,8 @@ private:
   std::shared_ptr<Ghost> blinky;
   GameContext context{};
 
-  std::string assetPath{[]() {
-    const char *env = std::getenv("ASSET_PATH");
-    return env ? env : "../assets";
-  }()};
-  AssetManager assetManager{assetPath};
-  AudioSystem audio{assetManager};
+  AssetManager &assetManager;
+  AudioSystem audio;
 };
 
 #endif
