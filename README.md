@@ -127,24 +127,38 @@ assets/
 ## Architecture Overview
 
 ```mermaid
-graph TD
-    subgraph Game["Game (Main Orchestrator)<br/>60 FPS: Input → Update → Render"]
-        SM[State Machine]
+graph LR
+    subgraph Game[Game Loop - 60 FPS]
+        Input --> Update --> Render
     end
 
-    SM --> Ready
-    Ready --> Play
-    Play <--> Paused
-    Play --> Dying
-    Play --> LevelComplete
-    Dying --> Ready
-    LevelComplete --> Ready
+    subgraph Subsystems
+        Renderer
+        Audio[Audio - Async]
+        Assets[Asset Manager]
+    end
 
-    Game --> Renderer
-    Game --> Audio["Audio System<br/>(Async)"]
-    Game --> Grid["Grid<br/>+ Pellets"]
-    Game --> Pacman
-    Game --> Ghosts["Ghosts<br/>(State Machine)"]
+    subgraph Entities
+        Pacman
+        Ghosts
+        Grid[Grid + Pellets]
+    end
+
+    Game --> Subsystems
+    Game --> Entities
+```
+
+**Game States:**
+
+```mermaid
+stateDiagram-v2
+    Ready --> Play: start
+    Play --> Paused: P key
+    Paused --> Play: P key
+    Play --> Dying: ghost collision
+    Play --> LevelComplete: all pellets
+    Dying --> Ready: lives > 0
+    LevelComplete --> Ready: next level
 ```
 
 ### Design Patterns
