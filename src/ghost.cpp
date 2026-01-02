@@ -520,12 +520,18 @@ public:
 
 class ChaseState : public GhostState {
 public:
-  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {
+  void Enter(Ghost &ghost, GhostStateType fromState) override {
+    if (fromState == GhostStateType::kScatter) {
+      ghost.SetHeading(reverseDirection(ghost.GetHeading()));
+    }
     ghost.SetFramesForHeading(ghost.GetHeading());
     ghost.SetVelocityForHeading(ghost.GetHeading());
   }
 
   auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    auto target = ghost.GetTargeter()(ghost, ctx.pacman, ctx.blinky, GhostMode::kChase);
+    ghost.UpdateMovement(deltaTime, ctx.grid, target);
+
     if (ctx.pacman.IsEnergized()) {
       return GhostStateType::kScared;
     }
@@ -533,9 +539,6 @@ public:
     if (ctx.waveManager.GetCurrentMode() == GhostMode::kScatter) {
       return GhostStateType::kScatter;
     }
-
-    auto target = ghost.GetTargeter()(ghost, ctx.pacman, ctx.blinky, GhostMode::kChase);
-    ghost.UpdateMovement(deltaTime, ctx.grid, target);
 
     return GhostStateType::kChase;
   }
@@ -553,6 +556,8 @@ public:
   }
 
   auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    ghost.UpdateMovement(deltaTime, ctx.grid, ghost.GetScatterCell());
+
     if (ctx.pacman.IsEnergized()) {
       return GhostStateType::kScared;
     }
@@ -560,8 +565,6 @@ public:
     if (ctx.waveManager.GetCurrentMode() == GhostMode::kChase) {
       return GhostStateType::kChase;
     }
-
-    ghost.UpdateMovement(deltaTime, ctx.grid, ghost.GetScatterCell());
 
     return GhostStateType::kScatter;
   }
@@ -576,11 +579,12 @@ public:
   }
 
   auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
-    if (!ctx.pacman.IsEnergized()) {
-      return ghost.GetPreviousActiveState();
-    }
-
     ghost.UpdateMovement(deltaTime, ctx.grid, ghost.GetScatterCell());
+
+    if (!ctx.pacman.IsEnergized()) {
+      return ctx.waveManager.GetCurrentMode() == GhostMode::kChase ? GhostStateType::kChase
+                                                                   : GhostStateType::kScatter;
+    }
 
     return GhostStateType::kScared;
   }

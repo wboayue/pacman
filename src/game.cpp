@@ -243,6 +243,8 @@ private:
 };
 
 struct PlayState : GameState {
+  auto Enter(Game &game) -> void override { game.waveManager_.Resume(); }
+
   auto Tick(Game &game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.pacman->ProcessInput(keyState);
@@ -295,6 +297,7 @@ struct PausedState : GameState {
 
 private:
   auto pause(Game &game) const -> void {
+    game.waveManager_.Pause();
     game.pacman->Pause();
     for (auto &ghost : game.ghosts) {
       ghost->Pause();
@@ -302,6 +305,7 @@ private:
   }
 
   auto resume(Game &game) const -> void {
+    game.waveManager_.Resume();
     game.pacman->Resume();
     for (auto &ghost : game.ghosts) {
       ghost->Resume();
@@ -315,6 +319,7 @@ struct DyingState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
+    game.waveManager_.Pause();
     game.PlaySound(Sounds::kDeath);
     game.context.extraLives -= 1;
   }
@@ -355,8 +360,8 @@ struct LevelCompleteState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
+    game.waveManager_.Pause();
     game.audio.CancelAllSounds();
-    // play sound
   }
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
