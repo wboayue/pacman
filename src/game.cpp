@@ -57,8 +57,8 @@ Game::Game(AssetManager &assetManager) : assetManager{assetManager}, audio{asset
 Game::~Game() { SDL_Quit(); }
 
 auto Game::createGhosts(SDL_Renderer *renderer) -> void {
-  // switch to stack
   blinky = std::make_shared<Ghost>(BlinkyConfig{renderer});
+  blinky->Activate();
   ghosts.push_back(blinky);
 
   auto inky = std::make_shared<Ghost>(InkyConfig{renderer});
