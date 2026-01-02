@@ -1,6 +1,8 @@
 #ifndef GHOST_H
 #define GHOST_H
 
+#include <memory>
+
 #include "constants.h"
 #include "game-context.h"
 #include "grid.h"
@@ -15,8 +17,26 @@ struct Candidate {
 
 class Ghost;
 class Pacman;
+class GhostState;
 
 using Targeter = Vec2 (*)(Ghost &me, Pacman &pacman, Ghost &blinky, GhostMode mode);
+
+enum class GhostStateType {
+  kPenned,
+  kExitingPen,
+  kChase,
+  kScatter,
+  kScared,
+  kRespawning,
+};
+
+struct UpdateContext {
+  Grid &grid;
+  GameContext &context;
+  Pacman &pacman;
+  Ghost &blinky;
+  GhostWaveManager &waveManager;
+};
 
 struct GhostConfig {
   GhostConfig(SDL_Renderer *renderer);
@@ -38,47 +58,74 @@ class Ghost {
 public:
   Ghost(const GhostConfig &config);
 
-  void Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky);
+  void Update(float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky,
+              GhostWaveManager &waveManager);
   void Render(SDL_Renderer *renderer);
   void Reset();
-  auto ReSpawn() -> void;
   Vec2 GetCell() const;
-  Vec2 GetScatterCell() { return scatterCell; };
-  void Activate() { active_ = true; };
-  auto IsChasing() const -> bool { return mode_ == GhostMode::kChase; };
-  auto IsReSpawning() const -> bool { return mode_ == GhostMode::kReSpawn; };
+  Vec2 GetScatterCell() const { return scatterCell_; }
+  void Activate() { active_ = true; }
+  auto GetStateType() const -> GhostStateType { return stateType_; }
+  auto IsScared() const -> bool { return stateType_ == GhostStateType::kScared; }
+  auto IsRespawning() const -> bool { return stateType_ == GhostStateType::kRespawning; }
   auto Pause() -> void;
   auto Resume() -> void;
 
+  // State machine
+  void TransitionTo(GhostStateType newState);
+  auto GetPreviousActiveState() const -> GhostStateType { return previousActiveState_; }
+
+  // Accessors for states
+  auto GetPosition() const -> Vec2 { return position_; }
+  auto GetHeading() const -> Direction { return heading_; }
+  auto GetVelocity() const -> Vec2 { return velocity_; }
+  auto GetInitialPosition() const -> Vec2 { return initialPosition_; }
+  auto GetTargeter() const -> Targeter { return targeter_; }
+  auto IsActive() const -> bool { return active_; }
+
+  // Mutators for states
+  void SetPosition(Vec2 pos) { position_ = pos; }
+  void SetHeading(Direction dir) { heading_ = dir; }
+  void SetVelocity(Vec2 vel) { velocity_ = vel; }
+  void SetPreviousHeading(Direction dir) { previousHeading_ = dir; }
+  void SetPreviousCell(Vec2 cell) { previousCell_ = cell; }
+  auto GetPreviousHeading() const -> Direction { return previousHeading_; }
+  auto GetPreviousCell() const -> Vec2 { return previousCell_; }
+
+  // Movement helpers for states
+  void SetFramesForHeading(Direction heading);
+  void SetVelocityForHeading(Direction heading);
+  void ExitPen(float deltaTime);
+  void PenDance(float deltaTime);
+  void MoveTowards(Grid &grid, const Vec2 &target);
+  auto InCellCenter() const -> bool;
+  auto IsInPen() const -> bool;
+  auto IsInTunnel() const -> bool;
+  auto NextCell(const Direction &direction) const -> Vec2;
+  auto Candidates(Grid &grid) -> std::vector<Candidate>;
+
 private:
-  void setFramesForHeading(Direction heading);
-  void setVelocityForHeading(Direction heading);
-  bool isInPen();
-  void exitPen(const float deltaTime);
-  void penDance(const float deltaTime);
-  auto moveTowards(Grid &grid, const Vec2 &target) -> void;
-  bool inCellCenter();
-  bool atDecisionPoint(Grid &grid) const;
-  std::vector<Candidate> candidates(Grid &grid);
-  auto isInTunnel() -> bool;
-  auto nextCell(const Direction &direction) const -> Vec2;
+  auto createState(GhostStateType type) -> std::unique_ptr<GhostState>;
 
   bool active_{false};
   Vec2 position_{};
   Vec2 initialPosition_;
   Vec2 velocity_{};
   Direction heading_;
-  Targeter targeter;
+  Targeter targeter_;
 
   Direction previousHeading_{Direction::kNeutral};
   Vec2 previousCell_{0, 0};
-  Vec2 scatterCell{0, 0};
+  Vec2 scatterCell_{0, 0};
 
-  GhostMode mode_{GhostMode::kChase};
+  // State machine
+  std::unique_ptr<GhostState> state_;
+  GhostStateType stateType_{GhostStateType::kPenned};
+  GhostStateType previousActiveState_{GhostStateType::kScatter};
 
-  std::unique_ptr<Sprite> sprite;
-  std::unique_ptr<Sprite> scaredSprite;
-  std::unique_ptr<Sprite> reSpawnSprite;
+  std::unique_ptr<Sprite> sprite_;
+  std::unique_ptr<Sprite> scaredSprite_;
+  std::unique_ptr<Sprite> respawnSprite_;
 };
 
 struct BlinkyConfig : public GhostConfig {
@@ -135,6 +182,14 @@ struct Pinky : public Ghost {
 
 struct Clyde : public Ghost {
   Clyde(SDL_Renderer *renderer) : Ghost{ClydeConfig{renderer}} {};
+};
+
+// Base class for ghost states
+class GhostState {
+public:
+  virtual ~GhostState() = default;
+  virtual void Enter(Ghost &ghost) = 0;
+  virtual auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType = 0;
 };
 
 #endif

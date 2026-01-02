@@ -147,9 +147,10 @@ auto Game::update(const float deltaTime) -> void {
 }
 
 auto Game::updateEntities(const float deltaTime) -> void {
+  waveManager_.Update(deltaTime);
   pacman->Update(deltaTime, grid, context, audio, ghosts);
   for (auto &ghost : ghosts) {
-    ghost->Update(deltaTime, grid, context, *pacman, *blinky);
+    ghost->Update(deltaTime, grid, context, *pacman, *blinky, waveManager_);
   }
 }
 
@@ -219,6 +220,7 @@ struct ReadyState : GameState {
   auto Enter(Game &game) -> void override {
     elapsedTime = 0.0f;
     game.pacman->Reset();
+    game.waveManager_.Reset();
     game.PlaySound(Sounds::kIntro);
   }
 
@@ -266,7 +268,7 @@ private:
 
   auto wasKilled(Game &game) const -> bool {
     for (auto &ghost : game.ghosts) {
-      if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
+      if (!ghost->IsScared() && !ghost->IsRespawning() && (ghost->GetCell() == game.pacman->GetCell())) {
         return true;
       }
     }
@@ -376,6 +378,7 @@ private:
   auto completeLevel(Game &game) const -> void {
     game.grid.Reset(game.renderer_->sdl_renderer);
     game.pacman->Reset();
+    game.waveManager_.Reset();
     game.context.NextLevel();
 
     for (auto &ghost : game.ghosts) {

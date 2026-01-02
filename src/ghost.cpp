@@ -36,99 +36,52 @@ auto toCell(const Vec2 &position) -> Vec2 {
 
 Ghost::Ghost(const GhostConfig &config)
     : initialPosition_{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
-      targeter{config.GetTargeter()}, scatterCell{config.GetScatterCell()}, sprite{config.GetSprite()},
-      scaredSprite{config.GetScaredSprite()}, reSpawnSprite{config.GetReSpawnSprite()} {
+      targeter_{config.GetTargeter()}, scatterCell_{config.GetScatterCell()}, sprite_{config.GetSprite()},
+      scaredSprite_{config.GetScaredSprite()}, respawnSprite_{config.GetReSpawnSprite()} {
   position_ = initialPosition_;
-  setFramesForHeading(heading_);
+  SetFramesForHeading(heading_);
+
+  // Initialize state based on starting position
+  if (IsInPen()) {
+    stateType_ = GhostStateType::kPenned;
+  } else {
+    stateType_ = GhostStateType::kScatter;
+  }
+  state_ = createState(stateType_);
+  state_->Enter(*this);
 }
 
-auto Ghost::Update(const float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky) -> void {
-  if (isInPen()) {
-    // update penned
-    if (active_) {
-      exitPen(deltaTime);
-    } else {
-      penDance(deltaTime);
-    }
-  } else if (isInTunnel()) {
-    position_ += (velocity_ * deltaTime);
+void Ghost::Update(float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky,
+                   GhostWaveManager &waveManager) {
+  UpdateContext ctx{grid, context, pacman, blinky, waveManager};
 
-    // teleport on side
-    if (position_.x < -16) {
-      position_.x = kGridWidth * kCellSize + 16;
-    } else if (position_.x > kGridWidth * kCellSize + 16) {
-      position_.x = -16;
-    }
-  } else {
-    // update active
-
-    if (mode_ != GhostMode::kReSpawn) {
-      if (pacman.IsEnergized()) {
-        mode_ = GhostMode::kScared;
-      } else {
-        mode_ = GhostMode::kChase;
-      }
-    }
-
-    if (inCellCenter()) {
-      auto candidates_ = candidates(grid);
-      if (candidates_.size() == 1) {
-        heading_ = candidates_[0].heading;
-      } else {
-        auto target = targeter(*this, pacman, blinky, mode_);
-        if (mode_ == GhostMode::kReSpawn) {
-          target = toCell(initialPosition_);
-        }
-        moveTowards(grid, target);
-      }
-
-      setFramesForHeading(heading_);
-      setVelocityForHeading(heading_);
-    }
-
-    if (previousCell_ != GetCell()) {
-      previousHeading_ = heading_;
-    }
-
-    previousCell_ = GetCell();
-
-    if (mode_ == GhostMode::kReSpawn && previousCell_ == toCell(initialPosition_)) {
-      mode_ = GhostMode::kChase;
-    }
-
-    position_ += (velocity_ * deltaTime);
-
-    auto nextPosition = nextCell(heading_);
-    if (grid.GetCell(nextPosition) == Cell::kWall) {
-      switch (heading_) {
-      case Direction::kEast:
-        position_.x = boundUpper(position_.x);
-        break;
-      case Direction::kWest:
-        position_.x = boundLower(position_.x);
-        break;
-      case Direction::kNorth:
-        position_.y = boundLower(position_.y);
-        break;
-      case Direction::kSouth:
-        position_.y = boundUpper(position_.y);
-        break;
-      default:
-        break;
-      }
-    }
+  auto nextState = state_->Update(*this, deltaTime, ctx);
+  if (nextState != stateType_) {
+    TransitionTo(nextState);
   }
 
-  sprite->Update(deltaTime);
-  scaredSprite->Update(deltaTime);
-  reSpawnSprite->Update(deltaTime);
+  sprite_->Update(deltaTime);
+  scaredSprite_->Update(deltaTime);
+  respawnSprite_->Update(deltaTime);
 }
+
+void Ghost::TransitionTo(GhostStateType newState) {
+  // Track previous active state for returning from Scared/Respawn
+  if (stateType_ == GhostStateType::kChase || stateType_ == GhostStateType::kScatter) {
+    previousActiveState_ = stateType_;
+  }
+  stateType_ = newState;
+  state_ = createState(newState);
+  state_->Enter(*this);
+}
+
+// createState is defined after state classes below
 
 auto Ghost::Pause() -> void {}
 
 auto Ghost::Resume() -> void {}
 
-auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
+auto Ghost::NextCell(const Direction &direction) const -> Vec2 {
   auto currentCell = GetCell();
 
   switch (direction) {
@@ -149,7 +102,7 @@ auto Ghost::nextCell(const Direction &direction) const -> Vec2 {
   }
 }
 
-auto Ghost::isInTunnel() -> bool {
+auto Ghost::IsInTunnel() const -> bool {
   auto currentCell = GetCell();
 
   if (currentCell.y != kTunnelRow) {
@@ -159,8 +112,8 @@ auto Ghost::isInTunnel() -> bool {
   return currentCell.x < 4 || currentCell.x > 22;
 }
 
-auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> void {
-  auto candidates_ = candidates(grid);
+void Ghost::MoveTowards(Grid &grid, const Vec2 &target) {
+  auto candidates_ = Candidates(grid);
 
   if (candidates_.empty()) {
     heading_ = reverseDirection(heading_);
@@ -182,7 +135,7 @@ auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> void {
   }
 }
 
-auto Ghost::inCellCenter() -> bool {
+auto Ghost::InCellCenter() const -> bool {
   float centerX = center(position_.x);
   float centerY = center(position_.y);
 
@@ -192,38 +145,8 @@ auto Ghost::inCellCenter() -> bool {
          (heading_ == Direction::kWest && position_.x <= centerX);
 }
 
-auto Ghost::atDecisionPoint(Grid &grid) const -> bool {
-  static constexpr auto kMidPoint = 0.5f;
 
-  float x = position_.x - floor(position_.x);
-  float y = position_.y - floor(position_.y);
-
-  // reach middle of cell?
-  if ((heading_ == Direction::kNorth && y > kMidPoint) || (heading_ == Direction::kSouth && y < kMidPoint) ||
-      (heading_ == Direction::kEast && x < kMidPoint) || (heading_ == Direction::kWest && x > kMidPoint)) {
-    return false;
-  }
-
-  // will i run into a wall?
-  if (grid.GetCell(nextCell(heading_)) == Cell::kWall) {
-    return true;
-  }
-
-  switch (heading_) {
-  case Direction::kNorth:
-  case Direction::kSouth:
-    return grid.GetCell(nextCell(Direction::kEast)) != Cell::kWall ||
-           grid.GetCell(nextCell(Direction::kWest)) != Cell::kWall;
-  case Direction::kEast:
-  case Direction::kWest:
-    return grid.GetCell(nextCell(Direction::kNorth)) == Cell::kWall ||
-           grid.GetCell(nextCell(Direction::kSouth)) == Cell::kWall;
-  default:
-    return true;
-  }
-}
-
-auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
+auto Ghost::Candidates(Grid &grid) -> std::vector<Candidate> {
 
   auto results = std::vector<Candidate>{};
   for (auto option : options) {
@@ -242,53 +165,62 @@ auto Ghost::candidates(Grid &grid) -> std::vector<Candidate> {
   return results;
 }
 
-auto Ghost::Render(SDL_Renderer *renderer) -> void {
-  if (mode_ == GhostMode::kScared) {
-    scaredSprite->Render(renderer, {.x = floor(position_.x - kCellSize), .y = floor(position_.y - kCellSize)});
-  } else if (mode_ == GhostMode::kReSpawn) {
-    reSpawnSprite->Render(renderer, {.x = floor(position_.x - kCellSize), .y = floor(position_.y - kCellSize)});
+void Ghost::Render(SDL_Renderer *renderer) {
+  Vec2 renderPos{floor(position_.x - kCellSize), floor(position_.y - kCellSize)};
+
+  if (stateType_ == GhostStateType::kScared) {
+    scaredSprite_->Render(renderer, renderPos);
+  } else if (stateType_ == GhostStateType::kRespawning) {
+    respawnSprite_->Render(renderer, renderPos);
   } else {
-    sprite->Render(renderer, {.x = floor(position_.x - kCellSize), .y = floor(position_.y - kCellSize)});
+    sprite_->Render(renderer, renderPos);
   }
 }
 
-auto Ghost::Reset() -> void {
+void Ghost::Reset() {
   position_ = initialPosition_;
-  mode_ = GhostMode::kChase;
+  active_ = false;
+  previousHeading_ = Direction::kNeutral;
+  previousCell_ = {0, 0};
+
+  if (IsInPen()) {
+    stateType_ = GhostStateType::kPenned;
+  } else {
+    stateType_ = GhostStateType::kScatter;
+  }
+  state_ = createState(stateType_);
+  state_->Enter(*this);
 }
 
-auto Ghost::ReSpawn() -> void { mode_ = GhostMode::kReSpawn; }
-
-auto Ghost::setFramesForHeading(Direction heading) -> void {
+void Ghost::SetFramesForHeading(Direction heading) {
   switch (heading) {
   case Direction::kNorth:
-    sprite->SetFrames({4, 5});
-    reSpawnSprite->SetFrames({2});
+    sprite_->SetFrames({4, 5});
+    respawnSprite_->SetFrames({2});
     break;
 
   case Direction::kSouth:
-    sprite->SetFrames({6, 7});
-    reSpawnSprite->SetFrames({3});
+    sprite_->SetFrames({6, 7});
+    respawnSprite_->SetFrames({3});
     break;
 
   case Direction::kEast:
-    sprite->SetFrames({0, 1});
-    reSpawnSprite->SetFrames({1});
+    sprite_->SetFrames({0, 1});
+    respawnSprite_->SetFrames({0});
     break;
 
   case Direction::kWest:
-    sprite->SetFrames({2, 3});
-    reSpawnSprite->SetFrames({1});
+    sprite_->SetFrames({2, 3});
+    respawnSprite_->SetFrames({1});
     break;
 
   default:
-    sprite->SetFrames({2, 3});
+    sprite_->SetFrames({2, 3});
     break;
   }
 }
 
-// velocity for heading
-auto Ghost::setVelocityForHeading(Direction heading) -> void {
+auto Ghost::SetVelocityForHeading(Direction heading) -> void {
   switch (heading) {
   case Direction::kNorth:
     velocity_ = Vec2{.x = 0, .y = kMaxSpeed * -kGhostSpeedMultiplier};
@@ -312,7 +244,7 @@ auto Ghost::setVelocityForHeading(Direction heading) -> void {
   }
 }
 
-auto Ghost::isInPen() -> bool {
+auto Ghost::IsInPen() const -> bool {
   auto pos = GetCell();
   return pos.x >= 12 && pos.x <= 16 && pos.y >= 17 && pos.y <= 18;
 }
@@ -322,20 +254,20 @@ auto Ghost::GetCell() const -> Vec2 {
   return {.x = floor(t.x), .y = floor(t.y)};
 }
 
-auto Ghost::exitPen(const float deltaTime) -> void {
+auto Ghost::ExitPen(float deltaTime) -> void {
   heading_ = Direction::kNorth;
 
-  setFramesForHeading(heading_);
-  setVelocityForHeading(heading_);
+  SetFramesForHeading(heading_);
+  SetVelocityForHeading(heading_);
 
-  position_ += (velocity_ / 2.0 * deltaTime);
+  position_ += (velocity_ / 2.0f * deltaTime);
 }
 
-auto Ghost::penDance(const float deltaTime) -> void {
-  setFramesForHeading(heading_);
-  setVelocityForHeading(heading_);
+auto Ghost::PenDance(float deltaTime) -> void {
+  SetFramesForHeading(heading_);
+  SetVelocityForHeading(heading_);
 
-  position_ += (velocity_ / 2.0 * deltaTime); // NOLINT(cppcoreguidlines-avoid-magic-numbers)
+  position_ += (velocity_ / 2.0f * deltaTime);
 
   if (position_.y < kPenTop) {
     position_.y = kPenTop;
@@ -347,8 +279,8 @@ auto Ghost::penDance(const float deltaTime) -> void {
     heading_ = reverseDirection(heading_);
   }
 
-  setFramesForHeading(heading_);
-  setVelocityForHeading(heading_);
+  SetFramesForHeading(heading_);
+  SetVelocityForHeading(heading_);
 }
 
 // Blinky
@@ -496,109 +428,354 @@ auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, Sprites::kGhostEyes, kGhostFps, kGhostFrameWidth);
 }
 
-// defines state machines for ghost behavior
+// State implementations
 
-enum class GhostStates {
-  kPenned,
-  kExitPen,
-  kChase,
-  kScatter,
-  kScared,
-  kReSpawn,
-};
-
-// Base state interface
-class GhostState {
+class PennedState : public GhostState {
 public:
-  virtual ~GhostState() = default;
+  void Enter(Ghost &ghost) override {}
 
-  // Core state methods
-  virtual auto Enter(GameContext &context, Ghost &ghost) -> void {};
-  virtual auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates = 0;
-};
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    ghost.PenDance(deltaTime);
 
-struct PennedState : GhostState {
-  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.Reset(); }
-
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (ghost.IsChasing()) {
-      return GhostStates::kExitPen;
+    if (ghost.IsActive()) {
+      return GhostStateType::kExitingPen;
     }
-
-    return GhostStates::kPenned;
+    return GhostStateType::kPenned;
   }
 };
 
-struct ExitPenState : GhostState {
-  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.Reset(); }
+class ExitingPenState : public GhostState {
+public:
+  void Enter(Ghost &ghost) override { ghost.SetHeading(Direction::kNorth); }
 
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (ghost.GetCell().y < kPenTop) {
-      return GhostStates::kChase;
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    ghost.ExitPen(deltaTime);
+
+    if (ghost.GetCell().y < kPenTop / kCellSize) {
+      return GhostStateType::kScatter;
     }
-
-    return GhostStates::kExitPen;
+    return GhostStateType::kExitingPen;
   }
 };
 
-struct ChaseState : GhostState {
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (context.paused) {
-      return GhostStates::kChase;
-    }
-
-    // ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
-
-    if (ghost.IsReSpawning()) {
-      return GhostStates::kReSpawn;
-    }
-
-    return GhostStates::kChase;
+class ChaseState : public GhostState {
+public:
+  void Enter(Ghost &ghost) override {
+    ghost.SetFramesForHeading(ghost.GetHeading());
+    ghost.SetVelocityForHeading(ghost.GetHeading());
   }
-};
 
-// blinky, pinky, inky, clyde
-
-struct ScatterState : GhostState {
-
-  ScatterState(const Vec2 &scatterTarget) : scatterTarget{scatterTarget} {};
-
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (context.paused) {
-      return GhostStates::kScatter;
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    // Check for scared transition
+    if (ctx.pacman.IsEnergized()) {
+      return GhostStateType::kScared;
     }
 
-    //        ghost.Update(deltaTime, context.grid, context, *context.pacman, *context.ghosts[0]);
-
-    if (ghost.IsReSpawning()) {
-      return GhostStates::kReSpawn;
+    // Check wave manager for scatter transition
+    if (ctx.waveManager.GetCurrentMode() == GhostMode::kScatter) {
+      return GhostStateType::kScatter;
     }
 
-    return GhostStates::kScatter;
+    // Handle movement
+    updateMovement(ghost, deltaTime, ctx);
+
+    return GhostStateType::kChase;
   }
 
 private:
-  Vec2 scatterTarget;
-};
-
-struct ScaredState : GhostState {
-  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.ReSpawn(); }
-
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (context.paused) {
-      return GhostStates::kScared;
+  void updateMovement(Ghost &ghost, float deltaTime, const UpdateContext &ctx) {
+    if (ghost.IsInTunnel()) {
+      ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+      handleTunnelWrap(ghost);
+      return;
     }
-    return GhostStates::kScared;
+
+    if (ghost.InCellCenter()) {
+      auto candidates = ghost.Candidates(ctx.grid);
+      if (candidates.size() == 1) {
+        ghost.SetHeading(candidates[0].heading);
+      } else {
+        auto target = ghost.GetTargeter()(ghost, ctx.pacman, ctx.blinky, GhostMode::kChase);
+        ghost.MoveTowards(ctx.grid, target);
+      }
+      ghost.SetFramesForHeading(ghost.GetHeading());
+      ghost.SetVelocityForHeading(ghost.GetHeading());
+    }
+
+    if (ghost.GetPreviousCell() != ghost.GetCell()) {
+      ghost.SetPreviousHeading(ghost.GetHeading());
+    }
+    ghost.SetPreviousCell(ghost.GetCell());
+
+    ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+    handleWallCollision(ghost, ctx.grid);
+  }
+
+  void handleTunnelWrap(Ghost &ghost) {
+    auto pos = ghost.GetPosition();
+    if (pos.x < -16) {
+      ghost.SetPosition({kGridWidth * kCellSize + 16, pos.y});
+    } else if (pos.x > kGridWidth * kCellSize + 16) {
+      ghost.SetPosition({-16, pos.y});
+    }
+  }
+
+  void handleWallCollision(Ghost &ghost, Grid &grid) {
+    auto nextPos = ghost.NextCell(ghost.GetHeading());
+    if (grid.GetCell(nextPos) == Cell::kWall) {
+      auto pos = ghost.GetPosition();
+      switch (ghost.GetHeading()) {
+      case Direction::kEast:
+        ghost.SetPosition({boundUpper(pos.x), pos.y});
+        break;
+      case Direction::kWest:
+        ghost.SetPosition({boundLower(pos.x), pos.y});
+        break;
+      case Direction::kNorth:
+        ghost.SetPosition({pos.x, boundLower(pos.y)});
+        break;
+      case Direction::kSouth:
+        ghost.SetPosition({pos.x, boundUpper(pos.y)});
+        break;
+      default:
+        break;
+      }
+    }
   }
 };
 
-struct ReSpawnState : GhostState {
-  auto Enter(GameContext &context, Ghost &ghost) -> void override { ghost.ReSpawn(); }
+class ScatterState : public GhostState {
+public:
+  void Enter(Ghost &ghost) override {
+    // Reverse direction on entering scatter
+    ghost.SetHeading(reverseDirection(ghost.GetHeading()));
+    ghost.SetFramesForHeading(ghost.GetHeading());
+    ghost.SetVelocityForHeading(ghost.GetHeading());
+  }
 
-  auto Tick(GameContext &context, Ghost &ghost, float deltaTime) -> GhostStates override {
-    if (context.paused) {
-      return GhostStates::kReSpawn;
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    // Check for scared transition
+    if (ctx.pacman.IsEnergized()) {
+      return GhostStateType::kScared;
     }
-    return GhostStates::kReSpawn;
+
+    // Check wave manager for chase transition
+    if (ctx.waveManager.GetCurrentMode() == GhostMode::kChase) {
+      return GhostStateType::kChase;
+    }
+
+    // Handle movement toward scatter cell
+    updateMovement(ghost, deltaTime, ctx);
+
+    return GhostStateType::kScatter;
+  }
+
+private:
+  void updateMovement(Ghost &ghost, float deltaTime, const UpdateContext &ctx) {
+    if (ghost.IsInTunnel()) {
+      ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+      handleTunnelWrap(ghost);
+      return;
+    }
+
+    if (ghost.InCellCenter()) {
+      auto candidates = ghost.Candidates(ctx.grid);
+      if (candidates.size() == 1) {
+        ghost.SetHeading(candidates[0].heading);
+      } else {
+        ghost.MoveTowards(ctx.grid, ghost.GetScatterCell());
+      }
+      ghost.SetFramesForHeading(ghost.GetHeading());
+      ghost.SetVelocityForHeading(ghost.GetHeading());
+    }
+
+    if (ghost.GetPreviousCell() != ghost.GetCell()) {
+      ghost.SetPreviousHeading(ghost.GetHeading());
+    }
+    ghost.SetPreviousCell(ghost.GetCell());
+
+    ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+    handleWallCollision(ghost, ctx.grid);
+  }
+
+  void handleTunnelWrap(Ghost &ghost) {
+    auto pos = ghost.GetPosition();
+    if (pos.x < -16) {
+      ghost.SetPosition({kGridWidth * kCellSize + 16, pos.y});
+    } else if (pos.x > kGridWidth * kCellSize + 16) {
+      ghost.SetPosition({-16, pos.y});
+    }
+  }
+
+  void handleWallCollision(Ghost &ghost, Grid &grid) {
+    auto nextPos = ghost.NextCell(ghost.GetHeading());
+    if (grid.GetCell(nextPos) == Cell::kWall) {
+      auto pos = ghost.GetPosition();
+      switch (ghost.GetHeading()) {
+      case Direction::kEast:
+        ghost.SetPosition({boundUpper(pos.x), pos.y});
+        break;
+      case Direction::kWest:
+        ghost.SetPosition({boundLower(pos.x), pos.y});
+        break;
+      case Direction::kNorth:
+        ghost.SetPosition({pos.x, boundLower(pos.y)});
+        break;
+      case Direction::kSouth:
+        ghost.SetPosition({pos.x, boundUpper(pos.y)});
+        break;
+      default:
+        break;
+      }
+    }
   }
 };
+
+class ScaredState : public GhostState {
+public:
+  void Enter(Ghost &ghost) override {
+    // Reverse direction when becoming scared
+    ghost.SetHeading(reverseDirection(ghost.GetHeading()));
+    ghost.SetFramesForHeading(ghost.GetHeading());
+    ghost.SetVelocityForHeading(ghost.GetHeading());
+  }
+
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    // Check if energizer expired
+    if (!ctx.pacman.IsEnergized()) {
+      return ghost.GetPreviousActiveState();
+    }
+
+    // Handle movement (flee toward scatter cell)
+    updateMovement(ghost, deltaTime, ctx);
+
+    return GhostStateType::kScared;
+  }
+
+private:
+  void updateMovement(Ghost &ghost, float deltaTime, const UpdateContext &ctx) {
+    if (ghost.IsInTunnel()) {
+      ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+      handleTunnelWrap(ghost);
+      return;
+    }
+
+    if (ghost.InCellCenter()) {
+      auto candidates = ghost.Candidates(ctx.grid);
+      if (candidates.size() == 1) {
+        ghost.SetHeading(candidates[0].heading);
+      } else {
+        ghost.MoveTowards(ctx.grid, ghost.GetScatterCell());
+      }
+      ghost.SetFramesForHeading(ghost.GetHeading());
+      ghost.SetVelocityForHeading(ghost.GetHeading());
+    }
+
+    if (ghost.GetPreviousCell() != ghost.GetCell()) {
+      ghost.SetPreviousHeading(ghost.GetHeading());
+    }
+    ghost.SetPreviousCell(ghost.GetCell());
+
+    ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * deltaTime);
+    handleWallCollision(ghost, ctx.grid);
+  }
+
+  void handleTunnelWrap(Ghost &ghost) {
+    auto pos = ghost.GetPosition();
+    if (pos.x < -16) {
+      ghost.SetPosition({kGridWidth * kCellSize + 16, pos.y});
+    } else if (pos.x > kGridWidth * kCellSize + 16) {
+      ghost.SetPosition({-16, pos.y});
+    }
+  }
+
+  void handleWallCollision(Ghost &ghost, Grid &grid) {
+    auto nextPos = ghost.NextCell(ghost.GetHeading());
+    if (grid.GetCell(nextPos) == Cell::kWall) {
+      auto pos = ghost.GetPosition();
+      switch (ghost.GetHeading()) {
+      case Direction::kEast:
+        ghost.SetPosition({boundUpper(pos.x), pos.y});
+        break;
+      case Direction::kWest:
+        ghost.SetPosition({boundLower(pos.x), pos.y});
+        break;
+      case Direction::kNorth:
+        ghost.SetPosition({pos.x, boundLower(pos.y)});
+        break;
+      case Direction::kSouth:
+        ghost.SetPosition({pos.x, boundUpper(pos.y)});
+        break;
+      default:
+        break;
+      }
+    }
+  }
+};
+
+class RespawningState : public GhostState {
+public:
+  void Enter(Ghost &ghost) override {
+    // Set eyes sprite based on heading
+    ghost.SetFramesForHeading(ghost.GetHeading());
+  }
+
+  auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
+    // Move toward initial position at 2x speed
+    auto target = toCell(ghost.GetInitialPosition());
+
+    if (ghost.InCellCenter()) {
+      auto candidates = ghost.Candidates(ctx.grid);
+      if (candidates.size() == 1) {
+        ghost.SetHeading(candidates[0].heading);
+      } else {
+        ghost.MoveTowards(ctx.grid, target);
+      }
+      ghost.SetFramesForHeading(ghost.GetHeading());
+      ghost.SetVelocityForHeading(ghost.GetHeading());
+    }
+
+    if (ghost.GetPreviousCell() != ghost.GetCell()) {
+      ghost.SetPreviousHeading(ghost.GetHeading());
+    }
+    ghost.SetPreviousCell(ghost.GetCell());
+
+    // Move at 2x speed
+    ghost.SetPosition(ghost.GetPosition() + ghost.GetVelocity() * 2.0f * deltaTime);
+
+    // Handle tunnel wrap
+    auto pos = ghost.GetPosition();
+    if (pos.x < -16) {
+      ghost.SetPosition({kGridWidth * kCellSize + 16, pos.y});
+    } else if (pos.x > kGridWidth * kCellSize + 16) {
+      ghost.SetPosition({-16, pos.y});
+    }
+
+    // Check if arrived at pen
+    if (ghost.GetCell() == target) {
+      return GhostStateType::kExitingPen;
+    }
+
+    return GhostStateType::kRespawning;
+  }
+};
+
+// Factory function for creating ghost states
+auto Ghost::createState(GhostStateType type) -> std::unique_ptr<GhostState> {
+  switch (type) {
+  case GhostStateType::kPenned:
+    return std::make_unique<PennedState>();
+  case GhostStateType::kExitingPen:
+    return std::make_unique<ExitingPenState>();
+  case GhostStateType::kChase:
+    return std::make_unique<ChaseState>();
+  case GhostStateType::kScatter:
+    return std::make_unique<ScatterState>();
+  case GhostStateType::kScared:
+    return std::make_unique<ScaredState>();
+  case GhostStateType::kRespawning:
+    return std::make_unique<RespawningState>();
+  default:
+    return std::make_unique<PennedState>();
+  }
+}
