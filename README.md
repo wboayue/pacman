@@ -1,6 +1,6 @@
 # Pacman
 
-A modern C++20 implementation of the classic Pac‑Man, built with SDL2 and CMake. The codebase uses a clean state machine, resource managers, and an entity-centric design for clarity and extensibility.
+A C++20 implementation of the classic Pac‑Man, built with SDL2 and CMake. This is a learning exercise and not a complete implementation, but the clean state machine, resource managers, and entity-centric design make it easy to extend.
 
 ![Gameplay Screenshot](assets/screenshots/gameplay.png)
 
