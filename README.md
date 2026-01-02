@@ -1,6 +1,6 @@
 # Pacman
 
-A C++20 implementation of the classic Pac-Man arcade game using SDL2. This is a learning exercise and not a complete implementation, but the clean architecture makes it easy to understand and extend.
+A clean C++20 Pac-Man implementation using SDL2, designed for readability and extensibility.
 
 ![Gameplay Screenshot](assets/screenshots/gameplay.png)
 
@@ -15,6 +15,7 @@ A C++20 implementation of the classic Pac-Man arcade game using SDL2. This is a 
 - [Entities](#entities)
 - [Ghost AI](#ghost-ai)
 - [Extending the Game](#extending-the-game)
+- [Known Limitations](#known-limitations)
 
 ## Prerequisites
 
@@ -50,7 +51,7 @@ git clone https://github.com/wboayue/pacman.git
 cd pacman
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
+make -j4
 
 # Run (from build directory)
 ./pacman
@@ -237,7 +238,8 @@ stateDiagram-v2
     Chase --> Scatter: wave change
     Scatter --> Scared: power pellet
     Chase --> Scared: power pellet
-    Scared --> Scatter: timer expires
+    Scared --> Scatter: timer expires (scatter wave)
+    Scared --> Chase: timer expires (chase wave)
     Scared --> Respawning: eaten
     Respawning --> ExitingPen: reached pen
 ```
@@ -339,6 +341,17 @@ pacman/
     ├── vector2.h/cpp       # 2D vector math
     └── constants.h         # Game constants
 ```
+
+## Known Limitations
+
+This implementation focuses on core gameplay. Not yet implemented:
+
+- **Cut scenes**: No intermission animations between levels
+- **Level progression**: Levels don't increase in difficulty (speed, ghost behavior)
+- **Fruit bonus**: Bonus fruits appear but scoring not fully implemented
+- **High score**: No persistent high score tracking
+- **Multiple lives animation**: No extra life indicator animation
+- **Sound variations**: Limited sound variety compared to original arcade
 
 ## License
 
