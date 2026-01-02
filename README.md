@@ -125,22 +125,25 @@ assets/
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Game (Main Orchestrator)                 │
-│         60 FPS loop: Input → Update → Render                │
-├─────────────────────────────────────────────────────────────┤
-│                     State Machine                           │
-│     Ready → Play ↔ Paused → Dying → LevelComplete           │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-    ┌──────────┬───────────┼───────────┬──────────────┐
-    │          │           │           │              │
-┌───▼───┐ ┌────▼────┐ ┌────▼────┐ ┌────▼────┐ ┌──────▼──────┐
-│Renderer│ │  Audio  │ │  Grid   │ │ Pacman  │ │   Ghosts    │
-│        │ │ System  │ │         │ │         │ │(State Machine)│
-└────────┘ │(Async)  │ │ Pellets │ │         │ │             │
-           └─────────┘ └─────────┘ └─────────┘ └─────────────┘
+```mermaid
+graph TD
+    subgraph Game["Game (Main Orchestrator)<br/>60 FPS: Input → Update → Render"]
+        SM[State Machine]
+    end
+
+    SM --> Ready
+    Ready --> Play
+    Play <--> Paused
+    Play --> Dying
+    Play --> LevelComplete
+    Dying --> Ready
+    LevelComplete --> Ready
+
+    Game --> Renderer
+    Game --> Audio["Audio System<br/>(Async)"]
+    Game --> Grid["Grid<br/>+ Pellets"]
+    Game --> Pacman
+    Game --> Ghosts["Ghosts<br/>(State Machine)"]
 ```
 
 ### Design Patterns
@@ -226,10 +229,17 @@ AI-controlled enemies with individual personalities:
 
 ### Ghost States
 
-```
-Penned → ExitingPen → Scatter ↔ Chase
-                         ↓
-                      Scared → Respawning
+```mermaid
+stateDiagram-v2
+    Penned --> ExitingPen: activated
+    ExitingPen --> Scatter: exit pen
+    Scatter --> Chase: wave change
+    Chase --> Scatter: wave change
+    Scatter --> Scared: power pellet
+    Chase --> Scared: power pellet
+    Scared --> Scatter: timer expires
+    Scared --> Respawning: eaten
+    Respawning --> ExitingPen: reached pen
 ```
 
 | State | Behavior |
