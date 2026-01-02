@@ -56,7 +56,7 @@ private:
   bool isInPen();
   void exitPen(const float deltaTime);
   void penDance(const float deltaTime);
-  auto moveTowards(Grid &grid, const Vec2 &target) -> Direction;
+  auto moveTowards(Grid &grid, const Vec2 &target) -> void;
   bool inCellCenter();
   bool atDecisionPoint(Grid &grid) const;
   std::vector<Candidate> candidates(Grid &grid);
@@ -126,15 +126,15 @@ struct Blinky : public Ghost {
 };
 
 struct Inky : public Ghost {
-  Inky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+  Inky(SDL_Renderer *renderer) : Ghost{InkyConfig{renderer}} {};
 };
 
 struct Pinky : public Ghost {
-  Pinky(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+  Pinky(SDL_Renderer *renderer) : Ghost{PinkyConfig{renderer}} {};
 };
 
 struct Clyde : public Ghost {
-  Clyde(SDL_Renderer *renderer) : Ghost{BlinkyConfig{renderer}} {};
+  Clyde(SDL_Renderer *renderer) : Ghost{ClydeConfig{renderer}} {};
 };
 
 #endif
