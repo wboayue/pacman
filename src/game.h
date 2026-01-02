@@ -61,6 +61,8 @@ public:
 private:
   const Uint8 *processInput();
   void update(const float deltaTime);
+  void updateEntities(const float deltaTime);
+  void updateAnimations(const float deltaTime);
   void render();
 
   void createGhosts(SDL_Renderer *renderer);
