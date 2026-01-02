@@ -147,9 +147,10 @@ auto Game::update(const float deltaTime) -> void {
 }
 
 auto Game::updateEntities(const float deltaTime) -> void {
+  waveManager_.Update(deltaTime);
   pacman->Update(deltaTime, grid, context, audio, ghosts);
   for (auto &ghost : ghosts) {
-    ghost->Update(deltaTime, grid, context, *pacman, *blinky);
+    ghost->Update(deltaTime, grid, context, *pacman, *blinky, waveManager_);
   }
 }
 
@@ -219,6 +220,7 @@ struct ReadyState : GameState {
   auto Enter(Game &game) -> void override {
     elapsedTime = 0.0f;
     game.pacman->Reset();
+    game.waveManager_.Reset();
     game.PlaySound(Sounds::kIntro);
   }
 
@@ -241,6 +243,8 @@ private:
 };
 
 struct PlayState : GameState {
+  auto Enter(Game &game) -> void override { game.waveManager_.Resume(); }
+
   auto Tick(Game &game, float deltaTime) -> GameStates override {
     auto keyState = game.processInput();
     game.pacman->ProcessInput(keyState);
@@ -266,7 +270,7 @@ private:
 
   auto wasKilled(Game &game) const -> bool {
     for (auto &ghost : game.ghosts) {
-      if (ghost->IsChasing() && (ghost->GetCell() == game.pacman->GetCell())) {
+      if (ghost->CanKill() && (ghost->GetCell() == game.pacman->GetCell())) {
         return true;
       }
     }
@@ -293,6 +297,7 @@ struct PausedState : GameState {
 
 private:
   auto pause(Game &game) const -> void {
+    game.waveManager_.Pause();
     game.pacman->Pause();
     for (auto &ghost : game.ghosts) {
       ghost->Pause();
@@ -300,6 +305,7 @@ private:
   }
 
   auto resume(Game &game) const -> void {
+    game.waveManager_.Resume();
     game.pacman->Resume();
     for (auto &ghost : game.ghosts) {
       ghost->Resume();
@@ -313,6 +319,7 @@ struct DyingState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Dying State\n";
     elapsedTime = 0.0f;
+    game.waveManager_.Pause();
     game.PlaySound(Sounds::kDeath);
     game.context.extraLives -= 1;
   }
@@ -353,8 +360,8 @@ struct LevelCompleteState : GameState {
   auto Enter(Game &game) -> void override {
     std::cout << "Entering Level Complete State\n";
     elapsedTime = 0.0f;
+    game.waveManager_.Pause();
     game.audio.CancelAllSounds();
-    // play sound
   }
 
   auto Tick(Game &game, float deltaTime) -> GameStates override {
@@ -376,6 +383,7 @@ private:
   auto completeLevel(Game &game) const -> void {
     game.grid.Reset(game.renderer_->sdl_renderer);
     game.pacman->Reset();
+    game.waveManager_.Reset();
     game.context.NextLevel();
 
     for (auto &ghost : game.ghosts) {

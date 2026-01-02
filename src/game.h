@@ -80,6 +80,7 @@ private:
   std::vector<std::shared_ptr<Ghost>> ghosts;
   std::shared_ptr<Ghost> blinky;
   GameContext context{};
+  GhostWaveManager waveManager_{};
 
   AssetManager &assetManager;
   AudioSystem audio;
