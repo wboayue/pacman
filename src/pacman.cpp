@@ -61,7 +61,7 @@ auto Pacman::Update(const float deltaTime, Grid &grid, GameContext &context, Aud
     auto currentPosition = GetCell();
     for (auto &ghost : ghosts) {
       if (currentPosition == ghost->GetCell() && !ghost->IsReSpawning()) {
-        context.score += kEnergizerPoints;
+        context.score += kGhostPoints;
         [[maybe_unused]] auto [handle, future] = audio.PlaySound(Sounds::kPowerPellet, 5);
         ghost->ReSpawn();
       }
