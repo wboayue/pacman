@@ -68,6 +68,9 @@ public:
   auto GetStateType() const -> GhostStateType { return stateType_; }
   auto IsScared() const -> bool { return stateType_ == GhostStateType::kScared; }
   auto IsRespawning() const -> bool { return stateType_ == GhostStateType::kRespawning; }
+  auto CanKill() const -> bool {
+    return stateType_ == GhostStateType::kChase || stateType_ == GhostStateType::kScatter;
+  }
   auto Pause() -> void;
   auto Resume() -> void;
 
@@ -98,6 +101,9 @@ public:
   void ExitPen(float deltaTime);
   void PenDance(float deltaTime);
   void MoveTowards(Grid &grid, const Vec2 &target);
+  void HandleTunnelWrap();
+  void HandleWallCollision(Grid &grid);
+  void UpdateMovement(float deltaTime, Grid &grid, const Vec2 &target, float speedMultiplier = 1.0f);
   auto InCellCenter() const -> bool;
   auto IsInPen() const -> bool;
   auto IsInTunnel() const -> bool;

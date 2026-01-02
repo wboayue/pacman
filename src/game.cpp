@@ -268,7 +268,7 @@ private:
 
   auto wasKilled(Game &game) const -> bool {
     for (auto &ghost : game.ghosts) {
-      if (!ghost->IsScared() && !ghost->IsRespawning() && (ghost->GetCell() == game.pacman->GetCell())) {
+      if (ghost->CanKill() && (ghost->GetCell() == game.pacman->GetCell())) {
         return true;
       }
     }
