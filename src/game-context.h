@@ -19,7 +19,7 @@ public:
   void Pause();
   void Resume();
   void Reset();
-  auto GetCurrentMode() const -> GhostMode { return paused_ ? GhostMode::kScared : kWaves[currentWave_].first; }
+  auto GetCurrentMode() const -> GhostMode { return kWaves[currentWave_].first; }
   auto IsPaused() const -> bool { return paused_; }
 
 private:

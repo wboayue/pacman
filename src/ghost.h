@@ -42,7 +42,7 @@ struct GhostConfig {
   GhostConfig(SDL_Renderer *renderer);
 
   std::unique_ptr<Sprite> GetScaredSprite() const;
-  auto GetReSpawnSprite() const -> std::unique_ptr<Sprite>;
+  auto GetRespawnSprite() const -> std::unique_ptr<Sprite>;
 
   virtual std::unique_ptr<Sprite> GetSprite() const = 0;
   virtual Vec2 GetInitialPosition() const = 0;
@@ -194,7 +194,7 @@ struct Clyde : public Ghost {
 class GhostState {
 public:
   virtual ~GhostState() = default;
-  virtual void Enter(Ghost &ghost) = 0;
+  virtual void Enter(Ghost &ghost, GhostStateType fromState) = 0;
   virtual auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType = 0;
 };
 

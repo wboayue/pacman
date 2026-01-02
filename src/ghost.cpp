@@ -37,7 +37,7 @@ auto toCell(const Vec2 &position) -> Vec2 {
 Ghost::Ghost(const GhostConfig &config)
     : initialPosition_{config.GetInitialPosition()}, heading_{config.GetInitialHeading()},
       targeter_{config.GetTargeter()}, scatterCell_{config.GetScatterCell()}, sprite_{config.GetSprite()},
-      scaredSprite_{config.GetScaredSprite()}, respawnSprite_{config.GetReSpawnSprite()} {
+      scaredSprite_{config.GetScaredSprite()}, respawnSprite_{config.GetRespawnSprite()} {
   position_ = initialPosition_;
   SetFramesForHeading(heading_);
 
@@ -48,7 +48,7 @@ Ghost::Ghost(const GhostConfig &config)
     stateType_ = GhostStateType::kScatter;
   }
   state_ = createState(stateType_);
-  state_->Enter(*this);
+  state_->Enter(*this, stateType_); // Initial state, no previous
 }
 
 void Ghost::Update(float deltaTime, Grid &grid, GameContext &context, Pacman &pacman, Ghost &blinky,
@@ -70,9 +70,10 @@ void Ghost::TransitionTo(GhostStateType newState) {
   if (stateType_ == GhostStateType::kChase || stateType_ == GhostStateType::kScatter) {
     previousActiveState_ = stateType_;
   }
+  auto fromState = stateType_;
   stateType_ = newState;
   state_ = createState(newState);
-  state_->Enter(*this);
+  state_->Enter(*this, fromState);
 }
 
 // createState is defined after state classes below
@@ -246,7 +247,7 @@ void Ghost::Reset() {
     stateType_ = GhostStateType::kScatter;
   }
   state_ = createState(stateType_);
-  state_->Enter(*this);
+  state_->Enter(*this, stateType_); // Reset, no previous
 }
 
 void Ghost::SetFramesForHeading(Direction heading) {
@@ -481,7 +482,7 @@ auto GhostConfig::GetScaredSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, Sprites::kScaredGhost, kGhostFps, kGhostFrameWidth);
 }
 
-auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
+auto GhostConfig::GetRespawnSprite() const -> std::unique_ptr<Sprite> {
   return std::make_unique<Sprite>(renderer, Sprites::kGhostEyes, kGhostFps, kGhostFrameWidth);
 }
 
@@ -489,7 +490,7 @@ auto GhostConfig::GetReSpawnSprite() const -> std::unique_ptr<Sprite> {
 
 class PennedState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override {}
+  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {}
 
   auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
     ghost.PenDance(deltaTime);
@@ -503,7 +504,9 @@ public:
 
 class ExitingPenState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override { ghost.SetHeading(Direction::kNorth); }
+  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {
+    ghost.SetHeading(Direction::kNorth);
+  }
 
   auto Update(Ghost &ghost, float deltaTime, const UpdateContext &ctx) -> GhostStateType override {
     ghost.ExitPen(deltaTime);
@@ -517,7 +520,7 @@ public:
 
 class ChaseState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override {
+  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {
     ghost.SetFramesForHeading(ghost.GetHeading());
     ghost.SetVelocityForHeading(ghost.GetHeading());
   }
@@ -540,8 +543,11 @@ public:
 
 class ScatterState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override {
-    ghost.SetHeading(reverseDirection(ghost.GetHeading()));
+  void Enter(Ghost &ghost, GhostStateType fromState) override {
+    // Only reverse direction when transitioning from Chase (not from ExitingPen)
+    if (fromState == GhostStateType::kChase) {
+      ghost.SetHeading(reverseDirection(ghost.GetHeading()));
+    }
     ghost.SetFramesForHeading(ghost.GetHeading());
     ghost.SetVelocityForHeading(ghost.GetHeading());
   }
@@ -563,7 +569,7 @@ public:
 
 class ScaredState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override {
+  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {
     ghost.SetHeading(reverseDirection(ghost.GetHeading()));
     ghost.SetFramesForHeading(ghost.GetHeading());
     ghost.SetVelocityForHeading(ghost.GetHeading());
@@ -582,7 +588,7 @@ public:
 
 class RespawningState : public GhostState {
 public:
-  void Enter(Ghost &ghost) override {
+  void Enter(Ghost &ghost, GhostStateType /*fromState*/) override {
     ghost.SetFramesForHeading(ghost.GetHeading());
   }
 
