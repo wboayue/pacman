@@ -159,7 +159,7 @@ auto Ghost::isInTunnel() -> bool {
   return currentCell.x < 4 || currentCell.x > 22;
 }
 
-auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> Direction {
+auto Ghost::moveTowards(Grid &grid, const Vec2 &target) -> void {
   auto candidates_ = candidates(grid);
 
   if (candidates_.empty()) {
