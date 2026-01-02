@@ -27,7 +27,7 @@ public:
 
 auto initializeStates() -> std::map<GameStates, std::unique_ptr<GameState>>;
 
-Game::Game() {
+Game::Game(AssetManager &assetManager) : assetManager{assetManager}, audio{assetManager} {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     std::cerr << "SDL could not initialize.\n";
